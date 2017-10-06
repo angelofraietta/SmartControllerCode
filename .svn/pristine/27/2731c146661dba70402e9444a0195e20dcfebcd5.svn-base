@@ -1,0 +1,610 @@
+[angelo-Fraiettas-Computer:controller/source/hal_rtems_pc386] angelofraietta% make
+make: Nothing to be done for `default_target'.
+[angelo-Fraiettas-Computer:controller/source/hal_rtems_pc386] angelofraietta% make clean
+rm -f a.out core mon.out gmon.out
+rm -f -r ../engine/o-optimize ../engineinterface/o-optimize
+rm -f -r  a.out *.o *.BAK Depends-o-optimize.tmp
+rm -f -r o-optimize o-debug o-profile
+[angelo-Fraiettas-Computer:controller/source/hal_rtems_pc386] angelofraietta% make
+test -d o-optimize || mkdir o-optimize
+i386-rtems-gcc --pipe -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -O4 -g      -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ../engine -I ../engineinterface -I ../hal_include -I ../link_driver -I ../../../threads/source -I ../../../mididriver -I ../../../mididriver/hal_rtems  -c   -o o-optimize/diags.o diags.c
+diags.c: In function `DiagTask':
+diags.c:226: warning: unsigned int format, size_t arg (arg 2)
+diags.c:227: warning: implicit declaration of function `IMFS_memfile_maximum_size'
+diags.c:189: warning: unused variable `fp'
+diags.c:191: warning: unused variable `buf_ptr'
+diags.c: At top level:
+diags.c:31: warning: `test_chars' defined but not used
+diags.c:36: warning: `patches_file' defined but not used
+i386-rtems-gcc --pipe -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -O4 -g      -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ../engine -I ../engineinterface -I ../hal_include -I ../link_driver -I ../../../threads/source -I ../../../mididriver -I ../../../mididriver/hal_rtems  -c   -o o-optimize/fsmount.o fsmount.c
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ../engine -I ../engineinterface -I ../hal_include -I ../link_driver -I ../../../threads/source -I ../../../mididriver -I ../../../mididriver/hal_rtems  -c   -o o-optimize/rtems_init.o rtems_init.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ../engine -I ../engineinterface -I ../hal_include -I ../link_driver -I ../../../threads/source -I ../../../mididriver -I ../../../mididriver/hal_rtems  -c   -o o-optimize/midioutput.o midioutput.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ../engine -I ../engineinterface -I ../hal_include -I ../link_driver -I ../../../threads/source -I ../../../mididriver -I ../../../mididriver/hal_rtems  -c   -o o-optimize/scheduler.o scheduler.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ../engine -I ../engineinterface -I ../hal_include -I ../link_driver -I ../../../threads/source -I ../../../mididriver -I ../../../mididriver/hal_rtems  -c   -o o-optimize/rtems_simulator.o rtems_simulator.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ../engine -I ../engineinterface -I ../hal_include -I ../link_driver -I ../../../threads/source -I ../../../mididriver -I ../../../mididriver/hal_rtems  -c   -o o-optimize/commtasks.o commtasks.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ../engine -I ../engineinterface -I ../hal_include -I ../link_driver -I ../../../threads/source -I ../../../mididriver -I ../../../mididriver/hal_rtems   -gc-sections     -Wl,-Ttext,0x00100000 -o o-optimize/smart.obj  o-optimize/diags.o o-optimize/fsmount.o o-optimize/rtems_init.o o-optimize/midioutput.o o-optimize/scheduler.o o-optimize/rtems_simulator.o o-optimize/commtasks.o  /opt/rtems/i386-rtems/pc386dx/lib/no-dpmem.rel /opt/rtems/i386-rtems/pc386dx/lib/no-mp.rel /opt/rtems/i386-rtems/pc386dx/lib/no-part.rel /opt/rtems/i386-rtems/pc386dx/lib/no-signal.rel ../engine/o-optimize/sm_engine.a   ../engineinterface/o-optimize/sm_engineinterface.a   ../engine/o-optimize/sm_engine.a   ../link_driver/o-optimize/sm_link_driver.a   ../link_driver/hal_rtems/o-optimize/sm_comm.a   ../../../threads/source/o-optimize/sm_rtems_active.a   ../../../threads/source/hal_rtems/o-optimize/sm_rtems_thread.a   ../../../mididriver/hal_rtems/o-optimize/rtems_midi.a    
+i386-rtems-g++: ../engine/o-optimize/sm_engine.a: No such file or directory
+i386-rtems-g++: ../engineinterface/o-optimize/sm_engineinterface.a: No such file or directory
+i386-rtems-g++: ../engine/o-optimize/sm_engine.a: No such file or directory
+make: *** [o-optimize/smart.exe] Error 1
+[angelo-Fraiettas-Computer:controller/source/hal_rtems_pc386] angelofraietta% ./bit_smarts 
+/Users/angelofraietta/SmartController/controller/source/hal_rtems_pc386
+Making engine in /Users/angelofraietta/SmartController/controller/source/engine
+test -d o-optimize || mkdir o-optimize
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/mainline.o mainline.cpp
+mainline.cpp: In function `void maintask()':
+mainline.cpp:35: warning: unused variable `char name[80]'
+mainline.cpp:36: warning: unused variable `bool exit'
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/baseshel.o baseshel.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/analogin.o analogin.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/analogout.o analogout.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/counter.o counter.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/connect.o connect.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/calculate.o calculate.cpp
+calculate.cpp: In member function `bool Calculate::Operator(char*, unsigned 
+   int) const':
+calculate.cpp:355: warning: comparison between signed and unsigned integer 
+   expressions
+calculate.cpp: In member function `bool Calculate::ResetOperator(char*, 
+   unsigned int) const':
+calculate.cpp:378: warning: comparison between signed and unsigned integer 
+   expressions
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/deltatime.o deltatime.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/delay.o delay.cpp
+In file included from delay.h:6,
+                 from delay.cpp:3:
+messagecell.h: In constructor `MessageCell::MessageCell(int)':
+messagecell.h:24: warning: member initializers for `int MessageCell::<anonymous 
+   union>::ival'
+messagecell.h:21: warning:   and `int MessageCell::MsgType'
+messagecell.h:17: warning:   will be re-ordered to match declaration order
+messagecell.h: In constructor `MessageCell::MessageCell(double)':
+messagecell.h:25: warning: member initializers for `double 
+   MessageCell::<anonymous union>::dval'
+messagecell.h:21: warning:   and `int MessageCell::MsgType'
+messagecell.h:18: warning:   will be re-ordered to match declaration order
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/digitalin.o digitalin.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/digitalout.o digitalout.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/display.o display.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/engine.o engine.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/flipflop.o flipflop.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/globfunc.o globfunc.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/identity.o identity.cpp
+identity.h: In constructor `Identity::Identity(Patch*, const char*, const 
+   char*)':
+identity.h:56: warning: member initializers for `bool Identity::IsModified'
+identity.h:55: warning:   and `Patch*Identity::pParent'
+identity.cpp:23: warning:   will be re-ordered to match declaration order
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/messagestore.o messagestore.cpp
+In file included from messagestore.h:6,
+                 from messagestore.cpp:5:
+messagecell.h: In constructor `MessageCell::MessageCell(int)':
+messagecell.h:24: warning: member initializers for `int MessageCell::<anonymous 
+   union>::ival'
+messagecell.h:21: warning:   and `int MessageCell::MsgType'
+messagecell.h:17: warning:   will be re-ordered to match declaration order
+messagecell.h: In constructor `MessageCell::MessageCell(double)':
+messagecell.h:25: warning: member initializers for `double 
+   MessageCell::<anonymous union>::dval'
+messagecell.h:21: warning:   and `int MessageCell::MsgType'
+messagecell.h:18: warning:   will be re-ordered to match declaration order
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/messagecell.o messagecell.cpp
+In file included from messagecell.cpp:7:
+messagecell.h: In constructor `MessageCell::MessageCell(int)':
+messagecell.h:24: warning: member initializers for `int MessageCell::<anonymous 
+   union>::ival'
+messagecell.h:21: warning:   and `int MessageCell::MsgType'
+messagecell.h:17: warning:   will be re-ordered to match declaration order
+messagecell.h: In constructor `MessageCell::MessageCell(double)':
+messagecell.h:25: warning: member initializers for `double 
+   MessageCell::<anonymous union>::dval'
+messagecell.h:21: warning:   and `int MessageCell::MsgType'
+messagecell.h:18: warning:   will be re-ordered to match declaration order
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/metro.o metro.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/number.o number.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/selector.o selector.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/randomgen.o randomgen.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/patchports.o patchports.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/patch.o patch.cpp
+patch.cpp:23: warning: `const char*szFileVersionPrefix' defined but not used
+patch.cpp:24: warning: `const char*szEndViewId' defined but not used
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/outlet.o outlet.cpp
+In file included from outlet.cpp:3:
+messagecell.h: In constructor `MessageCell::MessageCell(int)':
+messagecell.h:24: warning: member initializers for `int MessageCell::<anonymous 
+   union>::ival'
+messagecell.h:21: warning:   and `int MessageCell::MsgType'
+messagecell.h:17: warning:   will be re-ordered to match declaration order
+messagecell.h: In constructor `MessageCell::MessageCell(double)':
+messagecell.h:25: warning: member initializers for `double 
+   MessageCell::<anonymous union>::dval'
+messagecell.h:21: warning:   and `int MessageCell::MsgType'
+messagecell.h:18: warning:   will be re-ordered to match declaration order
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/sequencer.o sequencer.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/smfstl.o smfstl.cpp
+smfstl.cpp: In function `void Load_hsmf_Chunk(FILE*, byte_vec*, unsigned 
+   int*)':
+smfstl.cpp:280: warning: unsigned int format, long unsigned int arg (arg 2)
+smfstl.cpp:280: warning: unsigned int format, long unsigned int arg (arg 3)
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/tablepoints.o tablepoints.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/table.o table.cpp
+table.cpp: In member function `virtual void Table::DoDefaultAction()':
+table.cpp:142: warning: comparison between signed and unsigned integer 
+   expressions
+table.cpp: In member function `bool Table::CurrentValue(char*, unsigned int) 
+   const':
+table.cpp:507: warning: comparison between signed and unsigned integer 
+   expressions
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/switch.o switch.cpp
+switch.cpp: In member function `virtual void Switch::DoDefaultAction()':
+switch.cpp:39: warning: comparison between signed and unsigned integer 
+   expressions
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/stdmidiout.o stdmidiout.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/stdmidiin.o stdmidiin.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/socket.o socket.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/sysexdriver.o sysexdriver.cpp
+sysexdriver.cpp: In member function `void SysexDriver::ProcessOurSysex(char)':
+sysexdriver.cpp:124: warning: unused variable `unsigned int ret_bytes'
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/timer.o timer.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/trigger.o trigger.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/toggle.o toggle.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/typelist.o typelist.cpp
+In file included from messagestore.h:6,
+                 from typelist.cpp:10:
+messagecell.h: In constructor `MessageCell::MessageCell(int)':
+messagecell.h:24: warning: member initializers for `int MessageCell::<anonymous 
+   union>::ival'
+messagecell.h:21: warning:   and `int MessageCell::MsgType'
+messagecell.h:17: warning:   will be re-ordered to match declaration order
+messagecell.h: In constructor `MessageCell::MessageCell(double)':
+messagecell.h:25: warning: member initializers for `double 
+   MessageCell::<anonymous union>::dval'
+messagecell.h:21: warning:   and `int MessageCell::MsgType'
+messagecell.h:18: warning:   will be re-ordered to match declaration order
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/enginedatainput.o enginedatainput.cpp
+enginedatainput.cpp: In constructor `EngineDataInput::EngineDataInput(unsigned 
+   int)':
+enginedatainput.cpp:62: warning: base initializer for `MidiInputSync'
+enginedatainput.cpp:62: warning:    will be re-ordered to precede member 
+   initializations
+enginedatainput.cpp: In member function `virtual void 
+   EngineDataInput::processMidiInput()':
+enginedatainput.cpp:108: warning: passing negative value `-1' for argument 1 of 
+   `static bool hal_include::Scheduler::LockEngine(unsigned int)'
+enginedatainput.cpp:118: warning: passing negative value `-1' for argument 1 of 
+   `static bool hal_include::Scheduler::LockEngine(unsigned int)'
+enginedatainput.cpp:132: warning: passing negative value `-1' for argument 1 of 
+   `static bool hal_include::Scheduler::LockEngine(unsigned int)'
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/memorycache.o memorycache.cpp
+memorycache.cpp: In destructor `MemoryCache::~MemoryCache()':
+memorycache.cpp:62: warning: deleting `void*' is undefined
+memorycache.cpp: In member function `void MemoryCache::free(void*)':
+memorycache.cpp:140: warning: deleting `void*' is undefined
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL  -D_DO_STREAM   -I ../../../estl  -I ./  -I ../hal_include -I ../engineinterface -I ../link_driver -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/patchview.o patchview.cpp
+rm -f o-optimize/sm_engine.a
+i386-rtems-ar ruv o-optimize/sm_engine.a  o-optimize/mainline.o o-optimize/baseshel.o o-optimize/analogin.o o-optimize/analogout.o o-optimize/counter.o o-optimize/connect.o o-optimize/calculate.o o-optimize/deltatime.o o-optimize/delay.o o-optimize/digitalin.o o-optimize/digitalout.o o-optimize/display.o o-optimize/engine.o o-optimize/flipflop.o o-optimize/globfunc.o o-optimize/identity.o o-optimize/messagestore.o o-optimize/messagecell.o o-optimize/metro.o o-optimize/number.o o-optimize/selector.o o-optimize/randomgen.o o-optimize/patchports.o o-optimize/patch.o o-optimize/outlet.o o-optimize/sequencer.o o-optimize/smfstl.o o-optimize/tablepoints.o o-optimize/table.o o-optimize/switch.o o-optimize/stdmidiout.o o-optimize/stdmidiin.o o-optimize/socket.o o-optimize/sysexdriver.o o-optimize/timer.o o-optimize/trigger.o o-optimize/toggle.o o-optimize/typelist.o o-optimize/enginedatainput.o o-optimize/memorycache.o o-optimize/patchview.o 
+a - o-optimize/mainline.o
+a - o-optimize/baseshel.o
+a - o-optimize/analogin.o
+a - o-optimize/analogout.o
+a - o-optimize/counter.o
+a - o-optimize/connect.o
+a - o-optimize/calculate.o
+a - o-optimize/deltatime.o
+a - o-optimize/delay.o
+a - o-optimize/digitalin.o
+a - o-optimize/digitalout.o
+a - o-optimize/display.o
+a - o-optimize/engine.o
+a - o-optimize/flipflop.o
+a - o-optimize/globfunc.o
+a - o-optimize/identity.o
+a - o-optimize/messagestore.o
+a - o-optimize/messagecell.o
+a - o-optimize/metro.o
+a - o-optimize/number.o
+a - o-optimize/selector.o
+a - o-optimize/randomgen.o
+a - o-optimize/patchports.o
+a - o-optimize/patch.o
+a - o-optimize/outlet.o
+a - o-optimize/sequencer.o
+a - o-optimize/smfstl.o
+a - o-optimize/tablepoints.o
+a - o-optimize/table.o
+a - o-optimize/switch.o
+a - o-optimize/stdmidiout.o
+a - o-optimize/stdmidiin.o
+a - o-optimize/socket.o
+a - o-optimize/sysexdriver.o
+a - o-optimize/timer.o
+a - o-optimize/trigger.o
+a - o-optimize/toggle.o
+a - o-optimize/typelist.o
+a - o-optimize/enginedatainput.o
+a - o-optimize/memorycache.o
+a - o-optimize/patchview.o
+i386-rtems-ranlib o-optimize/sm_engine.a
+Making engineinterface in /Users/angelofraietta/SmartController/controller/source/engineinterface
+test -d o-optimize || mkdir o-optimize
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/smutility.o smutility.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/eventmessagequeue.o eventmessagequeue.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/baseshellquestion.o baseshellquestion.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/connectorquestion.o connectorquestion.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/patchquestion.o patchquestion.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/identityquestion.o identityquestion.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/sessionquestion.o sessionquestion.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/presentationquestion.o presentationquestion.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/eventquestion.o eventquestion.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/baseshellanswer.o baseshellanswer.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/connectoranswer.o connectoranswer.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/patchanswer.o patchanswer.cpp
+patchanswer.cpp: In function `static unsigned int PatchAnswer::Save(const 
+   BYTE*, BYTE*, unsigned int)':
+patchanswer.cpp:709: warning: unused variable `unsigned int ret_bytes'
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/identityanswer.o identityanswer.cpp
+In file included from identityanswer.cpp:23:
+../../../estl/emap.h:693: warning: `typename sm_str::map<K, T>::e_tree_node' is 
+   implicitly a typename
+../../../estl/emap.h:693: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:745: warning: `typename sm_str::map<K, T>::iterator' is 
+   implicitly a typename
+../../../estl/emap.h:745: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:783: warning: `typename sm_str::map<K, T>::iterator' is 
+   implicitly a typename
+../../../estl/emap.h:783: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:843: warning: `typename sm_str::map<K, T>::value_type' is 
+   implicitly a typename
+../../../estl/emap.h:843: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:853: warning: `typename sm_str::map<K, T>::iterator' is 
+   implicitly a typename
+../../../estl/emap.h:853: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:875: warning: `typename sm_str::map<K, T>::iterator' is 
+   implicitly a typename
+../../../estl/emap.h:875: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:901: warning: `typename sm_str::map<K, T>::iterator' is 
+   implicitly a typename
+../../../estl/emap.h:901: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:992: warning: `typename sm_str::map<K, T>::e_tree_node' is 
+   implicitly a typename
+../../../estl/emap.h:992: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1009: warning: `typename sm_str::map<K, T>::e_tree_node' 
+   is implicitly a typename
+../../../estl/emap.h:1009: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1047: warning: `typename sm_str::map<K, T>::e_tree_node' 
+   is implicitly a typename
+../../../estl/emap.h:1047: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1103: warning: `typename sm_str::map<K, T>::e_tree_node' 
+   is implicitly a typename
+../../../estl/emap.h:1103: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1161: warning: `typename sm_str::map<K, T>::e_tree_node' 
+   is implicitly a typename
+../../../estl/emap.h:1161: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1199: warning: `typename sm_str::map<K, T>::e_tree_node' 
+   is implicitly a typename
+../../../estl/emap.h:1199: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1237: warning: `typename sm_str::map<K, T>::e_tree_node' 
+   is implicitly a typename
+../../../estl/emap.h:1237: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1268: warning: `typename sm_str::map<K, T>::e_tree_node' 
+   is implicitly a typename
+../../../estl/emap.h:1268: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1288: warning: `typename sm_str::map<K, T>::e_tree_node' 
+   is implicitly a typename
+../../../estl/emap.h:1288: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1313: warning: `typename sm_str::map<K, T>::e_tree_node' 
+   is implicitly a typename
+../../../estl/emap.h:1313: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1387: warning: `typename sm_str::map<K, T>::iterator' is 
+   implicitly a typename
+../../../estl/emap.h:1387: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1401: warning: `typename sm_str::map<K, T>::iterator' is 
+   implicitly a typename
+../../../estl/emap.h:1401: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1527: warning: `typename sm_str::map<K, T>::e_tree_node' 
+   is implicitly a typename
+../../../estl/emap.h:1527: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1582: warning: `typename sm_str::map<K, 
+   T>::iterator::stack' is implicitly a typename
+../../../estl/emap.h:1582: warning: implicit typename is deprecated, please see 
+   the documentation for details
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/sessionanswer.o sessionanswer.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/presentationanswer.o presentationanswer.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/eventanswer.o eventanswer.cpp
+eventanswer.cpp: In member function `const EventAnswer& 
+   EventAnswer::operator=(const EventAnswer&)':
+eventanswer.cpp:66: warning: control reaches end of non-void function
+eventanswer.cpp: In member function `int EventAnswer::operator==(const 
+   EventAnswer&) const':
+eventanswer.cpp:73: warning: control reaches end of non-void function
+eventanswer.cpp: In member function `int EventAnswer::operator!=(const 
+   EventAnswer&) const':
+eventanswer.cpp:79: warning: control reaches end of non-void function
+eventanswer.cpp: In static member function `static bool 
+   EventAnswer::eventReady()':
+eventanswer.cpp:90: warning: control reaches end of non-void function
+eventanswer.cpp: In member function `unsigned int EventAnswer::GetEvent(const 
+   BYTE*, BYTE*, unsigned int)':
+eventanswer.cpp:98: warning: control reaches end of non-void function
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/fileanswer.o fileanswer.cpp
+In file included from fileanswer.cpp:21:
+../../../estl/emap.h:693: warning: `typename sm_str::map<K, T>::e_tree_node' is 
+   implicitly a typename
+../../../estl/emap.h:693: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:745: warning: `typename sm_str::map<K, T>::iterator' is 
+   implicitly a typename
+../../../estl/emap.h:745: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:783: warning: `typename sm_str::map<K, T>::iterator' is 
+   implicitly a typename
+../../../estl/emap.h:783: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:843: warning: `typename sm_str::map<K, T>::value_type' is 
+   implicitly a typename
+../../../estl/emap.h:843: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:853: warning: `typename sm_str::map<K, T>::iterator' is 
+   implicitly a typename
+../../../estl/emap.h:853: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:875: warning: `typename sm_str::map<K, T>::iterator' is 
+   implicitly a typename
+../../../estl/emap.h:875: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:901: warning: `typename sm_str::map<K, T>::iterator' is 
+   implicitly a typename
+../../../estl/emap.h:901: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:992: warning: `typename sm_str::map<K, T>::e_tree_node' is 
+   implicitly a typename
+../../../estl/emap.h:992: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1009: warning: `typename sm_str::map<K, T>::e_tree_node' 
+   is implicitly a typename
+../../../estl/emap.h:1009: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1047: warning: `typename sm_str::map<K, T>::e_tree_node' 
+   is implicitly a typename
+../../../estl/emap.h:1047: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1103: warning: `typename sm_str::map<K, T>::e_tree_node' 
+   is implicitly a typename
+../../../estl/emap.h:1103: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1161: warning: `typename sm_str::map<K, T>::e_tree_node' 
+   is implicitly a typename
+../../../estl/emap.h:1161: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1199: warning: `typename sm_str::map<K, T>::e_tree_node' 
+   is implicitly a typename
+../../../estl/emap.h:1199: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1237: warning: `typename sm_str::map<K, T>::e_tree_node' 
+   is implicitly a typename
+../../../estl/emap.h:1237: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1268: warning: `typename sm_str::map<K, T>::e_tree_node' 
+   is implicitly a typename
+../../../estl/emap.h:1268: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1288: warning: `typename sm_str::map<K, T>::e_tree_node' 
+   is implicitly a typename
+../../../estl/emap.h:1288: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1313: warning: `typename sm_str::map<K, T>::e_tree_node' 
+   is implicitly a typename
+../../../estl/emap.h:1313: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1387: warning: `typename sm_str::map<K, T>::iterator' is 
+   implicitly a typename
+../../../estl/emap.h:1387: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1401: warning: `typename sm_str::map<K, T>::iterator' is 
+   implicitly a typename
+../../../estl/emap.h:1401: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1527: warning: `typename sm_str::map<K, T>::e_tree_node' 
+   is implicitly a typename
+../../../estl/emap.h:1527: warning: implicit typename is deprecated, please see 
+   the documentation for details
+../../../estl/emap.h:1582: warning: `typename sm_str::map<K, 
+   T>::iterator::stack' is implicitly a typename
+../../../estl/emap.h:1582: warning: implicit typename is deprecated, please see 
+   the documentation for details
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/answertask.o answertask.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/sysexfilequestion.o sysexfilequestion.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/viewanswer.o viewanswer.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/fileblock.o fileblock.cpp
+fileblock.h: In constructor `FileBlock::FileBlock(const char*)':
+fileblock.h:226: warning: member initializers for `bool FileBlock::_failed'
+fileblock.h:173: warning:   and `sm_str::string FileBlock::_filename'
+fileblock.cpp:82: warning:   will be re-ordered to match declaration order
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ./  -I ../hal_include -I ../link_driver -I ../engine -I ../../../threads/source -I ../../../mididriver  -c   -o o-optimize/nvramstore.o nvramstore.cpp
+rm -f o-optimize/sm_engineinterface.a
+i386-rtems-ar ruv o-optimize/sm_engineinterface.a  o-optimize/smutility.o o-optimize/eventmessagequeue.o o-optimize/baseshellquestion.o o-optimize/connectorquestion.o o-optimize/patchquestion.o o-optimize/identityquestion.o o-optimize/sessionquestion.o o-optimize/presentationquestion.o o-optimize/eventquestion.o o-optimize/baseshellanswer.o o-optimize/connectoranswer.o o-optimize/patchanswer.o o-optimize/identityanswer.o o-optimize/sessionanswer.o o-optimize/presentationanswer.o o-optimize/eventanswer.o o-optimize/fileanswer.o o-optimize/answertask.o o-optimize/sysexfilequestion.o o-optimize/viewanswer.o o-optimize/fileblock.o o-optimize/nvramstore.o 
+a - o-optimize/smutility.o
+a - o-optimize/eventmessagequeue.o
+a - o-optimize/baseshellquestion.o
+a - o-optimize/connectorquestion.o
+a - o-optimize/patchquestion.o
+a - o-optimize/identityquestion.o
+a - o-optimize/sessionquestion.o
+a - o-optimize/presentationquestion.o
+a - o-optimize/eventquestion.o
+a - o-optimize/baseshellanswer.o
+a - o-optimize/connectoranswer.o
+a - o-optimize/patchanswer.o
+a - o-optimize/identityanswer.o
+a - o-optimize/sessionanswer.o
+a - o-optimize/presentationanswer.o
+a - o-optimize/eventanswer.o
+a - o-optimize/fileanswer.o
+a - o-optimize/answertask.o
+a - o-optimize/sysexfilequestion.o
+a - o-optimize/viewanswer.o
+a - o-optimize/fileblock.o
+a - o-optimize/nvramstore.o
+i386-rtems-ranlib o-optimize/sm_engineinterface.a
+Making link physical layer driver in /Users/angelofraietta/SmartController/controller/source/link_driver/hal_rtems
+make: Nothing to be done for `default_target'.
+Making link logical layer in /Users/angelofraietta/SmartController/controller/source/link_driver
+make: Nothing to be done for `default_target'.
+Making active objects in /Users/angelofraietta/SmartController/threads/source
+make: Nothing to be done for `default_target'.
+Making rtems threads in /Users/angelofraietta/SmartController/threads/source/hal_rtems
+make: Nothing to be done for `default_target'.
+Making active objects in /Users/angelofraietta/SmartController/mididriver/hal_rtems
+make: Nothing to be done for `default_target'.
+rm: o-optimize/*.exe: No such file or directory
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ../engine -I ../engineinterface -I ../hal_include -I ../link_driver -I ../../../threads/source -I ../../../mididriver -I ../../../mididriver/hal_rtems   -gc-sections     -Wl,-Ttext,0x00100000 -o o-optimize/smart.obj  o-optimize/diags.o o-optimize/fsmount.o o-optimize/rtems_init.o o-optimize/midioutput.o o-optimize/scheduler.o o-optimize/rtems_simulator.o o-optimize/commtasks.o  /opt/rtems/i386-rtems/pc386dx/lib/no-dpmem.rel /opt/rtems/i386-rtems/pc386dx/lib/no-mp.rel /opt/rtems/i386-rtems/pc386dx/lib/no-part.rel /opt/rtems/i386-rtems/pc386dx/lib/no-signal.rel ../engine/o-optimize/sm_engine.a   ../engineinterface/o-optimize/sm_engineinterface.a   ../engine/o-optimize/sm_engine.a   ../link_driver/o-optimize/sm_link_driver.a   ../link_driver/hal_rtems/o-optimize/sm_comm.a   ../../../threads/source/o-optimize/sm_rtems_active.a   ../../../threads/source/hal_rtems/o-optimize/sm_rtems_thread.a   ../../../mididriver/hal_rtems/o-optimize/rtems_midi.a    
+i386-rtems-objcopy -O elf32-i386 --remove-section=.rodata --remove-section=.comment --remove-section=.note --strip-unneeded o-optimize/smart.obj o-optimize/smart.exe
+i386-rtems-objcopy -O binary o-optimize/smart.obj o-optimize/smart.bin
+/opt/rtems/i386-rtems/pc386dx/build-tools/bin2boot -v o-optimize/smart.bt 0x00097E00 /opt/rtems/i386-rtems/pc386dx/lib/start16.bin 0x00097C00 0 o-optimize/smart.bin 0x00100000 0
+header address       0x00097e00, its memory size 0x00000200
+first  image address 0x00097c00, its memory size 0x00000200
+second image address 0x00100000, its memory size 0x000a5600
+i386-rtems-nm -g -n o-optimize/smart.obj > o-optimize/smart.num
+i386-rtems-size o-optimize/smart.obj
+   text	   data	    bss	    dec	    hex	filename
+ 641603	  35664	  36565	 713832	  ae468	o-optimize/smart.obj
+[angelo-Fraiettas-Computer:controller/source/hal_rtems_pc386] angelofraietta% ls -l o-optimize/
+total 15376
+-rw-r--r--  1 angelofr  staff    31292 Apr 28 13:53 commtasks.o
+-rw-r--r--  1 angelofr  staff    70984 Apr 28 13:53 diags.o
+-rw-r--r--  1 angelofr  staff    64500 Apr 28 13:53 fsmount.o
+-rw-r--r--  1 angelofr  staff    16008 Apr 28 13:53 midioutput.o
+-rw-r--r--  1 angelofr  staff   163528 Apr 28 13:53 rtems_init.o
+-rw-r--r--  1 angelofr  staff    17400 Apr 28 13:53 rtems_simulator.o
+-rw-r--r--  1 angelofr  staff   134956 Apr 28 13:53 scheduler.o
+-rwxr-xr-x  1 angelofr  staff   677268 Apr 28 13:54 smart.bin
+-rw-r--r--  1 angelofr  staff   678400 Apr 28 13:54 smart.bt
+-rwxr-xr-x  1 angelofr  staff   677728 Apr 28 13:54 smart.exe
+-rw-r--r--  1 angelofr  staff   222515 Apr 28 13:54 smart.num
+-rwxr-xr-x  1 angelofr  staff  5096926 Apr 28 13:54 smart.obj
+[angelo-Fraiettas-Computer:controller/source/hal_rtems_pc386] angelofraietta% cvs up
+cvs update: Updating .
+RCS file: /cvs/SmartControllerEngine/source/hal_rtems_pc386/Makefile,v
+retrieving revision 1.18
+retrieving revision 1.19
+Merging differences between 1.18 and 1.19 into Makefile
+rcsmerge: warning: conflicts during merge
+cvs update: conflicts found in Makefile
+C Makefile
+? build_rtems.sh
+? Depends-o-optimize
+? o-optimize
+? update
+cvs update: Updating config
+[angelo-Fraiettas-Computer:controller/source/hal_rtems_pc386] angelofraietta% rm Makefile 
+[angelo-Fraiettas-Computer:controller/source/hal_rtems_pc386] angelofraietta% cvs up
+cvs update: Updating .
+cvs update: warning: Makefile was lost
+U Makefile
+? build_rtems.sh
+? Depends-o-optimize
+? o-optimize
+? update
+cvs update: Updating config
+[angelo-Fraiettas-Computer:controller/source/hal_rtems_pc386] angelofraietta% make clean
+rm -f a.out core mon.out gmon.out
+rm -f -r 
+rm -f -r  a.out *.o *.BAK Depends-o-optimize.tmp
+rm -f -r o-optimize o-debug o-profile
+[angelo-Fraiettas-Computer:controller/source/hal_rtems_pc386] angelofraietta% make
+test -d o-optimize || mkdir o-optimize
+i386-rtems-gcc --pipe -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -O4 -g      -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ../engine -I ../engineinterface -I ../hal_include -I ../link_driver -I ../../../threads/source -I ../../../mididriver -I ../../../mididriver/hal_rtems  -c   -o o-optimize/diags.o diags.c
+diags.c: In function `DiagTask':
+diags.c:226: warning: unsigned int format, size_t arg (arg 2)
+diags.c:227: warning: implicit declaration of function `IMFS_memfile_maximum_size'
+diags.c:189: warning: unused variable `fp'
+diags.c:191: warning: unused variable `buf_ptr'
+diags.c: At top level:
+diags.c:31: warning: `test_chars' defined but not used
+diags.c:36: warning: `patches_file' defined but not used
+i386-rtems-gcc --pipe -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -O4 -g      -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ../engine -I ../engineinterface -I ../hal_include -I ../link_driver -I ../../../threads/source -I ../../../mididriver -I ../../../mididriver/hal_rtems  -c   -o o-optimize/fsmount.o fsmount.c
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ../engine -I ../engineinterface -I ../hal_include -I ../link_driver -I ../../../threads/source -I ../../../mididriver -I ../../../mididriver/hal_rtems  -c   -o o-optimize/rtems_init.o rtems_init.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ../engine -I ../engineinterface -I ../hal_include -I ../link_driver -I ../../../threads/source -I ../../../mididriver -I ../../../mididriver/hal_rtems  -c   -o o-optimize/midioutput.o midioutput.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ../engine -I ../engineinterface -I ../hal_include -I ../link_driver -I ../../../threads/source -I ../../../mididriver -I ../../../mididriver/hal_rtems  -c   -o o-optimize/scheduler.o scheduler.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ../engine -I ../engineinterface -I ../hal_include -I ../link_driver -I ../../../threads/source -I ../../../mididriver -I ../../../mididriver/hal_rtems  -c   -o o-optimize/rtems_simulator.o rtems_simulator.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ../engine -I ../engineinterface -I ../hal_include -I ../link_driver -I ../../../threads/source -I ../../../mididriver -I ../../../mididriver/hal_rtems  -c   -o o-optimize/commtasks.o commtasks.cpp
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ../engine -I ../engineinterface -I ../hal_include -I ../link_driver -I ../../../threads/source -I ../../../mididriver -I ../../../mididriver/hal_rtems   -Wl, '-gc-sections'     -Wl,-Ttext,0x00100000 -o o-optimize/smart.obj  o-optimize/diags.o o-optimize/fsmount.o o-optimize/rtems_init.o o-optimize/midioutput.o o-optimize/scheduler.o o-optimize/rtems_simulator.o o-optimize/commtasks.o  /opt/rtems/i386-rtems/pc386dx/lib/no-dpmem.rel /opt/rtems/i386-rtems/pc386dx/lib/no-mp.rel /opt/rtems/i386-rtems/pc386dx/lib/no-part.rel /opt/rtems/i386-rtems/pc386dx/lib/no-signal.rel ../engine/o-optimize/sm_engine.a   ../engineinterface/o-optimize/sm_engineinterface.a   ../engine/o-optimize/sm_engine.a   ../link_driver/o-optimize/sm_link_driver.a   ../link_driver/hal_rtems/o-optimize/sm_comm.a   ../../../threads/source/o-optimize/sm_rtems_active.a   ../../../threads/source/hal_rtems/o-optimize/sm_rtems_thread.a   ../../../mididriver/hal_rtems/o-optimize/rtems_midi.a    
+/opt/rtems/lib/gcc-lib/i386-rtems/3.2.2/../../../../i386-rtems/bin/ld: cannot open : No such file or directory
+collect2: ld returned 1 exit status
+make: *** [o-optimize/smart.exe] Error 1
+[angelo-Fraiettas-Computer:controller/source/hal_rtems_pc386] angelofraietta% make
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ../engine -I ../engineinterface -I ../hal_include -I ../link_driver -I ../../../threads/source -I ../../../mididriver -I ../../../mididriver/hal_rtems   -Wl,'-gc-sections'     -Wl,-Ttext,0x00100000 -o o-optimize/smart.obj  o-optimize/diags.o o-optimize/fsmount.o o-optimize/rtems_init.o o-optimize/midioutput.o o-optimize/scheduler.o o-optimize/rtems_simulator.o o-optimize/commtasks.o  /opt/rtems/i386-rtems/pc386dx/lib/no-dpmem.rel /opt/rtems/i386-rtems/pc386dx/lib/no-mp.rel /opt/rtems/i386-rtems/pc386dx/lib/no-part.rel /opt/rtems/i386-rtems/pc386dx/lib/no-signal.rel ../engine/o-optimize/sm_engine.a   ../engineinterface/o-optimize/sm_engineinterface.a   ../engine/o-optimize/sm_engine.a   ../link_driver/o-optimize/sm_link_driver.a   ../link_driver/hal_rtems/o-optimize/sm_comm.a   ../../../threads/source/o-optimize/sm_rtems_active.a   ../../../threads/source/hal_rtems/o-optimize/sm_rtems_thread.a   ../../../mididriver/hal_rtems/o-optimize/rtems_midi.a    
+i386-rtems-objcopy -O elf32-i386 --remove-section=.rodata --remove-section=.comment --remove-section=.note --strip-unneeded o-optimize/smart.obj o-optimize/smart.exe
+i386-rtems-objcopy -O binary o-optimize/smart.obj o-optimize/smart.bin
+/opt/rtems/i386-rtems/pc386dx/build-tools/bin2boot -v o-optimize/smart.bt 0x00097E00 /opt/rtems/i386-rtems/pc386dx/lib/start16.bin 0x00097C00 0 o-optimize/smart.bin 0x00100000 0
+header address       0x00097e00, its memory size 0x00000200
+first  image address 0x00097c00, its memory size 0x00000200
+second image address 0x00100000, its memory size 0x0007f000
+i386-rtems-nm -g -n o-optimize/smart.obj > o-optimize/smart.num
+i386-rtems-size o-optimize/smart.obj
+   text	   data	    bss	    dec	    hex	filename
+ 495630	  24218	  36508	 556356	  87d44	o-optimize/smart.obj
+[angelo-Fraiettas-Computer:controller/source/hal_rtems_pc386] angelofraietta% ls -l o-optimize/
+total 13688
+-rw-r--r--  1 angelofr  staff    31292 Apr 28 13:56 commtasks.o
+-rw-r--r--  1 angelofr  staff    70984 Apr 28 13:56 diags.o
+-rw-r--r--  1 angelofr  staff    64500 Apr 28 13:56 fsmount.o
+-rw-r--r--  1 angelofr  staff    16008 Apr 28 13:56 midioutput.o
+-rw-r--r--  1 angelofr  staff   163528 Apr 28 13:56 rtems_init.o
+-rw-r--r--  1 angelofr  staff    17400 Apr 28 13:56 rtems_simulator.o
+-rw-r--r--  1 angelofr  staff   134956 Apr 28 13:56 scheduler.o
+-rwxr-xr-x  1 angelofr  staff   519848 Apr 28 13:56 smart.bin
+-rw-r--r--  1 angelofr  staff   521216 Apr 28 13:56 smart.bt
+-rwxr-xr-x  1 angelofr  staff   520264 Apr 28 13:56 smart.exe
+-rw-r--r--  1 angelofr  staff   187890 Apr 28 13:56 smart.num
+-rwxr-xr-x  1 angelofr  staff  4740202 Apr 28 13:56 smart.obj
+[angelo-Fraiettas-Computer:controller/source/hal_rtems_pc386] angelofraietta% make
+i386-rtems-ar ruv (Makefile) Makefile
+/bin/sh: -c: line 1: syntax error near unexpected token `(M'
+/bin/sh: -c: line 1: `i386-rtems-ar ruv (Makefile) Makefile'
+make: *** [(Makefile)] Error 2
+[angelo-Fraiettas-Computer:controller/source/hal_rtems_pc386] angelofraietta% make
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ../engine -I ../engineinterface -I ../hal_include -I ../link_driver -I ../../../threads/source -I ../../../mididriver -I ../../../mididriver/hal_rtems   -Wl,'-gc-sections'     -Wl,-Ttext,0x00100000 -o o-optimize/smart.obj  o-optimize/diags.o o-optimize/fsmount.o o-optimize/rtems_init.o o-optimize/midioutput.o o-optimize/scheduler.o o-optimize/rtems_simulator.o o-optimize/commtasks.o  /opt/rtems/i386-rtems/pc386dx/lib/no-dpmem.rel /opt/rtems/i386-rtems/pc386dx/lib/no-mp.rel /opt/rtems/i386-rtems/pc386dx/lib/no-part.rel /opt/rtems/i386-rtems/pc386dx/lib/no-signal.rel ../engine/o-optimize/sm_engine.a   ../engineinterface/o-optimize/sm_engineinterface.a   ../engine/o-optimize/sm_engine.a   ../link_driver/o-optimize/sm_link_driver.a   ../link_driver/hal_rtems/o-optimize/sm_comm.a   ../../../threads/source/o-optimize/sm_rtems_active.a   ../../../threads/source/hal_rtems/o-optimize/sm_rtems_thread.a   ../../../mididriver/hal_rtems/o-optimize/rtems_midi.a    
+i386-rtems-objcopy -O elf32-i386 --remove-section=.rodata --remove-section=.comment --remove-section=.note --strip-unneeded o-optimize/smart.obj o-optimize/smart.exe
+i386-rtems-objcopy -O binary o-optimize/smart.obj o-optimize/smart.bin
+/opt/rtems/i386-rtems/pc386dx/build-tools/bin2boot -v o-optimize/smart.bt 0x00097E00 /opt/rtems/i386-rtems/pc386dx/lib/start16.bin 0x00097C00 0 o-optimize/smart.bin 0x00100000 0
+header address       0x00097e00, its memory size 0x00000200
+first  image address 0x00097c00, its memory size 0x00000200
+second image address 0x00100000, its memory size 0x0007f000
+i386-rtems-nm -g -n o-optimize/smart.obj > o-optimize/smart.num
+i386-rtems-size o-optimize/smart.obj
+   text	   data	    bss	    dec	    hex	filename
+ 495630	  24218	  36508	 556356	  87d44	o-optimize/smart.obj
+[angelo-Fraiettas-Computer:controller/source/hal_rtems_pc386] angelofraietta% make
+i386-rtems-g++ -B/opt/rtems/i386-rtems/pc386dx/lib/ -specs bsp_specs -qrtems   -g -Wall  -g     -msoft-float -mno-fp-ret-in-387 -D_E_STL    -I ../../../estl  -I ../engine -I ../engineinterface -I ../hal_include -I ../link_driver -I ../../../threads/source -I ../../../mididriver -I ../../../mididriver/hal_rtems   -gc-sections     -Wl,-Ttext,0x00100000 -o o-optimize/smart.obj  o-optimize/diags.o o-optimize/fsmount.o o-optimize/rtems_init.o o-optimize/midioutput.o o-optimize/scheduler.o o-optimize/rtems_simulator.o o-optimize/commtasks.o  /opt/rtems/i386-rtems/pc386dx/lib/no-dpmem.rel /opt/rtems/i386-rtems/pc386dx/lib/no-mp.rel /opt/rtems/i386-rtems/pc386dx/lib/no-part.rel /opt/rtems/i386-rtems/pc386dx/lib/no-signal.rel ../engine/o-optimize/sm_engine.a   ../engineinterface/o-optimize/sm_engineinterface.a   ../engine/o-optimize/sm_engine.a   ../link_driver/o-optimize/sm_link_driver.a   ../link_driver/hal_rtems/o-optimize/sm_comm.a   ../../../threads/source/o-optimize/sm_rtems_active.a   ../../../threads/source/hal_rtems/o-optimize/sm_rtems_thread.a   ../../../mididriver/hal_rtems/o-optimize/rtems_midi.a    
+i386-rtems-objcopy -O elf32-i386 --remove-section=.rodata --remove-section=.comment --remove-section=.note --strip-unneeded o-optimize/smart.obj o-optimize/smart.exe
+i386-rtems-objcopy -O binary o-optimize/smart.obj o-optimize/smart.bin
+/opt/rtems/i386-rtems/pc386dx/build-tools/bin2boot -v o-optimize/smart.bt 0x00097E00 /opt/rtems/i386-rtems/pc386dx/lib/start16.bin 0x00097C00 0 o-optimize/smart.bin 0x00100000 0
+header address       0x00097e00, its memory size 0x00000200
+first  image address 0x00097c00, its memory size 0x00000200
+second image address 0x00100000, its memory size 0x000a5600
+i386-rtems-nm -g -n o-optimize/smart.obj > o-optimize/smart.num
+i386-rtems-size o-optimize/smart.obj
+   text	   data	    bss	    dec	    hex	filename
+ 641603	  35664	  36565	 713832	  ae468	o-optimize/smart.obj
+[angelo-Fraiettas-Computer:controller/source/hal_rtems_pc386] angelofraietta% 

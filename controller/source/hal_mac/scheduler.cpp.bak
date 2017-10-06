@@ -1,0 +1,475 @@
+//## begin module%3A964F88025F.cm preserve=no
+//	  %X% %Q% %Z% %W%
+//## end module%3A964F88025F.cm
+
+//## begin module%3A964F88025F.cp preserve=no
+//	Angelo Fraietta
+//## end module%3A964F88025F.cp
+
+//## Module: mac_scheduler%3A964F88025F; Package body
+//## Subsystem: hal_mac%3A80A6B0022E
+//	This contains the implementation for the Macintosh
+//	specific build.  These are used for the engine simulator
+//	that will have to run within the Patch Editor.  These
+//	modules are linked with the engine package.
+//## Source file: c:\develop\WinSmartController\controller\source\hal_mac\scheduler.cpp
+
+//## begin module%3A964F88025F.additionalIncludes preserve=no
+#include "stdafx.h"
+//## end module%3A964F88025F.additionalIncludes
+
+//## begin module%3A964F88025F.includes preserve=yes
+#include <stdio.h>
+#include <pthread.h>
+#include "event.h"
+//## end module%3A964F88025F.includes
+
+// timer
+#include "timer.h"
+// scheduler
+#include "scheduler.h"
+// memorycache
+#include "memorycache.h"
+
+
+//## begin module%3A964F88025F.declarations preserve=no
+//## end module%3A964F88025F.declarations
+
+//## begin module%3A964F88025F.additionalDeclarations preserve=yes
+#define SHOW_TICKS
+#define TICK_WAIT_TIME 1020
+static volatile bool exit_schedule = false;
+static volatile bool scheduler_initialised = false;
+int set_realtime(int period, int computation, int constraint);
+using hal_include::Scheduler;
+
+Event* schedule_event;
+pthread_t _threadId;
+pthread_mutex_t _schedule_mutex, _engine_mutex;
+struct timeval initial_time;
+
+extern "C" void* ScheduledThreadEntry (void* param);
+//## end module%3A964F88025F.additionalDeclarations
+
+
+namespace hal_include {
+  //## begin hal_include%3A80CAE10028.initialDeclarations preserve=yes
+  //## end hal_include%3A80CAE10028.initialDeclarations
+
+  // Class Utility hal_include::Scheduler 
+
+  //## begin hal_include::Scheduler::initialised%3A9452E30298.attr preserve=no  private: static bool {UT} false
+  volatile bool  Scheduler::initialised = false;
+  //## end hal_include::Scheduler::initialised%3A9452E30298.attr
+
+  //## begin hal_include::Scheduler::dwOffset%3A91E2CD00DB.attr preserve=no  private: static DWORD {UT} 0
+  volatile DWORD  Scheduler::dwOffset = 0;
+  //## end hal_include::Scheduler::dwOffset%3A91E2CD00DB.attr
+
+  //## begin hal_include::Scheduler::dwPauseTime%3A9452F5004F.attr preserve=no  private: static DWORD {UT} 0
+  volatile DWORD  Scheduler::dwPauseTime = 0;
+  //## end hal_include::Scheduler::dwPauseTime%3A9452F5004F.attr
+
+  //## begin hal_include::Scheduler::lock_wait_time%3A95CF7E0253.attr preserve=no  private: static unsigned {U} 10
+  unsigned Scheduler::lock_wait_time = 10;
+  //## end hal_include::Scheduler::lock_wait_time%3A95CF7E0253.attr
+
+  //## begin hal_include::Scheduler::<the_ScheduledObjectPriority>%3A92EB3A02B0.role preserve=no  public: hal_include::ScheduledObjectPriority { -> RFHN}
+  //## end hal_include::Scheduler::<the_ScheduledObjectPriority>%3A92EB3A02B0.role
+
+  //## begin hal_include::Scheduler::ScheduledItems%3A92FF700133.role preserve=no  public: hal_include::ScheduledObjectQueue { -> 1VFHN}
+  ScheduledObjectQueue Scheduler::ScheduledItems;
+  //## end hal_include::Scheduler::ScheduledItems%3A92FF700133.role
+
+  //## begin hal_include::Scheduler::_mem_manager%3CCE19A8006D.role preserve=no  public: MemoryCache { -> 1RFHN}
+  MemoryCache *Scheduler::_mem_manager;
+  //## end hal_include::Scheduler::_mem_manager%3CCE19A8006D.role
+
+
+  //## Other Operations (implementation)
+  //## Operation: SetTimeEvent%981519022
+  //	Tells scheduler to add a Time event. Returns true if
+  //	successfull.
+  //## Preconditions:
+  //	The Scheduler must be initialised
+  //## Postconditions:
+  //	The new time event is added to que of events
+  ScheduledObject* Scheduler::SetTimeEvent (const TimerQueueItem& item)
+  {
+        ScheduledObject* pSchedule = NULL;
+        if (lock())
+          {
+            pSchedule = new ScheduledObject (item);
+            
+            if (pSchedule)
+              {
+                ScheduledObjectPriority NextEvent (pSchedule);
+                ScheduledItems.push(NextEvent);
+              }
+            unlock();
+          } // end Locked
+        
+        resume();
+        return pSchedule;
+
+
+    //## begin hal_include::Scheduler::SetTimeEvent%981519022.body preserve=yes
+    //## end hal_include::Scheduler::SetTimeEvent%981519022.body
+  }
+
+  //## Operation: KillTimeEvent%981519023
+  //	Tells scheduler to remove a Time event.
+  //## Preconditions:
+  //	The Scheduler must be initialised
+  //## Postconditions:
+  //	The Time event will not be called
+  void Scheduler::KillTimeEvent (ScheduledObject* item)
+  {
+    if (item)
+      {
+        item->valid = false;
+      }
+
+
+    //## begin hal_include::Scheduler::KillTimeEvent%981519023.body preserve=yes
+    //## end hal_include::Scheduler::KillTimeEvent%981519023.body
+  }
+
+  //## Operation: initialise%981603322
+  //	Obtains reources used by the scheduler
+  bool Scheduler::initialise ()
+  {
+    bool ret = true;
+    if (!initialised)
+    {
+       dwOffset = 0;	
+      _mem_manager = new MemoryCache;
+    }
+
+    //## begin hal_include::Scheduler::initialise%981603322.body preserve=yes
+	if (!scheduler_initialised)
+	{
+		if (gettimeofday(&initial_time, NULL))
+			{
+				printf("Unable to get current time");
+			}
+		
+		
+		schedule_event = Event::create();
+		pthread_mutex_init(&_schedule_mutex, NULL);
+		pthread_mutex_init(&_engine_mutex, NULL);
+		if (pthread_create(&_threadId, NULL, ScheduledThreadEntry, 0))
+			{
+				printf("Unable to create scheduler task");
+			}
+		else
+			{
+				ret = true;
+			}
+	
+	} // end 	if (!scheduler_initialised)
+	
+    //## end hal_include::Scheduler::initialise%981603322.body
+
+    return ret;
+  }
+
+  //## Operation: deinitialise%981603323
+  //	Releases reources used by the scheduler
+  bool Scheduler::deinitialise ()
+  {
+    purge ();
+    delete _mem_manager;
+    _mem_manager = 0;
+    initialised = false;
+
+    //## begin hal_include::Scheduler::deinitialise%981603323.body preserve=yes
+    exit_schedule = true;
+    resume();
+    delete schedule_event;
+		pthread_mutex_destroy(&_schedule_mutex);
+		pthread_mutex_destroy(&_engine_mutex);
+    //## end hal_include::Scheduler::deinitialise%981603323.body
+  }
+
+  //## Operation: getTime%981603750
+  //	Returns the current time in milliseconds of the scheduler
+  //## Preconditions:
+  //	The Scheduler must be initialised
+  DWORD Scheduler::getTime ()
+  {
+    //## begin hal_include::Scheduler::getTime%981603750.body preserve=yes
+      struct timeval current_time;
+			DWORD ret = 0;
+
+      if (gettimeofday(&current_time, NULL))
+				{
+					printf("Unable to get current time");
+				}
+      else
+				{
+					ret = (current_time.tv_sec - initial_time.tv_sec) * 1000;
+					ret += current_time.tv_usec / 1000;
+				}
+			return ret;
+    //## end hal_include::Scheduler::getTime%981603750.body
+  }
+
+  //## Operation: processCallback%982638343
+  //	Processes the callback and sends CallbackMessages.
+  //	Returns the time required for the next Callback
+  DWORD Scheduler::processCallback ()
+  {
+    volatile DWORD dwCurrentTime = getTime() - dwOffset;
+                
+    DWORD return_event_time = (DWORD)-1;
+                    
+    if (lock())
+      {
+        ScheduledObject* NextEvent = NULL;
+        // we will remove from Queue so we can release the lock
+        if (!ScheduledItems.empty() && ScheduledItems.top().CallbackTime() <= dwCurrentTime)
+          {
+            NextEvent = ScheduledItems.top()._scheduler;
+            ScheduledItems.pop ();
+          }
+        else
+          {
+            if (!ScheduledItems.empty())
+              {
+                return_event_time = ScheduledItems.top().CallbackTime() - dwCurrentTime;
+              }
+          }
+                        
+        unlock ();
+                        
+        //see if it is time yet
+        while (NextEvent)
+          {
+            if(NextEvent->valid)
+              {
+                NextEvent->valid = false;
+                //send the event
+                // we need to protect this area so only one task can enter the engine
+                if (LockEngine ((unsigned (-1))))
+                  {
+                  NextEvent->Timer()->ReceiveClockTiming(NextEvent->Param());
+                  UnlockEngine();
+        
+                  delete NextEvent;
+                  NextEvent = NULL;
+                  }
+              }
+            else // not valid
+              {
+              delete NextEvent;
+              NextEvent = NULL;
+              }
+        
+        
+            if (lock())
+              {
+                // re-read the time in case we took a long time
+                dwCurrentTime = getTime() - dwOffset;
+                if (!ScheduledItems.empty())
+                  {
+                    if(ScheduledItems.top().CallbackTime() <= dwCurrentTime)
+                      {
+                        NextEvent = ScheduledItems.top()._scheduler;
+                        ScheduledItems.pop ();
+                      }
+                    else
+                      {
+                        return_event_time = ScheduledItems.top().CallbackTime() - dwCurrentTime;
+                      }
+                  }
+                                
+                unlock ();
+              }
+            else
+              {
+                printf("Unable to lock Schedule\r\n");
+                return_event_time = 1;
+              }
+          } // end while
+      }
+    else
+      {
+        return_event_time = 1;
+				printf("Unable to lock Schedule\r\n");
+      }
+                    
+    return return_event_time;
+
+
+    //## begin hal_include::Scheduler::processCallback%982638343.body preserve=yes
+    //## end hal_include::Scheduler::processCallback%982638343.body
+  }
+
+  //## Operation: pause%982638344
+  //	pause al callbacks until resume is called
+  void Scheduler::pause ()
+  {
+    //## begin hal_include::Scheduler::pause%982638344.body preserve=yes
+    //## end hal_include::Scheduler::pause%982638344.body
+  }
+
+  //## Operation: resume%982638345
+  //	resume scheduling. Called to resume after pausing with
+  //	pause.
+  void Scheduler::resume ()
+  {
+    //## begin hal_include::Scheduler::resume%982638345.body preserve=yes
+    schedule_event->Release();
+    //## end hal_include::Scheduler::resume%982638345.body
+  }
+
+  //## Operation: purge%982879201
+  //	Purge all items in queue
+  void Scheduler::purge ()
+  {
+        while (!ScheduledItems.empty())
+          {
+            if (lock())
+              {
+                ScheduledObject* NextEvent = ScheduledItems.top()._scheduler;
+                if(NextEvent->valid)
+                  {
+                    //Tell Timer to Purge all events
+                    NextEvent->Timer()->Purge();
+                  }
+                ScheduledItems.pop(); //now remove item
+                delete NextEvent;
+              }
+    				unlock();
+          } // end while
+
+
+    //## begin hal_include::Scheduler::purge%982879201.body preserve=yes
+    //## end hal_include::Scheduler::purge%982879201.body
+  }
+
+  //## Operation: lock%982879202
+  //	Locks the Scheduler to protect its critical sections.
+  //	Returns true if successful.
+  bool Scheduler::lock (unsigned period)
+  {
+    //## begin hal_include::Scheduler::lock%982879202.body preserve=yes
+		pthread_mutex_lock(&_schedule_mutex);
+		return true;
+    //## end hal_include::Scheduler::lock%982879202.body
+  }
+
+  //## Operation: unlock%982879203
+  //	Unlocks the Scheduler and releases its critical
+  //	sections. Returns true if unlocked.
+  bool Scheduler::unlock ()
+  {
+    //## begin hal_include::Scheduler::unlock%982879203.body preserve=yes
+		pthread_mutex_unlock(&_schedule_mutex);
+		return true;
+    //## end hal_include::Scheduler::unlock%982879203.body
+  }
+
+  //## Operation: LockEngine%1018482872
+  //	A public lock to limit access to the engne to a single
+  //	task
+  bool Scheduler::LockEngine (unsigned wait_period)
+  {
+    //## begin hal_include::Scheduler::LockEngine%1018482872.body preserve=yes
+		pthread_mutex_lock(&_engine_mutex);
+		return true;
+    //## end hal_include::Scheduler::LockEngine%1018482872.body
+  }
+
+  //## Operation: UnlockEngine%1018482873
+  //	Release Function For LockEngineFunction
+  bool Scheduler::UnlockEngine ()
+  {
+    //## begin hal_include::Scheduler::UnlockEngine%1018482873.body preserve=yes
+		pthread_mutex_unlock(&_engine_mutex);
+		return true;
+    //## end hal_include::Scheduler::UnlockEngine%1018482873.body
+  }
+
+  // Additional Declarations
+    //## begin hal_include::Scheduler%3A80BBBF0082.declarations preserve=yes
+extern "C" void* ScheduledThreadEntry (void* param)
+{
+	scheduler_initialised = true;
+	DWORD wait_interval = 0;
+
+	struct sched_param sp;
+	memset(&sp, 0, sizeof(struct sched_param));
+	sp.sched_priority=1;
+	if (pthread_setschedparam(pthread_self(), SCHED_RR, &sp) == -1) 
+		{
+			printf("Failed to change priority.\n");
+    }
+
+	while (!exit_schedule)
+	{
+		printf ("Wait %u \r\n", wait_interval);
+
+		schedule_event->Wait (wait_interval);
+
+
+		if (!exit_schedule)
+		{
+      wait_interval = hal_include::Scheduler::processCallback ();
+#ifdef SHOW_TICKS
+			if (wait_interval > TICK_WAIT_TIME)
+				{
+					wait_interval = TICK_WAIT_TIME;
+					//printf ("Tick Time %u\r\n", hal_include::Scheduler::getTime());
+				}
+#endif
+		}
+	
+	}
+	
+	return 0;
+	
+}    
+    //## end hal_include::Scheduler%3A80BBBF0082.declarations
+  // Class hal_include::ScheduledObject 
+
+
+
+
+
+  //## Operation: operator new%1020137284
+  //	Overloaded allocation operator
+  //## Preconditions:
+  //	The Scheduler is already locked before this function is
+  //	called
+  void* ScheduledObject::operator new (size_t size)
+  {
+    //## begin hal_include::ScheduledObject::operator new%1020137284.body preserve=yes
+    //## end hal_include::ScheduledObject::operator new%1020137284.body
+
+    return Scheduler::_mem_manager->allocate(size);
+  }
+
+  //## Operation: operator delete%1020137285
+  //	Overloaded de allocation operator
+  void ScheduledObject::operator delete (void* mem)
+  {
+    //## begin hal_include::ScheduledObject::operator delete%1020137285.body preserve=yes
+    //## end hal_include::ScheduledObject::operator delete%1020137285.body
+
+    Scheduler::lock();
+    Scheduler::_mem_manager->free(mem);
+    Scheduler::unlock();
+
+  }
+
+
+  // Additional Declarations
+    //## begin hal_include::ScheduledObject%3A909E770117.declarations preserve=yes
+    //## end hal_include::ScheduledObject%3A909E770117.declarations
+
+} // namespace hal_include
+
+//## begin module%3A964F88025F.epilog preserve=yesg
+//## end module%3A964F88025F.epilog

@@ -1,0 +1,261 @@
+
+(object Petal
+    version    	42
+    _written   	"Rose 4.5.8163.3"
+    charSet    	0)
+
+(object Class "NetworkLayer"
+    attributes 	(list Attribute_Set
+	(object Attribute
+	    tool       	"cg"
+	    name       	"cg_style"
+	    value      	"no_operations")
+	(object Attribute
+	    tool       	"Traversal"
+	    name       	"CodeFile"
+	    value      	"D:\\develop\\Smartcontroller\\controller\\source\\link_driver\\networklayer.h")
+	(object Attribute
+	    tool       	"Traversal"
+	    name       	"BodyFile"
+	    value      	"D:\\develop\\Smartcontroller\\controller\\source\\link_driver\\networklayer.cpp"))
+    quid       	"4082F624037A"
+    used_nodes 	(list uses_relationship_list
+	(object Uses_Relationship
+	    quid       	"4082FB9E0196"
+	    supplier   	"Logical View::link_driver::LinkLayer"
+	    quidu      	"3AEF67BA0167")
+	(object Uses_Relationship
+	    quid       	"4082FBA00222"
+	    supplier   	"Logical View::link_driver::UDPPort"
+	    quidu      	"4069C85102EE"))
+    operations 	(list Operations
+	(object Operation "WriteBuffer"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationIsConst"
+		    value      	FALSE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 202))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Raises"
+		    value      	""))
+	    quid       	"4082F69B0222"
+	    documentation 	"Writes a buffer of Bytes to an open Port"
+	    parameters 	(list Parameters
+		(object Parameter "lpBuf"
+		    type       	"const unsigned char*")
+		(object Parameter "dwToWrite"
+		    type       	"unsigned long"))
+	    result     	"bool"
+	    protocol   	"C++"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1082317734)
+	(object Operation "ReadBuffer"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 202)))
+	    quid       	"4082F69B0232"
+	    documentation 	"Reads a buffer of Bytes from a port"
+	    parameters 	(list Parameters
+		(object Parameter "lpBuf"
+		    type       	"unsigned  char*")
+		(object Parameter "dwToRead"
+		    type       	"unsigned long"))
+	    result     	"unsigned long"
+	    protocol   	"C++"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1082317735)
+	(object Operation "create"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 203)))
+	    quid       	"4082F69B0242"
+	    documentation 	"Interface for creating a link layer"
+	    parameters 	(list Parameters
+		(object Parameter "port_name"
+		    documentation 	"the name of the port that is opened"
+		    type       	"const char*")
+		(object Parameter "port_param"
+		    type       	"unsigned long")
+		(object Parameter "buf"
+		    documentation 	"This is a pre-allocated buffer. If the parameter is provided, it must remain within scope for the duration of the class instance. If no buffer is provided, a Buffer of max_size is created and maintained by this class"
+		    type       	"unsigned char*"
+		    initv      	"NULL")
+		(object Parameter "max_size"
+		    documentation 	"this is the maximum size that can be transmitted though this layer"
+		    type       	"unsigned"
+		    initv      	"1024"))
+	    result     	"NetworkLayer*"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1082317736)
+	(object Operation "reset"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 201))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE))
+	    quid       	"4082F69B0251"
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1082317737)
+	(object Operation "flush"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 201))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE))
+	    quid       	"4082F69B0271"
+	    documentation 	"Flushes the input buffer"
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1082317738)
+	(object Operation "WriteRaw"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationIsConst"
+		    value      	FALSE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 201))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"EntryCode"
+		    value      	(value Text "return false;")))
+	    quid       	"4082F69B0280"
+	    documentation 	"Writes a Raw buffer of Bytes to an open Port"
+	    parameters 	(list Parameters
+		(object Parameter "lpBuf"
+		    type       	"const unsigned char*")
+		(object Parameter "dwToWrite"
+		    type       	"unsigned long"))
+	    result     	"bool"
+	    protocol   	"C++"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1082317739)
+	(object Operation "Open"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationIsConst"
+		    value      	FALSE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	FALSE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 202)))
+	    quid       	"4082F69B0290"
+	    documentation 	"Opens the Comm port"
+	    parameters 	(list Parameters
+		(object Parameter "port_name"
+		    type       	"const char*")
+		(object Parameter "port_settings"
+		    type       	"const char*"
+		    initv      	"NULL"))
+	    result     	"bool"
+	    protocol   	"C++"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1082317740)
+	(object Operation "SetTo"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 201))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"EntryCode"
+		    value      	(value Text "return false;")))
+	    quid       	"4082F69B029F"
+	    documentation 	"Sets the To address"
+	    parameters 	(list Parameters
+		(object Parameter "to_address"
+		    type       	"const char*"))
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1082317741)
+	(object Operation "GetFrom"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 201))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"EntryCode"
+		    value      	(value Text "return false;")))
+	    quid       	"4082F69B02BF"
+	    documentation 	"Returns the From Address"
+	    parameters 	(list Parameters
+		(object Parameter "ret_buf"
+		    type       	"char*")
+		(object Parameter "buf_size"
+		    type       	"unsigned"))
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1082317742))
+    class_attributes 	(list class_attribute_list
+	(object ClassAttribute "UDP_PORT_NAME"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"IDL"
+		    name       	"IsConst"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"cg_style"
+		    value      	"noGetOrSet")
+		(object Attribute
+		    tool       	"cg"
+		    name       	"DataMemberVisibility"
+		    value      	("DataMemberVisibilitySet" 45)))
+	    quid       	"407AF25700AB"
+	    type       	"const char*"
+	    initv      	
+|"UDP"
+	    
+	    exportControl 	"Public"
+	    Containment 	"By Value"
+	    static     	TRUE))
+    language   	"C++")

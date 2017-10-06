@@ -1,0 +1,1 @@
+make INCMC=Makefile.mac $1

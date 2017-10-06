@@ -1,0 +1,210 @@
+
+(object Petal
+    version    	42
+    _written   	"Rose 4.5.8163.3"
+    charSet    	0)
+
+(object Class "MidiInputSync"
+    attributes 	(list Attribute_Set
+	(object Attribute
+	    tool       	"Traversal"
+	    name       	"CodeFile"
+	    value      	"D:\\develop\\SmartController\\mididriver\\midiinputsync.h")
+	(object Attribute
+	    tool       	"Traversal"
+	    name       	"BodyFile"
+	    value      	"D:\\develop\\SmartController\\mididriver\\midiinputsync.cpp")
+	(object Attribute
+	    tool       	"cg"
+	    name       	"DestructorKind"
+	    value      	("ThreeKindSet" 201))
+	(object Attribute
+	    tool       	"cg"
+	    name       	"InlineDestructor"
+	    value      	TRUE))
+    quid       	"3C588FAC01DD"
+    documentation 	"Allows Input of Data to be synchronizes within a thread"
+    superclasses 	(list inheritance_relationship_list
+	(object Inheritance_Relationship
+	    quid       	"3C588BEF00A1"
+	    supplier   	"Logical View::MultiThread::ActiveObject"
+	    quidu      	"3B25578F0192"))
+    operations 	(list Operations
+	(object Operation "MidiInputSync"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE))
+	    quid       	"3C58909A0013"
+	    parameters 	(list Parameters
+		(object Parameter "queue_size"
+		    type       	"int"))
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1012442862)
+	(object Operation "resume"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE))
+	    quid       	"3C58B4140396"
+	    documentation 	"Sets event in class, which then causes the thread to unblock."
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1012859310)
+	(object Operation "open"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE))
+	    quid       	"3C6036F802DF"
+	    documentation 	"opens Midi Driver"
+	    parameters 	(list Parameters
+		(object Parameter "device_num"
+		    documentation 	"The device number required by hardware. This value is the the device number in the hardware"
+		    type       	"int")
+		(object Parameter "device_id"
+		    documentation 	"Index that the device will be identified as the driver. -1 signifies that the device_num is used"
+		    type       	"int"
+		    initv      	"-1"))
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1012937117)
+	(object Operation "run"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 200))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE))
+	    quid       	"3C60507D0148"
+	    documentation 	"The actual function of the task"
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1012937118)
+	(object Operation "processMidiInput"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 202)))
+	    quid       	"3C6050A201BA"
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1012937119)
+	(object Operation "Purge"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"EntryCode"
+		    value      	(value Text "_purging = true;")))
+	    quid       	"3C6052FF03B8"
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1012937120)
+	(object Operation "ReadData"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 200))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE))
+	    quid       	"3C60568E0322"
+	    documentation 	"Removes and retrieves item from Queue. Rteuns true if successful. Is abstract so each subclass can protect its critical sections"
+	    parameters 	(list Parameters
+		(object Parameter "item"
+		    type       	"IOData*"))
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1012937121)
+	(object Operation "close"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE))
+	    quid       	"3C69A8A90189"
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1013552377)
+	(object Operation "GetDeviceNum"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationIsConst"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"EntryCode"
+		    value      	(value Text "return pMidiDriver->GetDeviceNum();"))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE))
+	    quid       	"3CB6212202CB"
+	    documentation 	"Returns the Device Number of The Midi Driver"
+	    result     	"int"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1018564233)
+	(object Operation "ExtDataInput"
+	    quid       	"41571F9002B1"
+	    documentation 	"Allows external Process to Add Data to Its's queue"
+	    parameters 	(list Parameters
+		(object Parameter "data"
+		    type       	"IOData"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1096227733)
+	(object Operation "ReadAnalogVal"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 200))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE))
+	    quid       	"415A3F8C0157"
+	    documentation 	"Reads Cached Analogue Data"
+	    parameters 	(list Parameters
+		(object Parameter "channel"
+		    type       	"unsigned"))
+	    result     	"unsigned"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1096433557))
+    class_attributes 	(list class_attribute_list
+	(object ClassAttribute "_purging"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"DataMemberIsVolatile"
+		    value      	TRUE))
+	    quid       	"3C6052710210"
+	    type       	"bool"
+	    initv      	"false"))
+    language   	"C++"
+    abstract   	TRUE)

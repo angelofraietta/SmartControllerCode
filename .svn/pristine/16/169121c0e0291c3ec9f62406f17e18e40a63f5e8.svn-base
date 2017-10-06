@@ -1,0 +1,192 @@
+#! /bin/sh
+#
+#  Simple shell script to configure and build gdb for *-rtems targets
+#
+#  build-${CPU}-gdb is created as the build tree
+#
+#  NOTE:  Adding -g to the CFLAGS is necessary to debug the tools
+#         but greatly increases the installed size.
+#
+#  $Id: bit_gdb,v 1.1 2003/03/05 04:36:25 angelo Exp $
+#
+
+do_build=yes
+
+#
+#  Prints the usage for this script.
+#
+usage()
+{
+  echo "usage: $0 CPU"
+  print_rtems_cpus
+}
+
+#
+#  Common exit routine for this script so we can print the starting
+#  and ending times.
+#
+my_exit()
+{
+  stop=`date`
+
+  if [ "x${BUILDDIR}" = "x" ] ; then
+    exit 1
+  fi
+  echo
+  echo "Started:  " $start
+  echo "Finished: " $stop
+
+  cd ${TOOLSDIR}
+  echo
+  echo "Directory size information:"
+  du -s -k ${BUILDDIR}
+  du -s -k ${INSTALL_POINT}
+  echo
+  if [ $1 -eq 0 ] ; then
+    echo "The ${BUILDDIR} subdirectory is now being removed."
+    echo "The src subdirectory has NOT been removed."
+    rm -rf ${BUILDDIR}
+  else
+    echo "The src and ${BUILDDIR} subdirectory have NOT been removed."
+  fi
+  echo
+  exit $1
+}
+
+if [ $# -ne 1 ]; then
+  echo "usage: $0 CPU"
+  exit 1
+fi
+
+CPU=$1
+BUILD_PIECE=gdb
+
+start=`date`
+
+# Include shared setup
+if [ ! -r ./common.sh ] ; then
+  echo "Cannot find shared shell script support (common.sh)"
+  exit 1
+fi
+. `echo $0 | sed -e 's/bit_gdb/common.sh/'`
+
+
+# Include user configurable information
+test -r ./user.cfg || \
+  check_fatal 1 "Cannot find user configuration (user.cfg)"
+. ./user.cfg
+
+#
+#  Get the "tools" directory
+#
+
+TOOLSDIR=`pwd`
+
+#
+#  If the specified tools are not available, then abort.
+#
+    test -d ${GDB}      || check_fatal 1 "Cannot find GDB (${GDB})"
+
+    #  Look for target specific required directories
+    case ${target} in
+       *)
+         # Nothing specific required when building gdb
+         ;;
+    esac
+
+#
+#  Print some information for the user
+#
+    echo
+    echo "Building a cross GNU Debugger with the following configuration:"
+    echo "    GDB           --> " $GDB
+    echo "    TARGET        --> " $target
+    echo "    INSTALL POINT --> " $INSTALL_POINT
+    echo "    BUILD DOCS    --> " $BUILD_DOCS
+    echo
+
+#  The following removes the build tree and creates another.
+    echo
+    echo "Compilation will occur in ${BUILDDIR}."
+    echo
+
+    rm -rf ${BUILDDIR}
+    mkdir ${BUILDDIR}
+    check_fatal $?  "**** FAILED **** unable to make build tree"
+    cd ${BUILDDIR}
+
+#  Configure to build the target requested
+    case ${CPU} in
+      powerpc)
+        conf_args="--enable-sim --enable-sim-powerpc --enable-sim-timebase"
+        conf_args="${conf_args} --enable-sim-hardware"
+        #  Enabling this causes the program image to be huge and causes
+        #  some gcc/hosts combinations to run out of memory.
+        # conf_args="${conf_args} --enable-sim-inline"
+        ;;
+      sparc)
+        conf_args="--enable-sim"
+        ;;
+      *)
+        ;;
+    esac
+    ../${GDB}/configure --target=${target} \
+      ${conf_args} \
+      --verbose \
+      --prefix=${INSTALL_POINT}
+    check_fatal $? "**** FAILED **** configure"
+
+    if [ ${do_build} = no ] ; then
+      echo "**** SKIPPING BUILD ****"
+      my_exit 0
+    fi
+
+#  If the install point does not exist, then create it.
+    if [ ! -d ${INSTALL_POINT} ] ; then
+      echo "Making directory for install point (${INSTALL_POINT}) ..."
+      mkdir -p ${INSTALL_POINT}
+      check_fatal $?  "**** FAILED **** unable to make install point"
+    else
+      if [ -r ${INSTALL_POINT}/bin/${target}-gdb ] ; then
+        echo
+        echo "Warning!!! Installing over an existing installation."
+        echo 
+      fi 
+    fi 
+
+#  Build the tools
+    if [ x${BUILD_DOCS} = xyes ] ; then
+      MAKE_DOCS=info
+    fi
+    ${MAKE} CC=gcc CFLAGS="-O2 -g -DRTEMS_TARGET" all ${MAKE_DOCS} install
+    check_fatal $?  "**** FAILED **** build"
+
+# Now install the ddd wrapper script
+    dddfile=${INSTALL_POINT}/bin/${target}-ddd
+    echo "#! /bin/sh"                          >${dddfile}
+    echo "ddd --debugger ${target}-gdb \$\*"  >>${dddfile}
+
+# cd back to the main build directory
+    cd ../
+
+#  There may be some post installation target specific stuff to do.
+#  the binaries needed from the djgpp 1.12 distribution.
+    case ${target} in
+      *)
+        ;;
+    esac
+  
+#################### Version file from here down ###################
+
+    VERSION_FILE=${INSTALL_POINT}/VERSIONS.gdb
+
+    # USERCHANGE -- Localize the version information if you want to
+    #               put specific information about patches.
+    echo "GDB      - " ${GDB}                         >>${VERSION_FILE}
+    echo "TARGET   - " ${target}                      >>${VERSION_FILE}
+    echo "INSTALL POINT - " ${INSTALL_POINT}          >>${VERSION_FILE}
+    echo                                              >>${VERSION_FILE}
+    echo "Patches may be installed"                   >>${VERSION_FILE}
+
+my_exit 0
+

@@ -1,0 +1,1 @@
+/opt/rtems/bin/i386-rtems-g++ -S -v $1

@@ -1,0 +1,110 @@
+#include "stdafx.h"
+#include "answertask.h"
+
+#include "iodata.h"
+#include "midioutputdriver.h"
+#include "enginedatainput.h"
+#include "fileanswer.h"
+#include "oscinput.h"
+#include "midiflags.h"
+
+#define MIDI_IN_SIZE (1024 * 32)
+
+extern "C" bool OpenOSCInputPort(int port_number)
+{
+	bool ret = false;
+
+  printf("Open OSC Port %d\r\n", port_number);
+  OSCInput* pDriver = new OSCInput ();
+
+  if (pDriver)
+  {
+    ret = pDriver->open (port_number);
+    if (ret)
+    {
+      pDriver->start();
+    }
+
+  }
+  else
+  {
+    printf("Unable to open OSC Port %d\r\n", port_number);
+  }
+
+  return ret;
+}
+
+void StartCommTasks()
+{
+	FileAnswer::SetDefaultDirectory ("/patch/");
+
+		MidiOutputDriver* pDriver = MidiOutputDriver::create (1024 );
+		
+		if (pDriver)
+			pDriver->open (0);
+		
+		EngineDataInput* pMidiIn = new EngineDataInput(MIDI_IN_SIZE);
+
+		if (pMidiIn->open(0))
+			{
+				printf("Midi Input Opened with buffsize %u\r\n", MIDI_IN_SIZE);
+				pMidiIn->start();
+			}
+
+
+		AnswerTask* answer_task_1 = new AnswerTask;
+
+		if (!answer_task_1->startTask ("/dev/ttyS1", 0))
+			{
+				printf("unable to start task 1");
+			}
+		else
+			{
+				printf("comm task 1 started");
+				AnswerTask::SetDefault( answer_task_1);
+			}
+
+		//OpenOSCInputPort(7000);
+		/*
+		AnswerTask* answer_task_2 = new AnswerTask;
+		
+		if (!answer_task_2->startTask ("/dev/ttyS2", 0))
+			{
+				cout<<"unable to start task 2"<<endl;
+			}
+		else
+			{
+				cout<<"comm task 2 started"<<endl;
+			}
+		*/
+		
+}
+
+extern "C" void StartUPDTask (unsigned port_number)
+{
+	AnswerTask* answer_task_3 = new AnswerTask;
+		
+	if (!answer_task_3->startTask ("UDP", port_number))
+		{
+			printf("unable to start UDP Task\r\n");
+		}
+	else
+		{
+			printf("UDP task 2 started\r\n");
+		}
+
+}
+
+
+extern "C" void SendIOReboot()
+{
+    // get exclusive access to IO
+
+    out_data = EEPROM_START * 0x100;
+    MidiOutputDriver::TransmitIoData (out_data);
+
+    out_data = EEPROM_REBOOT * 0x100;
+    MidiOutputDriver::TransmitIoData (out_data);
+}
+
+

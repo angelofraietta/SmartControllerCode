@@ -1,0 +1,484 @@
+
+(object Petal
+    version    	42
+    _written   	"Rose 4.5.8163.3"
+    charSet    	0)
+
+(object Class "FileProperties"
+    attributes 	(list Attribute_Set
+	(object Attribute
+	    tool       	"cg"
+	    name       	"cg_style"
+	    value      	"no_operations")
+	(object Attribute
+	    tool       	"cg"
+	    name       	"GenerateDefaultConstructor"
+	    value      	("GenerateSet" 199))
+	(object Attribute
+	    tool       	"Traversal"
+	    name       	"CodeFile"
+	    value      	"d:\\develop\\qsfformat\\qsfformat\\fileproperties.h")
+	(object Attribute
+	    tool       	"Traversal"
+	    name       	"BodyFile"
+	    value      	"d:\\develop\\qsfformat\\qsfformat\\fileproperties.cpp"))
+    quid       	"3B01A8580069"
+    documentation 	"contains the properties pertaining to this file"
+    superclasses 	(list inheritance_relationship_list
+	(object Inheritance_Relationship
+	    quid       	"3B02E26D0199"
+	    supplier   	"Logical View::StreamedObject"
+	    quidu      	"3B02E1AD031A"))
+    used_nodes 	(list uses_relationship_list
+	(object Uses_Relationship
+	    quid       	"3B01B953025E"
+	    supplier   	"Logical View::Windows::filestream"
+	    quidu      	"3B00A9F701CA")
+	(object Uses_Relationship
+	    quid       	"3B01E4B20336"
+	    supplier   	"Logical View::Windows::InputFileStream"
+	    quidu      	"3B00ACF402EC")
+	(object Uses_Relationship
+	    quid       	"3B01E7420130"
+	    supplier   	"Logical View::Windows::OutputFileStream"
+	    quidu      	"3B00AD0D0220"))
+    operations 	(list Operations
+	(object Operation "write"
+	    quid       	"3B01B63900F4"
+	    documentation 	"writes a field to disk"
+	    parameters 	(list Parameters
+		(object Parameter "stream"
+		    documentation 	"thye stream to write to"
+		    type       	"OutputFileStream&"))
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	989968166)
+	(object Operation "Restore"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 203)))
+	    quid       	"3B01FF3E0067"
+	    parameters 	(list Parameters
+		(object Parameter "stream"
+		    documentation 	"the stream to read from"
+		    type       	"InputFileStream&"))
+	    result     	"FileProperties"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	989968198)
+	(object Operation "CalculateBlockSize"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 200))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationIsConst"
+		    value      	TRUE))
+	    quid       	"3B02E2FE0329"
+	    documentation 	"Rquired function so the object can write how many bytes are required to be written for the object"
+	    result     	"long"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	990040821)
+	(object Operation "GetFilePosition"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationIsConst"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"EntryCode"
+		    value      	(value Text "return _file_load_position;")))
+	    quid       	"3B02FFF70175"
+	    result     	"long"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	990052226)
+	(object Operation "ReadKey"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationIsConst"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"EntryCode"
+		    value      	(value Text "return _this_file_key;")))
+	    quid       	"3B1434660018"
+	    documentation 	"Returns the file key"
+	    result     	"long"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	991179676)
+	(object Operation "AddDataSize"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"EntryCode"
+		    value      	(value Text "_active_data_size += size;")))
+	    quid       	"40316DB70139"
+	    documentation 	"Adds to the data size"
+	    parameters 	(list Parameters
+		(object Parameter "size"
+		    type       	"long"))
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1076973007)
+	(object Operation "operator new"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 203))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"ExitCode"
+		    value      	(value Text "return RecordMemCache.allocate (size);")))
+	    quid       	"4085B239001F"
+	    documentation 	"Memory managed new operator"
+	    parameters 	(list Parameters
+		(object Parameter "size"
+		    type       	"size_t"))
+	    result     	"void *"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1082502949)
+	(object Operation "operator delete"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 203))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"ExitCode"
+		    value      	(value Text "RecordMemCache.free ((char*) mem);")))
+	    quid       	"4085B239009C"
+	    parameters 	(list Parameters
+		(object Parameter "mem"
+		    type       	"void *"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1082502950))
+    class_attributes 	(list class_attribute_list
+	(object ClassAttribute "_priority"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"cg_style"
+		    value      	"default")
+		(object Attribute
+		    tool       	"cg"
+		    name       	"GetName"
+		    value      	"GetPriority")
+		(object Attribute
+		    tool       	"cg"
+		    name       	"SetName"
+		    value      	"SetPriority"))
+	    quid       	"3B01A8980133"
+	    documentation 	"the rank or priority as an integer"
+	    stereotype 	"streamed"
+	    type       	"int"
+	    initv      	"0"
+	    exportControl 	"Public")
+	(object ClassAttribute "_transcription_time"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"GetName"
+		    value      	"GetTranscriptionTime")
+		(object Attribute
+		    tool       	"cg"
+		    name       	"SetName"
+		    value      	"SetTranscriptionTime"))
+	    quid       	"3B01A8C5039B"
+	    documentation 	"The time in milliseconds of transcription time"
+	    stereotype 	"streamed"
+	    type       	"long"
+	    initv      	"0"
+	    exportControl 	"Public")
+	(object ClassAttribute "_percentage_Complete"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"GetName"
+		    value      	"GetPercentageComplete")
+		(object Attribute
+		    tool       	"cg"
+		    name       	"SetName"
+		    value      	"SetPercentageComplete"))
+	    quid       	"3B01AD520057"
+	    stereotype 	"streamed"
+	    type       	"int"
+	    initv      	"0"
+	    exportControl 	"Public")
+	(object ClassAttribute "_key"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"GetName"
+		    value      	"GetKey")
+		(object Attribute
+		    tool       	"cg"
+		    name       	"SetName"
+		    value      	"SetKey"))
+	    quid       	"3B01B20803A4"
+	    documentation 	"To be advised. Used to link a player or recorder with this dll. Is changed per client."
+	    type       	"long"
+	    initv      	"0"
+	    exportControl 	"Public"
+	    static     	TRUE)
+	(object ClassAttribute "_status"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"GetName"
+		    value      	"GetStatus")
+		(object Attribute
+		    tool       	"cg"
+		    name       	"SetName"
+		    value      	"SetStatus"))
+	    quid       	"3B01DD3203A3"
+	    stereotype 	"streamed"
+	    type       	"int"
+	    initv      	"0"
+	    exportControl 	"Public")
+	(object ClassAttribute "_file_load_position"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"cg_style"
+		    value      	"noGetOrSet"))
+	    quid       	"3B02FF950188"
+	    documentation 	"This is the position in the file wher restored from. It is used when saving file in append mode. Default at zero and can be modified only during restore"
+	    type       	"long"
+	    initv      	"0")
+	(object ClassAttribute "_this_file_key"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"cg_style"
+		    value      	"noGetOrSet"))
+	    quid       	"3B03059102C2"
+	    documentation 	"The key that thi file has been read as "
+	    stereotype 	"streamed"
+	    type       	"long"
+	    initv      	"_key")
+	(object ClassAttribute "_recorder_time"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"GetName"
+		    value      	"GetRecordTime")
+		(object Attribute
+		    tool       	"cg"
+		    name       	"SetName"
+		    value      	"SetRecordTime"))
+	    quid       	"3B2EC9430269"
+	    documentation 	"The amount of time the file was opened with the recorder"
+	    stereotype 	"streamed"
+	    type       	"long"
+	    initv      	"0"
+	    exportControl 	"Public")
+	(object ClassAttribute "_player_position"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"GetName"
+		    value      	"GetPlayerPosition")
+		(object Attribute
+		    tool       	"cg"
+		    name       	"SetName"
+		    value      	"SetPlayerPosition"))
+	    quid       	"3B2EC9DD01DE"
+	    documentation 	"The position in the file"
+	    stereotype 	"streamed"
+	    type       	"long"
+	    initv      	"0"
+	    exportControl 	"Public")
+	(object ClassAttribute "_file_version"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"GetName"
+		    value      	"GetVersion")
+		(object Attribute
+		    tool       	"cg"
+		    name       	"SetName"
+		    value      	"SetVersion"))
+	    quid       	"3B0454F00268"
+	    documentation 	"variable to track the number of complete saves the file has had.  This will enable the host to check the version of the file against theire own copy, in order to determine whether they need to re-extract the files"
+	    stereotype 	"streamed"
+	    type       	"long"
+	    initv      	"0"
+	    exportControl 	"Public")
+	(object ClassAttribute "_recorder_position"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"GetName"
+		    value      	"GetRecorderPosition")
+		(object Attribute
+		    tool       	"cg"
+		    name       	"SetName"
+		    value      	"SetRecorderPosition"))
+	    quid       	"3B32D0E20022"
+	    stereotype 	"streamed"
+	    type       	"long"
+	    initv      	"0"
+	    exportControl 	"Public")
+	(object ClassAttribute "_sample_rate"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"GetName"
+		    value      	"GetSampleRate")
+		(object Attribute
+		    tool       	"cg"
+		    name       	"SetName"
+		    value      	"SetSampleRate"))
+	    quid       	"3B2ECEA70263"
+	    documentation 	"The sample rate of the file"
+	    stereotype 	"streamed"
+	    type       	"long"
+	    initv      	"8000"
+	    exportControl 	"Public")
+	(object ClassAttribute "_num_channels"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"GetName"
+		    value      	"GetNumChannels")
+		(object Attribute
+		    tool       	"cg"
+		    name       	"SetName"
+		    value      	"SetNumChannels"))
+	    quid       	"3B2ECE3B0037"
+	    documentation 	"The number of channels"
+	    stereotype 	"streamed"
+	    type       	"long"
+	    initv      	"1"
+	    exportControl 	"Public")
+	(object ClassAttribute "_wave_format"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"GetName"
+		    value      	"GetWaveFormat")
+		(object Attribute
+		    tool       	"cg"
+		    name       	"SetName"
+		    value      	"SetWaveFormat"))
+	    quid       	"3B2ECE340376"
+	    documentation 	"Format"
+	    stereotype 	"streamed"
+	    type       	"long"
+	    initv      	"1"
+	    exportControl 	"Public")
+	(object ClassAttribute "_spare"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"GetName"
+		    value      	"GetTimeOpened")
+		(object Attribute
+		    tool       	"cg"
+		    name       	"SetName"
+		    value      	"SetTimeOpened"))
+	    quid       	"3B2ECE420218"
+	    documentation 	"The time the file was opened"
+	    stereotype 	"streamed"
+	    type       	"long"
+	    initv      	"0"
+	    exportControl 	"Public")
+	(object ClassAttribute "_player_time"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"GetName"
+		    value      	"GetPlayerTime")
+		(object Attribute
+		    tool       	"cg"
+		    name       	"SetName"
+		    value      	"SetPlayerTime"))
+	    quid       	"3B2EC99500CC"
+	    documentation 	"The amount of time the file was opened with the player"
+	    stereotype 	"streamed"
+	    type       	"long"
+	    initv      	"0"
+	    exportControl 	"Public")
+	(object ClassAttribute "_dummies"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"IDL"
+		    name       	"IsConst"
+		    value      	FALSE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"cg_style"
+		    value      	"noGetOrSet"))
+	    quid       	"3B2ED49503E3"
+	    documentation 	"A set of dummy longs to allow expansion of file properties"
+	    type       	"long [7]")
+	(object ClassAttribute "_active_data_position"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"GetName"
+		    value      	"GetActiveDataPosition")
+		(object Attribute
+		    tool       	"cg"
+		    name       	"SetName"
+		    value      	"SetActiveDataPosition"))
+	    quid       	"40314D1902BF"
+	    documentation 	"The position within the file that record is currently taking place"
+	    stereotype 	"streamed"
+	    type       	"long"
+	    initv      	"0"
+	    exportControl 	"Public")
+	(object ClassAttribute "_active_data_size"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"GetName"
+		    value      	"GetActiveDataSize")
+		(object Attribute
+		    tool       	"cg"
+		    name       	"SetName"
+		    value      	"SetActiveDataSize"))
+	    quid       	"40314D7B02FD"
+	    documentation 	"The size in bytes of the data at _active_data_position"
+	    stereotype 	"streamed"
+	    type       	"long"
+	    initv      	"0"
+	    exportControl 	"Public")
+	(object ClassAttribute "RecordMemCache"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"cg_style"
+		    value      	"noGetOrSet"))
+	    quid       	"4085B23F008C"
+	    type       	"MemoryCache"
+	    static     	TRUE))
+    language   	"C++")

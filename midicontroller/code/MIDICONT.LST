@@ -1,0 +1,7293 @@
+CCS PCM C Compiler, Version 3.060, 12652
+
+               Filename: C:\DEVELOP\MIDICO~3\MIDICO~1\CODE\MIDICONT.LST
+
+               ROM used: 4807 (59%)
+                         Largest free fragment is 2048
+               RAM used: 96 (55%) at main() level
+                         165 (94%) worst case
+               Stack:    7 worst case (5 in main + 2 for interrupts)
+
+*
+0000:  MOVLW  00
+0001:  MOVWF  0A
+0002:  GOTO   6F3
+0003:  NOP
+0004:  MOVWF  7F
+0005:  SWAPF  03,W
+0006:  BCF    03.5
+0007:  BCF    03.6
+0008:  MOVWF  21
+0009:  MOVF   0A,W
+000A:  MOVWF  20
+000B:  CLRF   0A
+000C:  MOVF   04,W
+000D:  MOVWF  22
+000E:  MOVF   77,W
+000F:  MOVWF  23
+0010:  MOVF   78,W
+0011:  MOVWF  24
+0012:  MOVF   79,W
+0013:  MOVWF  25
+0014:  MOVF   7A,W
+0015:  MOVWF  26
+0016:  MOVF   7B,W
+0017:  MOVWF  27
+0018:  BCF    03.7
+0019:  BCF    03.5
+001A:  MOVLW  8C
+001B:  MOVWF  04
+001C:  BTFSS  00.5
+001D:  GOTO   020
+001E:  BTFSC  0C.5
+001F:  GOTO   033
+0020:  MOVF   22,W
+0021:  MOVWF  04
+0022:  MOVF   23,W
+0023:  MOVWF  77
+0024:  MOVF   24,W
+0025:  MOVWF  78
+0026:  MOVF   25,W
+0027:  MOVWF  79
+0028:  MOVF   26,W
+0029:  MOVWF  7A
+002A:  MOVF   27,W
+002B:  MOVWF  7B
+002C:  MOVF   20,W
+002D:  MOVWF  0A
+002E:  SWAPF  21,W
+002F:  MOVWF  03
+0030:  SWAPF  7F,F
+0031:  SWAPF  7F,W
+0032:  RETFIE
+0033:  BCF    0A.3
+0034:  BCF    0A.4
+0035:  GOTO   04C
+....................  /******************************************************************************* 
+.................... *	Author: Angelo Fraietta 
+.................... *	Description: General Purpose Midi controller 
+.................... *	Processor PIC16F877 
+.................... *	Specifications: 
+.................... *		16 Digital input to Midi Output (SPI) 
+.................... *		16 Analogue input to Midi Output (ADC) 
+.................... *		Midi input to Midi output merge (UART) 
+.................... *   Midi input to 16 Analogue ouput (I2C) 
+.................... * 
+.................... *******************************************************************************/ 
+....................  
+.................... #include "16f877.h" 
+....................  //////// Standard Header file for the PIC16F877 device //////////////// 
+.................... #device PIC16F877 
+.................... #list 
+.................... 
+.................... #device adc=8 
+.................... #fuses HS, WDT, BROWNOUT, PUT, NOLVP, PROTECT 
+....................  
+.................... //#define _SIMULATE 
+....................  
+....................  
+.................... // define pins for SPI input reads and output writes 
+.................... #define SPI_IN_LATCH      PIN_C2 
+.................... #define SPI_CLOCK         PIN_C3 
+.................... #define SPI_DATA_OUT      PIN_D1 
+.................... #define DIGITAL_OUT_LATCH PIN_D2 
+....................   
+....................  
+.................... #define DIGITAL_IN_DATA PIN_C4 
+.................... #define MIDI_CONTROLLER_BUILD 
+....................  
+.................... #ifdef _SIMULATE 
+.................... #define _NO_DELAY 
+.................... #else 
+.................... #define _USE_PRINTF 
+.................... #endif 
+....................  
+.................... #define NUM_ANALOGUE_OUT 8 
+.................... #define NUM_DIGITAL_OUT 16 
+....................  
+....................  
+.................... #use delay(clock=20000000) 
+*
+00D5:  MOVLW  A5
+00D6:  MOVWF  04
+00D7:  MOVF   00,W
+00D8:  BTFSC  03.2
+00D9:  GOTO   0E7
+00DA:  MOVLW  06
+00DB:  MOVWF  78
+00DC:  CLRF   77
+00DD:  DECFSZ 77,F
+00DE:  GOTO   0DD
+00DF:  DECFSZ 78,F
+00E0:  GOTO   0DC
+00E1:  MOVLW  7B
+00E2:  MOVWF  77
+00E3:  DECFSZ 77,F
+00E4:  GOTO   0E3
+00E5:  DECFSZ 00,F
+00E6:  GOTO   0DA
+00E7:  RETLW  00
+....................  
+.................... #define MIDIOUT_1_PIN PIN_C6 
+.................... #define MIDIOUT_2_PIN PIN_C5 
+.................... #define MIDI_IN_PIN PIN_C7 
+....................  
+.................... #define WATCHDOG_OVERFLOW_COUNT   255 
+.................... #define WATCHDOG_NORMAL_COUNT     5000L 
+....................  
+.................... #define NUM_ANALOGUE_IN_BANKS 2 
+.................... #define NUM_ANALOGUE_IN_SUB_BANKS 8 
+.................... #define NUM_ANALOGUE_IN_CHANS (NUM_ANALOGUE_IN_BANKS * NUM_ANALOGUE_IN_SUB_BANKS) 
+.................... #define AD_READ_DELAY 20 // num us to delay from setting channel to making read 
+.................... #define AD_SWITCH_DELAY 1 // num us to wait between switching analog switch to reading 
+.................... #define NUM_ANALOG_VALID_READS 2 // must be this many identical reads to be a valid input 
+....................  
+.................... #define SEVEN_BIT_AD 
+....................  
+.................... #ifdef SEVEN_BIT_AD 
+.................... #define DIG_ON_VAL 0x7f 
+.................... #else 
+.................... #define DIG_ON_VAL 0xff 
+.................... #endif 
+....................  
+.................... #byte PORTA = 5 
+.................... #byte PORTB = 6 
+.................... #byte PORTC = 7 
+....................  
+....................  
+.................... #use rs232(baud=31250, xmit=MIDIOUT_1_PIN, rcv=MIDI_IN_PIN, ERRORS)  
+*
+003E:  BTFSS  0C.5
+003F:  GOTO   03E
+0040:  MOVF   18,W
+0041:  MOVWF  28
+0042:  MOVF   1A,W
+0043:  MOVWF  78
+0044:  BTFSS  28.1
+0045:  GOTO   048
+0046:  BCF    18.4
+0047:  BSF    18.4
+0048:  NOP
+0049:  BCF    0A.3
+004A:  BCF    0A.4
+004B:  GOTO   04D (RETURN)
+....................  
+.................... #USE I2C(master, sda=PIN_B7, scl=PIN_B6) 
+*
+02BC:  MOVLW  08
+02BD:  MOVWF  78
+02BE:  NOP
+02BF:  MOVLW  04
+02C0:  MOVWF  77
+02C1:  DECFSZ 77,F
+02C2:  GOTO   2C1
+02C3:  BCF    06.6
+02C4:  BSF    03.5
+02C5:  BCF    06.6
+02C6:  MOVLW  06
+02C7:  MOVWF  77
+02C8:  BCF    03.5
+02C9:  DECFSZ 77,F
+02CA:  GOTO   2C9
+02CB:  BSF    03.5
+02CC:  RLF    4F,F
+02CD:  BCF    03.5
+02CE:  BCF    06.7
+02CF:  BTFSS  03.0
+02D0:  GOTO   2D4
+02D1:  BSF    03.5
+02D2:  BSF    06.7
+02D3:  BCF    03.5
+02D4:  BTFSC  03.0
+02D5:  GOTO   2D9
+02D6:  BSF    03.5
+02D7:  BCF    06.7
+02D8:  BCF    03.5
+02D9:  BSF    03.5
+02DA:  BSF    06.6
+02DB:  BCF    03.5
+02DC:  BTFSS  06.6
+02DD:  GOTO   2DC
+02DE:  DECFSZ 78,F
+02DF:  GOTO   2BE
+02E0:  MOVLW  04
+02E1:  MOVWF  77
+02E2:  DECFSZ 77,F
+02E3:  GOTO   2E2
+02E4:  BCF    06.6
+02E5:  BSF    03.5
+02E6:  BCF    06.6
+02E7:  NOP
+02E8:  BSF    06.7
+02E9:  MOVLW  06
+02EA:  MOVWF  77
+02EB:  BCF    03.5
+02EC:  DECFSZ 77,F
+02ED:  GOTO   2EC
+02EE:  MOVLW  06
+02EF:  MOVWF  77
+02F0:  DECFSZ 77,F
+02F1:  GOTO   2F0
+02F2:  BSF    03.5
+02F3:  BSF    06.6
+02F4:  BCF    03.5
+02F5:  BTFSS  06.6
+02F6:  GOTO   2F5
+02F7:  CLRF   78
+02F8:  MOVLW  06
+02F9:  MOVWF  77
+02FA:  DECFSZ 77,F
+02FB:  GOTO   2FA
+02FC:  BTFSC  06.7
+02FD:  BSF    78.0
+02FE:  BCF    06.6
+02FF:  BSF    03.5
+0300:  BCF    06.6
+0301:  BCF    03.5
+0302:  BCF    06.7
+0303:  BSF    03.5
+0304:  BCF    06.7
+0305:  BCF    03.5
+0306:  RETLW  00
+.................... #include "sysexcommands.h" 
+....................  #ifndef _SYSEXCAMMANDS_H 
+.................... #define _SYSEXCAMMANDS_H 
+....................  
+.................... #define BASIC_MIDI_CONTROLLER 0x00 
+.................... #define SMART_CONTROLLER      0x01 
+....................  
+.................... // define SYSEX ID education/ research 
+.................... #define SYSEX_ID 0x7D 
+.................... #define EQUIPMENT_TYPE BASIC_MIDI_CONTROLLER 
+.................... #define ANY_DEVICE_ID_NUM 0xff // any device will respond 
+....................  
+....................  
+.................... // define the numbers of the bytes within a sysyex message 
+.................... #define SYSEX_ID_NUM 1 
+.................... #define SYSEX_EQUIPMENT_NUM 2 
+.................... #define SYSEX_DEVICE_NUM 3 
+.................... #define SYSEX_COMMAND_NUM 4 
+.................... #define SYSEX_CONGIG_INDEX_NUM 5 
+....................  
+....................  
+.................... // define COMMANDS 
+.................... #define READ_CONFIG_BYTE 0 
+.................... #define WRITE_CONGFIG_BYTE 1 
+.................... #define FACTORY_DEFAULT 2 
+.................... #define WRITE_ACKNOWLEDGE 3 
+....................  
+....................  
+.................... #define SYSEX_BEGIN 0xF0 
+.................... #define SYSEX_END 0xF7 
+.................... #define SYSTEM_RESET 0xFF 
+.................... #define SYSTEM_QUARTER_FRAME 0xF1 
+.................... #define SYSTEM_SONG_POS 0xF2 
+.................... #define SYSTEM_SONG_SELECT 0xF3 
+....................  
+....................  
+.................... #define STATUS_BYTE_MASK 0x80  
+.................... #define SYSTEM_MSG_VAL 0xF0 
+.................... #define STATUS_NIBBLE_MASK 0xF0 
+....................  
+.................... #endif 
+....................  
+....................  
+....................  
+.................... 
+.................... #include "midiDrv.h" 
+....................  /******************************************************************* 
+....................  * Module for encoding and decoding a data stream from transmission 
+....................  * through a Midi sysex block 
+....................  * The main issue is preventing any bytes with a MSB of 1 from being  
+....................  * transmitted inside a Midi stream. 
+....................  *******************************************************************/ 
+.................... #ifndef MIDIDRV_H 
+.................... #define MIDIDRV_H 
+....................  
+.................... // define control characters 
+.................... #define MIDIDRV_MODMSB 0x01 // the following char must have MSB set 
+.................... #define MIDIDRV_NOMOD 0x02 // the following char is not a control char 
+....................  
+.................... /***************************************************************************** 
+....................  * Author: A. Fraietta 
+....................  * Function: EncodeMidiByte 
+....................  * Purpose:  Determine whether a control character is required for a character 
+....................  *           And if so, modify the input character and return the control  
+....................  *           char value 
+....................  * Input:    char_to_tx - address of char that needs to be transmitted (also Op) 
+....................  * Output:   char_to_tx - the new value of character that will be transmitted 
+....................  * Returns:  a control char if required, otherwise zero 
+....................  ******************************************************************************/ 
+.................... #pragma inline 
+.................... byte EncodeMidiByte (byte *char_to_tx) 
+.................... { 
+....................   byte ret; 
+....................  
+....................   if (*char_to_tx & 0x80) // Msb is 1 
+*
+01B1:  BSF    03.5
+01B2:  MOVF   44,W
+01B3:  MOVWF  04
+01B4:  MOVF   00,W
+01B5:  ANDLW  80
+01B6:  XORLW  00
+01B7:  BTFSS  03.2
+01B8:  GOTO   1BB
+01B9:  BCF    03.5
+01BA:  GOTO   1C6
+01BB:  BCF    03.5
+*
+020B:  BSF    03.5
+020C:  MOVF   44,W
+020D:  MOVWF  04
+020E:  MOVF   00,W
+020F:  ANDLW  80
+0210:  XORLW  00
+0211:  BTFSS  03.2
+0212:  GOTO   215
+0213:  BCF    03.5
+0214:  GOTO   220
+0215:  BCF    03.5
+*
+0268:  BSF    03.5
+0269:  MOVF   44,W
+026A:  MOVWF  04
+026B:  MOVF   00,W
+026C:  ANDLW  80
+026D:  XORLW  00
+026E:  BTFSS  03.2
+026F:  GOTO   272
+0270:  BCF    03.5
+0271:  GOTO   27D
+0272:  BCF    03.5
+*
+0904:  BSF    03.5
+0905:  MOVF   44,W
+0906:  MOVWF  04
+0907:  MOVF   00,W
+0908:  ANDLW  80
+0909:  XORLW  00
+090A:  BTFSS  03.2
+090B:  GOTO   10E
+090C:  BCF    03.5
+090D:  GOTO   119
+090E:  BCF    03.5
+*
+096C:  BSF    03.5
+096D:  MOVF   44,W
+096E:  MOVWF  04
+096F:  MOVF   00,W
+0970:  ANDLW  80
+0971:  XORLW  00
+0972:  BTFSS  03.2
+0973:  GOTO   176
+0974:  BCF    03.5
+0975:  GOTO   181
+0976:  BCF    03.5
+*
+09CA:  BSF    03.5
+09CB:  MOVF   44,W
+09CC:  MOVWF  04
+09CD:  MOVF   00,W
+09CE:  ANDLW  80
+09CF:  XORLW  00
+09D0:  BTFSS  03.2
+09D1:  GOTO   1D4
+09D2:  BCF    03.5
+09D3:  GOTO   1DF
+09D4:  BCF    03.5
+*
+0A36:  BSF    03.5
+0A37:  MOVF   44,W
+0A38:  MOVWF  04
+0A39:  MOVF   00,W
+0A3A:  ANDLW  80
+0A3B:  XORLW  00
+0A3C:  BTFSS  03.2
+0A3D:  GOTO   240
+0A3E:  BCF    03.5
+0A3F:  GOTO   24B
+0A40:  BCF    03.5
+*
+0AA4:  BSF    03.5
+0AA5:  MOVF   44,W
+0AA6:  MOVWF  04
+0AA7:  MOVF   00,W
+0AA8:  ANDLW  80
+0AA9:  XORLW  00
+0AAA:  BTFSS  03.2
+0AAB:  GOTO   2AE
+0AAC:  BCF    03.5
+0AAD:  GOTO   2B9
+0AAE:  BCF    03.5
+....................     { 
+....................       *char_to_tx &= 0x7F; // clear MSB 
+*
+01BC:  BSF    03.5
+01BD:  MOVF   44,W
+01BE:  MOVWF  04
+01BF:  MOVF   00,W
+01C0:  ANDLW  7F
+01C1:  MOVWF  00
+*
+0216:  BSF    03.5
+0217:  MOVF   44,W
+0218:  MOVWF  04
+0219:  MOVF   00,W
+021A:  ANDLW  7F
+021B:  MOVWF  00
+*
+0273:  BSF    03.5
+0274:  MOVF   44,W
+0275:  MOVWF  04
+0276:  MOVF   00,W
+0277:  ANDLW  7F
+0278:  MOVWF  00
+*
+090F:  BSF    03.5
+0910:  MOVF   44,W
+0911:  MOVWF  04
+0912:  MOVF   00,W
+0913:  ANDLW  7F
+0914:  MOVWF  00
+*
+0977:  BSF    03.5
+0978:  MOVF   44,W
+0979:  MOVWF  04
+097A:  MOVF   00,W
+097B:  ANDLW  7F
+097C:  MOVWF  00
+*
+09D5:  BSF    03.5
+09D6:  MOVF   44,W
+09D7:  MOVWF  04
+09D8:  MOVF   00,W
+09D9:  ANDLW  7F
+09DA:  MOVWF  00
+*
+0A41:  BSF    03.5
+0A42:  MOVF   44,W
+0A43:  MOVWF  04
+0A44:  MOVF   00,W
+0A45:  ANDLW  7F
+0A46:  MOVWF  00
+*
+0AAF:  BSF    03.5
+0AB0:  MOVF   44,W
+0AB1:  MOVWF  04
+0AB2:  MOVF   00,W
+0AB3:  ANDLW  7F
+0AB4:  MOVWF  00
+....................       ret = MIDIDRV_MODMSB; 
+*
+01C2:  MOVLW  01
+01C3:  MOVWF  45
+*
+021C:  MOVLW  01
+021D:  MOVWF  45
+*
+0279:  MOVLW  01
+027A:  MOVWF  45
+*
+0915:  MOVLW  01
+0916:  MOVWF  45
+*
+097D:  MOVLW  01
+097E:  MOVWF  45
+*
+09DB:  MOVLW  01
+09DC:  MOVWF  45
+*
+0A47:  MOVLW  01
+0A48:  MOVWF  45
+*
+0AB5:  MOVLW  01
+0AB6:  MOVWF  45
+....................     } 
+....................   else // test if it is a control char 
+*
+01C4:  BCF    03.5
+01C5:  GOTO   1E2
+*
+021E:  BCF    03.5
+021F:  GOTO   23C
+*
+027B:  BCF    03.5
+027C:  GOTO   299
+*
+0917:  BCF    03.5
+0918:  GOTO   135
+*
+097F:  BCF    03.5
+0980:  GOTO   19D
+*
+09DD:  BCF    03.5
+09DE:  GOTO   1FB
+*
+0A49:  BCF    03.5
+0A4A:  GOTO   267
+*
+0AB7:  BCF    03.5
+0AB8:  GOTO   2D5
+....................     { 
+....................       if (*char_to_tx == MIDIDRV_MODMSB || *char_to_tx == MIDIDRV_NOMOD) 
+*
+01C6:  BSF    03.5
+01C7:  MOVF   44,W
+01C8:  MOVWF  04
+01C9:  DECFSZ 00,W
+01CA:  GOTO   1CC
+01CB:  GOTO   1CE
+01CC:  BCF    03.5
+01CD:  GOTO   1D0
+01CE:  BCF    03.5
+01CF:  GOTO   1DA
+01D0:  BSF    03.5
+01D1:  MOVF   44,W
+01D2:  MOVWF  04
+01D3:  MOVF   00,W
+01D4:  SUBLW  02
+01D5:  BTFSC  03.2
+01D6:  GOTO   1D9
+01D7:  BCF    03.5
+01D8:  GOTO   1DF
+01D9:  BCF    03.5
+*
+0220:  BSF    03.5
+0221:  MOVF   44,W
+0222:  MOVWF  04
+0223:  DECFSZ 00,W
+0224:  GOTO   226
+0225:  GOTO   228
+0226:  BCF    03.5
+0227:  GOTO   22A
+0228:  BCF    03.5
+0229:  GOTO   234
+022A:  BSF    03.5
+022B:  MOVF   44,W
+022C:  MOVWF  04
+022D:  MOVF   00,W
+022E:  SUBLW  02
+022F:  BTFSC  03.2
+0230:  GOTO   233
+0231:  BCF    03.5
+0232:  GOTO   239
+0233:  BCF    03.5
+*
+027D:  BSF    03.5
+027E:  MOVF   44,W
+027F:  MOVWF  04
+0280:  DECFSZ 00,W
+0281:  GOTO   283
+0282:  GOTO   285
+0283:  BCF    03.5
+0284:  GOTO   287
+0285:  BCF    03.5
+0286:  GOTO   291
+0287:  BSF    03.5
+0288:  MOVF   44,W
+0289:  MOVWF  04
+028A:  MOVF   00,W
+028B:  SUBLW  02
+028C:  BTFSC  03.2
+028D:  GOTO   290
+028E:  BCF    03.5
+028F:  GOTO   296
+0290:  BCF    03.5
+*
+0919:  BSF    03.5
+091A:  MOVF   44,W
+091B:  MOVWF  04
+091C:  DECFSZ 00,W
+091D:  GOTO   11F
+091E:  GOTO   121
+091F:  BCF    03.5
+0920:  GOTO   123
+0921:  BCF    03.5
+0922:  GOTO   12D
+0923:  BSF    03.5
+0924:  MOVF   44,W
+0925:  MOVWF  04
+0926:  MOVF   00,W
+0927:  SUBLW  02
+0928:  BTFSC  03.2
+0929:  GOTO   12C
+092A:  BCF    03.5
+092B:  GOTO   132
+092C:  BCF    03.5
+*
+0981:  BSF    03.5
+0982:  MOVF   44,W
+0983:  MOVWF  04
+0984:  DECFSZ 00,W
+0985:  GOTO   187
+0986:  GOTO   189
+0987:  BCF    03.5
+0988:  GOTO   18B
+0989:  BCF    03.5
+098A:  GOTO   195
+098B:  BSF    03.5
+098C:  MOVF   44,W
+098D:  MOVWF  04
+098E:  MOVF   00,W
+098F:  SUBLW  02
+0990:  BTFSC  03.2
+0991:  GOTO   194
+0992:  BCF    03.5
+0993:  GOTO   19A
+0994:  BCF    03.5
+*
+09DF:  BSF    03.5
+09E0:  MOVF   44,W
+09E1:  MOVWF  04
+09E2:  DECFSZ 00,W
+09E3:  GOTO   1E5
+09E4:  GOTO   1E7
+09E5:  BCF    03.5
+09E6:  GOTO   1E9
+09E7:  BCF    03.5
+09E8:  GOTO   1F3
+09E9:  BSF    03.5
+09EA:  MOVF   44,W
+09EB:  MOVWF  04
+09EC:  MOVF   00,W
+09ED:  SUBLW  02
+09EE:  BTFSC  03.2
+09EF:  GOTO   1F2
+09F0:  BCF    03.5
+09F1:  GOTO   1F8
+09F2:  BCF    03.5
+*
+0A4B:  BSF    03.5
+0A4C:  MOVF   44,W
+0A4D:  MOVWF  04
+0A4E:  DECFSZ 00,W
+0A4F:  GOTO   251
+0A50:  GOTO   253
+0A51:  BCF    03.5
+0A52:  GOTO   255
+0A53:  BCF    03.5
+0A54:  GOTO   25F
+0A55:  BSF    03.5
+0A56:  MOVF   44,W
+0A57:  MOVWF  04
+0A58:  MOVF   00,W
+0A59:  SUBLW  02
+0A5A:  BTFSC  03.2
+0A5B:  GOTO   25E
+0A5C:  BCF    03.5
+0A5D:  GOTO   264
+0A5E:  BCF    03.5
+*
+0AB9:  BSF    03.5
+0ABA:  MOVF   44,W
+0ABB:  MOVWF  04
+0ABC:  DECFSZ 00,W
+0ABD:  GOTO   2BF
+0ABE:  GOTO   2C1
+0ABF:  BCF    03.5
+0AC0:  GOTO   2C3
+0AC1:  BCF    03.5
+0AC2:  GOTO   2CD
+0AC3:  BSF    03.5
+0AC4:  MOVF   44,W
+0AC5:  MOVWF  04
+0AC6:  MOVF   00,W
+0AC7:  SUBLW  02
+0AC8:  BTFSC  03.2
+0AC9:  GOTO   2CC
+0ACA:  BCF    03.5
+0ACB:  GOTO   2D2
+0ACC:  BCF    03.5
+....................         { 
+....................           // set control char to notify that *char_to_tx is not to  
+....................           // behave as a control char 
+....................           ret = MIDIDRV_NOMOD;  
+*
+01DA:  MOVLW  02
+01DB:  BSF    03.5
+01DC:  MOVWF  45
+*
+0234:  MOVLW  02
+0235:  BSF    03.5
+0236:  MOVWF  45
+*
+0291:  MOVLW  02
+0292:  BSF    03.5
+0293:  MOVWF  45
+*
+092D:  MOVLW  02
+092E:  BSF    03.5
+092F:  MOVWF  45
+*
+0995:  MOVLW  02
+0996:  BSF    03.5
+0997:  MOVWF  45
+*
+09F3:  MOVLW  02
+09F4:  BSF    03.5
+09F5:  MOVWF  45
+*
+0A5F:  MOVLW  02
+0A60:  BSF    03.5
+0A61:  MOVWF  45
+*
+0ACD:  MOVLW  02
+0ACE:  BSF    03.5
+0ACF:  MOVWF  45
+....................         } 
+....................       else 
+*
+01DD:  BCF    03.5
+01DE:  GOTO   1E2
+*
+0237:  BCF    03.5
+0238:  GOTO   23C
+*
+0294:  BCF    03.5
+0295:  GOTO   299
+*
+0930:  BCF    03.5
+0931:  GOTO   135
+*
+0998:  BCF    03.5
+0999:  GOTO   19D
+*
+09F6:  BCF    03.5
+09F7:  GOTO   1FB
+*
+0A62:  BCF    03.5
+0A63:  GOTO   267
+*
+0AD0:  BCF    03.5
+0AD1:  GOTO   2D5
+....................         { 
+....................           ret = 0x00; 
+*
+01DF:  BSF    03.5
+01E0:  CLRF   45
+01E1:  BCF    03.5
+*
+0239:  BSF    03.5
+023A:  CLRF   45
+023B:  BCF    03.5
+*
+0296:  BSF    03.5
+0297:  CLRF   45
+0298:  BCF    03.5
+*
+0932:  BSF    03.5
+0933:  CLRF   45
+0934:  BCF    03.5
+*
+099A:  BSF    03.5
+099B:  CLRF   45
+099C:  BCF    03.5
+*
+09F8:  BSF    03.5
+09F9:  CLRF   45
+09FA:  BCF    03.5
+*
+0A64:  BSF    03.5
+0A65:  CLRF   45
+0A66:  BCF    03.5
+*
+0AD2:  BSF    03.5
+0AD3:  CLRF   45
+0AD4:  BCF    03.5
+....................  
+....................         } 
+....................     } 
+....................   return ret; 
+*
+01E2:  BSF    03.5
+01E3:  MOVF   45,W
+01E4:  MOVWF  78
+01E5:  BCF    03.5
+*
+023C:  BSF    03.5
+023D:  MOVF   45,W
+023E:  MOVWF  78
+023F:  BCF    03.5
+*
+0299:  BSF    03.5
+029A:  MOVF   45,W
+029B:  MOVWF  78
+029C:  BCF    03.5
+*
+0935:  BSF    03.5
+0936:  MOVF   45,W
+0937:  MOVWF  78
+0938:  BCF    03.5
+*
+099D:  BSF    03.5
+099E:  MOVF   45,W
+099F:  MOVWF  78
+09A0:  BCF    03.5
+*
+09FB:  BSF    03.5
+09FC:  MOVF   45,W
+09FD:  MOVWF  78
+09FE:  BCF    03.5
+*
+0A67:  BSF    03.5
+0A68:  MOVF   45,W
+0A69:  MOVWF  78
+0A6A:  BCF    03.5
+*
+0AD5:  BSF    03.5
+0AD6:  MOVF   45,W
+0AD7:  MOVWF  78
+0AD8:  BCF    03.5
+.................... } // end EncodeMidiByte 
+....................  
+.................... /***************************************************************************** 
+....................  * Author: A. Fraietta 
+....................  * Function: DecodeMidiByte 
+....................  * Purpose:  Decodes and modify two input characters 
+....................  
+....................  * Input:    control_char - control char used to determine mod reqd for current_char 
+....................  *           current_char - char that is being tested 
+....................  
+....................  * Output:   control_char - new value for control char used for next current_char 
+....................  *           current_char - decoded value of current_char 
+....................  
+....................  * Returns:  true if current_char is a valid (not control) character 
+....................  * 
+....................  * Notes: using 0x00 in case as it is most common and makes function more efficient 
+....................  ******************************************************************************/ 
+.................... #pragma inline 
+.................... short DecodeMidiByte (byte *control_char, byte *current_char) 
+.................... { 
+....................   short ret; 
+....................  
+....................   switch (*control_char) 
+*
+0B80:  BSF    03.5
+0B81:  MOVF   3F,W
+0B82:  MOVWF  04
+0B83:  MOVF   00,W
+0B84:  MOVWF  77
+0B85:  BTFSS  03.2
+0B86:  GOTO   389
+0B87:  BCF    03.5
+0B88:  GOTO   391
+0B89:  MOVLW  01
+0B8A:  SUBWF  77,W
+0B8B:  BTFSS  03.2
+0B8C:  GOTO   38F
+0B8D:  BCF    03.5
+0B8E:  GOTO   3B7
+0B8F:  BCF    03.5
+0B90:  GOTO   3C3
+....................     { 
+....................     case 0x00: // place first for efficiency 
+....................       if (*current_char == MIDIDRV_MODMSB || *current_char == MIDIDRV_NOMOD) 
+0B91:  BSF    03.5
+0B92:  MOVF   40,W
+0B93:  MOVWF  04
+0B94:  DECFSZ 00,W
+0B95:  GOTO   397
+0B96:  GOTO   399
+0B97:  BCF    03.5
+0B98:  GOTO   39B
+0B99:  BCF    03.5
+0B9A:  GOTO   3A5
+0B9B:  BSF    03.5
+0B9C:  MOVF   40,W
+0B9D:  MOVWF  04
+0B9E:  MOVF   00,W
+0B9F:  SUBLW  02
+0BA0:  BTFSC  03.2
+0BA1:  GOTO   3A4
+0BA2:  BCF    03.5
+0BA3:  GOTO   3B3
+0BA4:  BCF    03.5
+....................         { 
+....................           ret = false; 
+0BA5:  BSF    03.5
+0BA6:  BCF    41.0
+....................           *control_char = *current_char; 
+0BA7:  MOVF   3F,W
+0BA8:  MOVWF  42
+0BA9:  MOVF   40,W
+0BAA:  MOVWF  04
+0BAB:  MOVF   00,W
+0BAC:  MOVWF  43
+0BAD:  MOVF   42,W
+0BAE:  MOVWF  04
+0BAF:  MOVF   43,W
+0BB0:  MOVWF  00
+....................         } 
+....................       else 
+0BB1:  BCF    03.5
+0BB2:  GOTO   3B6
+....................         { 
+....................           ret = true; 
+0BB3:  BSF    03.5
+0BB4:  BSF    41.0
+0BB5:  BCF    03.5
+....................         } 
+....................       break; 
+0BB6:  GOTO   3C9
+....................  
+....................     case MIDIDRV_MODMSB: 
+....................       ret = true; 
+0BB7:  BSF    03.5
+0BB8:  BSF    41.0
+....................       *control_char = 0x00; // clear next control char 
+0BB9:  MOVF   3F,W
+0BBA:  MOVWF  04
+0BBB:  CLRF   00
+....................       *current_char |= 0x80; // set MSB 
+0BBC:  MOVF   40,W
+0BBD:  MOVWF  04
+0BBE:  MOVF   00,W
+0BBF:  IORLW  80
+0BC0:  MOVWF  00
+....................       break; 
+0BC1:  BCF    03.5
+0BC2:  GOTO   3C9
+....................  
+....................     default:  
+....................       ret = true; 
+0BC3:  BSF    03.5
+0BC4:  BSF    41.0
+....................       *control_char = 0x00; // clear next control char 
+0BC5:  MOVF   3F,W
+0BC6:  MOVWF  04
+0BC7:  CLRF   00
+0BC8:  BCF    03.5
+....................     } // end select 
+....................  
+....................   return ret; 
+0BC9:  MOVLW  00
+0BCA:  BSF    03.5
+0BCB:  BTFSC  41.0
+0BCC:  MOVLW  01
+0BCD:  MOVWF  78
+0BCE:  BCF    03.5
+.................... } // end DecodeMidiByte 
+....................  
+....................  
+.................... #endif 
+....................  
+.................... /***************************************************************************** 
+....................  * Author: A. Fraietta 
+....................  * Function: CalculateMidiTxBufferSize 
+....................  * Purpose:  Calculates the size of a buffer to encode 
+....................  
+....................  * Input:    Tx_Buffer- buffer of chars to be transmitted 
+....................  *           Buff_size - size of buffer 
+....................  
+....................  * Output:   Nill 
+....................  
+....................  * Returns:  Size of buffer required does not include start and end sysex chars 
+....................  * 
+....................  * Notes:  
+....................  ******************************************************************************/ 
+.................... int16 CalculateMidiTxBufferSize (byte *buf, int16 buf_size) 
+.................... { 
+....................   int16 ret;  
+....................   int16 i; 
+....................   byte current_char; // local so we do not modify buff 
+....................  
+....................   ret = 0; 
+....................  
+....................   for (i = 0; i < buf_size; i++) 
+....................     { 
+....................       current_char = buf[i]; 
+....................        
+....................       if (EncodeMidiByte (&current_char)) 
+....................         { 
+....................           ret += 2; 
+....................         } 
+....................       else 
+....................         { 
+....................           ret++; 
+....................         } 
+....................     } 
+....................   return ret; 
+....................    
+.................... } // end CalculateMidiTxBufferSize 
+....................  
+....................  
+....................  
+.................... 
+.................... #include "cfgram.h" 
+....................  /********************************************************* 
+.................... Module for storing configuration in Pic EEProm 
+.................... ********************************************************/ 
+....................  
+....................  
+.................... //#inline 
+.................... void WriteConfigByte (int index, byte config_byte) 
+.................... { 
+....................  
+.................... #ifndef _SIMULATE 
+....................   restart_wdt(); 
+*
+007F:  CLRWDT
+.................... 	write_eeprom (index, config_byte); 
+0080:  BSF    03.5
+0081:  MOVF   43,W
+0082:  BCF    03.5
+0083:  BSF    03.6
+0084:  MOVWF  0D
+0085:  CLRF   0F
+0086:  BSF    03.5
+0087:  BCF    03.6
+0088:  MOVF   44,W
+0089:  BCF    03.5
+008A:  BSF    03.6
+008B:  MOVWF  0C
+008C:  BSF    03.5
+008D:  BCF    0C.7
+008E:  BSF    0C.2
+008F:  BCF    03.5
+0090:  BCF    03.6
+0091:  MOVF   0B,W
+0092:  MOVWF  77
+0093:  BCF    0B.7
+0094:  MOVLW  55
+0095:  BSF    03.5
+0096:  BSF    03.6
+0097:  MOVWF  0D
+0098:  MOVLW  AA
+0099:  MOVWF  0D
+009A:  BSF    0C.1
+009B:  BCF    03.5
+009C:  BCF    03.6
+009D:  BSF    03.5
+009E:  BSF    03.6
+009F:  BTFSS  0C.1
+00A0:  GOTO   0A4
+00A1:  BCF    03.5
+00A2:  BCF    03.6
+00A3:  GOTO   09D
+00A4:  BCF    0C.2
+00A5:  MOVF   77,W
+00A6:  BCF    03.5
+00A7:  BCF    03.6
+00A8:  IORWF  0B,F
+....................   restart_wdt(); 
+00A9:  CLRWDT
+00AA:  RETLW  00
+.................... #else // let us decode from here 
+....................   int x; 
+....................   x = index; 
+.................... #endif 
+.................... } // end WriteConfigByte 
+....................  
+....................  
+.................... #inline 
+.................... byte ReadConfigByte (int index) 
+.................... { 
+.................... 	return read_eeprom (index); 
+*
+0130:  BSF    03.5
+0131:  MOVF   50,W
+0132:  BCF    03.5
+0133:  BSF    03.6
+0134:  MOVWF  0D
+0135:  CLRF   0F
+0136:  BSF    03.5
+0137:  BCF    0C.7
+0138:  BSF    0C.0
+0139:  BCF    03.5
+013A:  MOVF   0C,W
+013B:  MOVWF  78
+013C:  BCF    03.6
+*
+018A:  BSF    03.5
+018B:  MOVF   50,W
+018C:  BCF    03.5
+018D:  BSF    03.6
+018E:  MOVWF  0D
+018F:  CLRF   0F
+0190:  BSF    03.5
+0191:  BCF    0C.7
+0192:  BSF    0C.0
+0193:  BCF    03.5
+0194:  MOVF   0C,W
+0195:  MOVWF  78
+0196:  BCF    03.6
+*
+05A7:  BSF    03.5
+05A8:  MOVF   50,W
+05A9:  BCF    03.5
+05AA:  BSF    03.6
+05AB:  MOVWF  0D
+05AC:  CLRF   0F
+05AD:  BSF    03.5
+05AE:  BCF    0C.7
+05AF:  BSF    0C.0
+05B0:  BCF    03.5
+05B1:  MOVF   0C,W
+05B2:  MOVWF  78
+05B3:  BCF    03.6
+*
+0847:  BSF    03.5
+0848:  MOVF   50,W
+0849:  BCF    03.5
+084A:  BSF    03.6
+084B:  MOVWF  0D
+084C:  CLRF   0F
+084D:  BSF    03.5
+084E:  BCF    0C.7
+084F:  BSF    0C.0
+0850:  BCF    03.5
+0851:  MOVF   0C,W
+0852:  MOVWF  78
+0853:  BCF    03.6
+*
+0A20:  BSF    03.5
+0A21:  MOVF   50,W
+0A22:  BCF    03.5
+0A23:  BSF    03.6
+0A24:  MOVWF  0D
+0A25:  CLRF   0F
+0A26:  BSF    03.5
+0A27:  BCF    0C.7
+0A28:  BSF    0C.0
+0A29:  BCF    03.5
+0A2A:  MOVF   0C,W
+0A2B:  MOVWF  78
+0A2C:  BCF    03.6
+*
+0A8E:  BSF    03.5
+0A8F:  MOVF   50,W
+0A90:  BCF    03.5
+0A91:  BSF    03.6
+0A92:  MOVWF  0D
+0A93:  CLRF   0F
+0A94:  BSF    03.5
+0A95:  BCF    0C.7
+0A96:  BSF    0C.0
+0A97:  BCF    03.5
+0A98:  MOVF   0C,W
+0A99:  MOVWF  78
+0A9A:  BCF    03.6
+*
+0B5D:  BSF    03.5
+0B5E:  MOVF   50,W
+0B5F:  BCF    03.5
+0B60:  BSF    03.6
+0B61:  MOVWF  0D
+0B62:  CLRF   0F
+0B63:  BSF    03.5
+0B64:  BCF    0C.7
+0B65:  BSF    0C.0
+0B66:  BCF    03.5
+0B67:  MOVF   0C,W
+0B68:  MOVWF  78
+0B69:  BCF    03.6
+*
+0C98:  BSF    03.5
+0C99:  MOVF   50,W
+0C9A:  BCF    03.5
+0C9B:  BSF    03.6
+0C9C:  MOVWF  0D
+0C9D:  CLRF   0F
+0C9E:  BSF    03.5
+0C9F:  BCF    0C.7
+0CA0:  BSF    0C.0
+0CA1:  BCF    03.5
+0CA2:  MOVF   0C,W
+0CA3:  MOVWF  78
+0CA4:  BCF    03.6
+*
+0CC3:  BSF    03.5
+0CC4:  MOVF   50,W
+0CC5:  BCF    03.5
+0CC6:  BSF    03.6
+0CC7:  MOVWF  0D
+0CC8:  CLRF   0F
+0CC9:  BSF    03.5
+0CCA:  BCF    0C.7
+0CCB:  BSF    0C.0
+0CCC:  BCF    03.5
+0CCD:  MOVF   0C,W
+0CCE:  MOVWF  78
+0CCF:  BCF    03.6
+*
+1007:  BSF    03.5
+1008:  MOVF   50,W
+1009:  BCF    03.5
+100A:  BSF    03.6
+100B:  MOVWF  0D
+100C:  CLRF   0F
+100D:  BSF    03.5
+100E:  BCF    0C.7
+100F:  BSF    0C.0
+1010:  BCF    03.5
+1011:  MOVF   0C,W
+1012:  MOVWF  78
+1013:  BCF    03.6
+*
+11A7:  BSF    03.5
+11A8:  MOVF   50,W
+11A9:  BCF    03.5
+11AA:  BSF    03.6
+11AB:  MOVWF  0D
+11AC:  CLRF   0F
+11AD:  BSF    03.5
+11AE:  BCF    0C.7
+11AF:  BSF    0C.0
+11B0:  BCF    03.5
+11B1:  MOVF   0C,W
+11B2:  MOVWF  78
+11B3:  BCF    03.6
+*
+126C:  BSF    03.5
+126D:  MOVF   50,W
+126E:  BCF    03.5
+126F:  BSF    03.6
+1270:  MOVWF  0D
+1271:  CLRF   0F
+1272:  BSF    03.5
+1273:  BCF    0C.7
+1274:  BSF    0C.0
+1275:  BCF    03.5
+1276:  MOVF   0C,W
+1277:  MOVWF  78
+1278:  BCF    03.6
+*
+149E:  BSF    03.5
+149F:  MOVF   50,W
+14A0:  BCF    03.5
+14A1:  BSF    03.6
+14A2:  MOVWF  0D
+14A3:  CLRF   0F
+14A4:  BSF    03.5
+14A5:  BCF    0C.7
+14A6:  BSF    0C.0
+14A7:  BCF    03.5
+14A8:  MOVF   0C,W
+14A9:  MOVWF  78
+14AA:  BCF    03.6
+.................... } // end ReadConfigByte 
+.................... 
+.................... #include "midicfg.h" 
+....................  /**************************************************************************** 
+.................... * MidiCfg.h 
+.................... * Contains the configuration data for the Midi configuration for each input  
+.................... * and output channel 
+.................... * 
+.................... * Configuration is stored as 64 element arrays 
+.................... *  
+.................... * 256 bytes available due to PIC limitations.  
+.................... * Therefore, a max of 64 configuration types 
+.................... * 
+.................... * module shared between patch editor and PIC code 
+.................... ****************************************************************************/ 
+.................... #ifndef _MIDICFG_H 
+.................... #define _MIDICFG_H 
+....................  
+....................  
+....................  
+.................... const byte ANA_OUT_CONTROLLER [] = {1, 2, 4, 7}; 
+*
+0036:  BCF    0A.0
+0037:  BCF    0A.1
+0038:  BCF    0A.2
+0039:  ADDWF  02,F
+003A:  RETLW  01
+003B:  RETLW  02
+003C:  RETLW  04
+003D:  RETLW  07
+....................  
+.................... #define ANALOG_IN_CONFIG_INDEX  0 
+.................... #define DIGITAL_IN_CONFIG_INDEX 16 
+.................... #define ANALOGUE_OUT_CONFIG_INDEX 32 
+.................... #define DIGITAL_OUT_CONFIG_INDEX  40 
+....................  
+.................... #define NOTEOFF_MASK 0x80 
+.................... #define NOTEON_MASK 0x90 
+.................... #define POLYPRESS_MASK 0xA0 
+.................... #define CONTROLLER_MASK 0xB0 
+.................... #define PROGCHANGE_MASK 0xC0 
+.................... #define CHANPRESS_MASK 0xD0 
+.................... #define PITCHBEND_MASK 0xE0 
+....................  
+.................... // define index for configuraion within eeprom 
+.................... #define MAX_INPUT_CHAN 16 
+.................... #define MAX_ANAOUTPUT_CHAN 8 
+.................... #define MAX_DIGOUTPUT_CHAN 16 
+.................... #define MIDI_CONFIG_START_ADDRESS 32 
+....................  
+.................... #define VALID_CONFIG_ADDRESS 0x0 
+.................... #define DEVICE_ID_ADDRESS 0x01 
+.................... #define MIDI_MERGE_ADDRESS 0x02 
+....................  
+....................  
+.................... #define DEFAULT_ANA_IN_CONT 12 
+.................... #define DEFAULT_DIG_IN_CONT 64 
+.................... #define DEFAULT_DIG_OUT_CONT 80 
+....................  
+.................... // define bitmasks for config flags 
+.................... #define DATA_1_VARY_MASK    0x01 // this means data 1 is the byte containg the variable value 
+.................... #define INVERT_VALUE_MASK   0x02 // this means the variable value is inverted 
+.................... #define MUTE_CONFIG_MASK    0x04 // no output generated for this configuration 
+.................... #define MIDI_OUTPUT2_MASK   0x08 // Output generated on Midi output 2 insetad of 1 
+.................... #define PRESET_VALUE_FLAG   0x10 // Value will be sent upon reset 
+....................  
+....................  
+.................... /* define a structure for a midi config. max 4 bytes */ 
+.................... typedef struct 
+.................... { 
+....................   BYTE status_chan; 
+....................   BYTE data_1; 
+....................   BYTE data_2; 
+....................   BYTE config_flag; 
+.................... } str_midiconfig; 
+....................  
+....................  
+.................... #ifdef _PATCH_EDITOR 
+....................   byte ReadConfigByte (int index); 
+....................   void WriteConfigByte (int index, byte value); 
+.................... #endif 
+....................  
+.................... #pragma inline 
+.................... short DoMidiMerge() 
+.................... { 
+....................   return (ReadConfigByte(MIDI_MERGE_ADDRESS)); 
+*
+05A3:  MOVLW  02
+05A4:  BSF    03.5
+05A5:  MOVWF  50
+05A6:  BCF    03.5
+*
+05B4:  MOVF   78,W
+*
+0843:  MOVLW  02
+0844:  BSF    03.5
+0845:  MOVWF  50
+0846:  BCF    03.5
+*
+0854:  MOVF   78,W
+*
+0B59:  MOVLW  02
+0B5A:  BSF    03.5
+0B5B:  MOVWF  50
+0B5C:  BCF    03.5
+*
+0B6A:  MOVF   78,W
+*
+0C94:  MOVLW  02
+0C95:  BSF    03.5
+0C96:  MOVWF  50
+0C97:  BCF    03.5
+*
+0CA5:  MOVF   78,W
+*
+0CBF:  MOVLW  02
+0CC0:  BSF    03.5
+0CC1:  MOVWF  50
+0CC2:  BCF    03.5
+*
+0CD0:  MOVF   78,W
+*
+11A3:  MOVLW  02
+11A4:  BSF    03.5
+11A5:  MOVWF  50
+11A6:  BCF    03.5
+*
+11B4:  MOVF   78,W
+*
+1268:  MOVLW  02
+1269:  BSF    03.5
+126A:  MOVWF  50
+126B:  BCF    03.5
+*
+1279:  MOVF   78,W
+*
+149A:  MOVLW  02
+149B:  BSF    03.5
+149C:  MOVWF  50
+149D:  BCF    03.5
+*
+14AB:  MOVF   78,W
+.................... } 
+....................  
+....................  
+.................... // note that index must be less than 64 
+.................... void ReadMidiConfig (str_midiconfig* ret_config, byte index) 
+.................... { 
+....................   byte i; 
+....................   byte* ret_ptr; 
+.................... 	byte start_memory_index; // the index within the RAM configuration array 
+....................  
+....................   ret_ptr = (byte*)ret_config; 
+*
+0111:  BSF    03.5
+0112:  MOVF   49,W
+0113:  MOVWF  4C
+.................... 	start_memory_index = (byte)((index * sizeof (str_midiconfig)) 
+.................... 		+ MIDI_CONFIG_START_ADDRESS); 
+0114:  BCF    03.0
+0115:  RLF    4A,W
+0116:  MOVWF  77
+0117:  RLF    77,F
+0118:  MOVLW  FC
+0119:  ANDWF  77,F
+011A:  MOVF   77,W
+011B:  ADDLW  20
+011C:  MOVWF  4D
+....................  
+....................   for (i = 0; i < sizeof (str_midiconfig); i++) 
+011D:  CLRF   4B
+011E:  BCF    03.5
+011F:  BSF    03.5
+0120:  MOVF   4B,W
+0121:  SUBLW  03
+0122:  BTFSC  03.0
+0123:  GOTO   126
+0124:  BCF    03.5
+0125:  GOTO   147
+0126:  BCF    03.5
+....................   { 
+....................     ret_ptr [i] = (byte)ReadConfigByte ((byte) (start_memory_index + i)); 
+0127:  BSF    03.5
+0128:  MOVF   4C,W
+0129:  ADDWF  4B,W
+012A:  MOVWF  4E
+012B:  MOVF   4B,W
+012C:  ADDWF  4D,W
+012D:  MOVWF  4F
+012E:  MOVWF  50
+012F:  BCF    03.5
+*
+013D:  BSF    03.5
+013E:  MOVF   4E,W
+013F:  MOVWF  04
+0140:  MOVF   78,W
+0141:  MOVWF  00
+0142:  BCF    03.5
+....................   } 
+0143:  BSF    03.5
+0144:  INCF   4B,F
+0145:  BCF    03.5
+0146:  GOTO   11F
+0147:  RETLW  00
+.................... } // end void ReadMidiConfig (str_midiconfig* ret_config, int index)  
+....................  
+....................  
+.................... // note that index must be less than 64 
+.................... void WriteMidiConfig (str_midiconfig* config, byte index) 
+.................... { 
+....................   byte i; 
+....................   byte* ptr; 
+.................... 	byte start_memory_index; // the index within the RAM configuration array 
+....................  
+....................   ptr = (byte*)config; 
+*
+00AB:  BSF    03.5
+00AC:  MOVF   28,W
+00AD:  MOVWF  2B
+....................    
+.................... 	start_memory_index = (byte) ((index * sizeof (str_midiconfig)) 
+.................... 		+ MIDI_CONFIG_START_ADDRESS); 
+00AE:  BCF    03.0
+00AF:  RLF    29,W
+00B0:  MOVWF  77
+00B1:  RLF    77,F
+00B2:  MOVLW  FC
+00B3:  ANDWF  77,F
+00B4:  MOVF   77,W
+00B5:  ADDLW  20
+00B6:  MOVWF  2C
+....................    
+.................... 	for (i = 0; i < sizeof (str_midiconfig); i++) 
+00B7:  CLRF   2A
+00B8:  BCF    03.5
+00B9:  BSF    03.5
+00BA:  MOVF   2A,W
+00BB:  SUBLW  03
+00BC:  BTFSC  03.0
+00BD:  GOTO   0C0
+00BE:  BCF    03.5
+00BF:  GOTO   0D4
+00C0:  BCF    03.5
+....................   { 
+....................     WriteConfigByte ((byte) (start_memory_index + i), ptr [i]); 
+00C1:  BSF    03.5
+00C2:  MOVF   2A,W
+00C3:  ADDWF  2C,W
+00C4:  MOVWF  2D
+00C5:  MOVF   2B,W
+00C6:  ADDWF  2A,W
+00C7:  MOVWF  04
+00C8:  MOVF   00,W
+00C9:  MOVWF  2E
+00CA:  MOVF   2D,W
+00CB:  MOVWF  43
+00CC:  MOVF   2E,W
+00CD:  MOVWF  44
+00CE:  BCF    03.5
+00CF:  CALL   07F
+....................   } 
+00D0:  BSF    03.5
+00D1:  INCF   2A,F
+00D2:  BCF    03.5
+00D3:  GOTO   0B9
+00D4:  RETLW  00
+.................... } // end void WriteMidiConfig (str_midiconfig* config, int index)  
+....................  
+....................  
+.................... #pragma inline  
+.................... void ReadAnalogueInConfig(str_midiconfig* ret_config, int index)  
+.................... { 
+.................... 	ReadMidiConfig (ret_config, (byte) (ANALOG_IN_CONFIG_INDEX + index)); 
+*
+116D:  BSF    03.5
+116E:  MOVF   31,W
+116F:  MOVWF  49
+1170:  MOVF   32,W
+1171:  MOVWF  4A
+1172:  BCF    03.5
+1173:  BCF    0A.4
+1174:  CALL   111
+1175:  BSF    0A.4
+*
+1425:  BSF    03.5
+1426:  MOVF   31,W
+1427:  MOVWF  49
+1428:  MOVF   32,W
+1429:  MOVWF  4A
+142A:  BCF    03.5
+142B:  BCF    0A.4
+142C:  CALL   111
+142D:  BSF    0A.4
+.................... } 
+....................  
+....................  
+.................... # pragma inline  
+.................... void ReadDigitalInConfig(str_midiconfig* ret_config, int index)  
+.................... { 
+.................... 	ReadMidiConfig (ret_config, (byte) (DIGITAL_IN_CONFIG_INDEX + index)); 
+*
+0531:  MOVLW  10
+0532:  BSF    03.5
+0533:  ADDWF  37,W
+0534:  MOVWF  38
+0535:  MOVF   36,W
+0536:  MOVWF  49
+0537:  MOVF   38,W
+0538:  MOVWF  4A
+0539:  BCF    03.5
+053A:  CALL   111
+*
+122F:  MOVLW  10
+1230:  BSF    03.5
+1231:  ADDWF  37,W
+1232:  MOVWF  38
+1233:  MOVF   36,W
+1234:  MOVWF  49
+1235:  MOVF   38,W
+1236:  MOVWF  4A
+1237:  BCF    03.5
+1238:  BCF    0A.4
+1239:  CALL   111
+123A:  BSF    0A.4
+.................... } // end void ReadDigitalInConfig(str_midiconfig* ret_config, int index)  
+....................  
+....................  
+.................... #pragma inline  
+.................... void ReadAnalogueOutConfig(str_midiconfig* ret_config, int index)  
+.................... { 
+.................... 	ReadMidiConfig (ret_config, (byte) (ANALOGUE_OUT_CONFIG_INDEX + index)); 
+*
+0D15:  MOVLW  20
+0D16:  BSF    03.5
+0D17:  ADDWF  47,W
+0D18:  MOVWF  48
+0D19:  MOVF   46,W
+0D1A:  MOVWF  49
+0D1B:  MOVF   48,W
+0D1C:  MOVWF  4A
+0D1D:  BCF    03.5
+0D1E:  BCF    0A.3
+0D1F:  CALL   111
+0D20:  BSF    0A.3
+*
+12F4:  MOVLW  20
+12F5:  BSF    03.5
+12F6:  ADDWF  47,W
+12F7:  MOVWF  48
+12F8:  MOVF   46,W
+12F9:  MOVWF  49
+12FA:  MOVF   48,W
+12FB:  MOVWF  4A
+12FC:  BCF    03.5
+12FD:  BCF    0A.4
+12FE:  CALL   111
+12FF:  BSF    0A.4
+.................... } // end void ReadAnalogueOutConfig(str_midiconfig* ret_config, int index)  
+....................  
+....................  
+.................... #pragma inline  
+.................... void ReadDigitalOutConfig(str_midiconfig* ret_config, int index)  
+.................... { 
+.................... 	ReadMidiConfig (ret_config, (byte) (DIGITAL_OUT_CONFIG_INDEX + index)); 
+*
+0DC6:  MOVLW  28
+0DC7:  BSF    03.5
+0DC8:  ADDWF  47,W
+0DC9:  MOVWF  48
+0DCA:  MOVF   46,W
+0DCB:  MOVWF  49
+0DCC:  MOVF   48,W
+0DCD:  MOVWF  4A
+0DCE:  BCF    03.5
+0DCF:  BCF    0A.3
+0DD0:  CALL   111
+0DD1:  BSF    0A.3
+*
+134A:  MOVLW  28
+134B:  BSF    03.5
+134C:  ADDWF  47,W
+134D:  MOVWF  48
+134E:  MOVF   46,W
+134F:  MOVWF  49
+1350:  MOVF   48,W
+1351:  MOVWF  4A
+1352:  BCF    03.5
+1353:  BCF    0A.4
+1354:  CALL   111
+1355:  BSF    0A.4
+.................... } // end void ReadDigitalOutConfig(str_midiconfig* ret_config, int index)  
+....................  
+.................... void GetDefaultAnalogueIn(str_midiconfig* ret_config, int index)  
+.................... { 
+....................   ret_config->status_chan = CONTROLLER_MASK | 0x00; // controller on channel 1  
+*
+102F:  BSF    03.5
+1030:  MOVF   27,W
+1031:  MOVWF  04
+1032:  MOVLW  B0
+1033:  MOVWF  00
+....................   ret_config->data_1 = (byte) (DEFAULT_ANA_IN_CONT + index); 
+1034:  MOVLW  01
+1035:  ADDWF  27,W
+1036:  MOVWF  04
+1037:  MOVLW  0C
+1038:  ADDWF  28,W
+1039:  MOVWF  00
+.................... 	ret_config->data_2 = 0;  
+103A:  MOVLW  02
+103B:  ADDWF  27,W
+103C:  MOVWF  04
+103D:  CLRF   00
+....................   ret_config->config_flag = 0; 
+103E:  MOVLW  03
+103F:  ADDWF  27,W
+1040:  MOVWF  04
+1041:  CLRF   00
+1042:  BCF    03.5
+.................... } // end void GetDefaultAnalogueIn(str_midiconfig* ret_config, int index)  
+....................  
+.................... void GetDefaultDigitalIn(str_midiconfig* ret_config, int index)  
+.................... { 
+....................   ret_config->status_chan = CONTROLLER_MASK | 0x00; // controller on channel 1  
+*
+1061:  BSF    03.5
+1062:  MOVF   27,W
+1063:  MOVWF  04
+1064:  MOVLW  B0
+1065:  MOVWF  00
+....................   ret_config->data_1 = (byte) (DEFAULT_DIG_IN_CONT + index); 
+1066:  MOVLW  01
+1067:  ADDWF  27,W
+1068:  MOVWF  04
+1069:  MOVLW  40
+106A:  ADDWF  28,W
+106B:  MOVWF  00
+.................... 	ret_config->data_2 = 0; 
+106C:  MOVLW  02
+106D:  ADDWF  27,W
+106E:  MOVWF  04
+106F:  CLRF   00
+....................   ret_config->config_flag = 0; 
+1070:  MOVLW  03
+1071:  ADDWF  27,W
+1072:  MOVWF  04
+1073:  CLRF   00
+1074:  BCF    03.5
+.................... } // end void GetDefaultDigitalIn(str_midiconfig* ret_config, int index)  
+....................  
+.................... void GetDefaultDigitalOut(str_midiconfig* ret_config, int index)  
+.................... { 
+....................   ret_config->status_chan = CONTROLLER_MASK | 0x00; // controller on channel 1  
+*
+10D8:  BSF    03.5
+10D9:  MOVF   27,W
+10DA:  MOVWF  04
+10DB:  MOVLW  B0
+10DC:  MOVWF  00
+....................   ret_config->data_1 = (byte) (DEFAULT_DIG_OUT_CONT + index); 
+10DD:  MOVLW  01
+10DE:  ADDWF  27,W
+10DF:  MOVWF  04
+10E0:  MOVLW  50
+10E1:  ADDWF  28,W
+10E2:  MOVWF  00
+.................... 	ret_config->data_2 = 0; 
+10E3:  MOVLW  02
+10E4:  ADDWF  27,W
+10E5:  MOVWF  04
+10E6:  CLRF   00
+....................   ret_config->config_flag = 0; 
+10E7:  MOVLW  03
+10E8:  ADDWF  27,W
+10E9:  MOVWF  04
+10EA:  CLRF   00
+10EB:  BCF    03.5
+.................... } // end void GetDefaultDigitalOut(str_midiconfig* ret_config, int index)  
+....................  
+.................... void GetDefaultAnalogueOut(str_midiconfig* ret_config, int index)  
+.................... { 
+.................... 	ret_config->status_chan = (byte) (CONTROLLER_MASK | (index / sizeof(ANA_OUT_CONTROLLER)));  
+*
+1096:  BSF    03.5
+1097:  MOVF   27,W
+1098:  MOVWF  04
+1099:  BCF    03.0
+109A:  RRF    28,W
+109B:  MOVWF  77
+109C:  RRF    77,F
+109D:  MOVLW  3F
+109E:  ANDWF  77,F
+109F:  MOVF   77,W
+10A0:  IORLW  B0
+10A1:  MOVWF  00
+.................... 	ret_config->data_1 = ANA_OUT_CONTROLLER [index % sizeof(ANA_OUT_CONTROLLER)]; 
+10A2:  MOVLW  01
+10A3:  ADDWF  27,W
+10A4:  MOVWF  04
+10A5:  MOVF   28,W
+10A6:  ANDLW  03
+10A7:  BCF    03.5
+10A8:  BCF    0A.4
+10A9:  CALL   036
+10AA:  BSF    0A.4
+10AB:  MOVWF  78
+10AC:  MOVWF  00
+.................... 	ret_config->data_2 = 0; 
+10AD:  MOVLW  02
+10AE:  BSF    03.5
+10AF:  ADDWF  27,W
+10B0:  MOVWF  04
+10B1:  CLRF   00
+....................   ret_config->config_flag = 0; 
+10B2:  MOVLW  03
+10B3:  ADDWF  27,W
+10B4:  MOVWF  04
+10B5:  CLRF   00
+10B6:  BCF    03.5
+.................... } // end void GetDefaultAnalogueOut(str_midiconfig* ret_config, int index)  
+....................  
+.................... // gets the default for all types and writes it to eeprom 
+.................... void ResetConfiguration() 
+.................... { 
+.................... 	// configure analog in first 
+.................... 	str_midiconfig config; 
+.................... 	int i; 
+....................  
+.................... 	for (i = 0; i < MAX_INPUT_CHAN; i++) 
+*
+101E:  BSF    03.5
+101F:  CLRF   26
+1020:  BCF    03.5
+1021:  BSF    03.5
+1022:  MOVF   26,W
+1023:  SUBLW  0F
+1024:  BTFSC  03.0
+1025:  GOTO   028
+1026:  BCF    03.5
+1027:  GOTO   050
+1028:  BCF    03.5
+.................... 		{ 
+.................... 			GetDefaultAnalogueIn (&config, i); 
+1029:  MOVLW  A2
+102A:  BSF    03.5
+102B:  MOVWF  27
+102C:  MOVF   26,W
+102D:  MOVWF  28
+102E:  BCF    03.5
+....................  
+.................... 			WriteMidiConfig (&config, (byte) (i + ANALOG_IN_CONFIG_INDEX)); 
+*
+1043:  MOVLW  A2
+1044:  BSF    03.5
+1045:  MOVWF  28
+1046:  MOVF   26,W
+1047:  MOVWF  29
+1048:  BCF    03.5
+1049:  BCF    0A.4
+104A:  CALL   0AB
+104B:  BSF    0A.4
+.................... 		} 
+104C:  BSF    03.5
+104D:  INCF   26,F
+104E:  BCF    03.5
+104F:  GOTO   021
+....................  
+....................  
+.................... 	for (i = 0; i < MAX_INPUT_CHAN; i++) 
+1050:  BSF    03.5
+1051:  CLRF   26
+1052:  BCF    03.5
+1053:  BSF    03.5
+1054:  MOVF   26,W
+1055:  SUBLW  0F
+1056:  BTFSC  03.0
+1057:  GOTO   05A
+1058:  BCF    03.5
+1059:  GOTO   085
+105A:  BCF    03.5
+.................... 		{ 
+.................... 			GetDefaultDigitalIn (&config, i); 
+105B:  MOVLW  A2
+105C:  BSF    03.5
+105D:  MOVWF  27
+105E:  MOVF   26,W
+105F:  MOVWF  28
+1060:  BCF    03.5
+....................  
+.................... 			WriteMidiConfig (&config, (byte) (i + DIGITAL_IN_CONFIG_INDEX)); 
+*
+1075:  MOVLW  10
+1076:  BSF    03.5
+1077:  ADDWF  26,W
+1078:  MOVWF  27
+1079:  MOVLW  A2
+107A:  MOVWF  28
+107B:  MOVF   27,W
+107C:  MOVWF  29
+107D:  BCF    03.5
+107E:  BCF    0A.4
+107F:  CALL   0AB
+1080:  BSF    0A.4
+.................... 		} 
+1081:  BSF    03.5
+1082:  INCF   26,F
+1083:  BCF    03.5
+1084:  GOTO   053
+....................  
+.................... 	for (i = 0; i < MAX_ANAOUTPUT_CHAN; i++) 
+1085:  BSF    03.5
+1086:  CLRF   26
+1087:  BCF    03.5
+1088:  BSF    03.5
+1089:  MOVF   26,W
+108A:  SUBLW  07
+108B:  BTFSC  03.0
+108C:  GOTO   08F
+108D:  BCF    03.5
+108E:  GOTO   0C7
+108F:  BCF    03.5
+.................... 		{ 
+.................... 			GetDefaultAnalogueOut (&config, i); 
+1090:  MOVLW  A2
+1091:  BSF    03.5
+1092:  MOVWF  27
+1093:  MOVF   26,W
+1094:  MOVWF  28
+1095:  BCF    03.5
+....................  
+.................... 			WriteMidiConfig (&config, (byte) (i + ANALOGUE_OUT_CONFIG_INDEX)); 
+*
+10B7:  MOVLW  20
+10B8:  BSF    03.5
+10B9:  ADDWF  26,W
+10BA:  MOVWF  27
+10BB:  MOVLW  A2
+10BC:  MOVWF  28
+10BD:  MOVF   27,W
+10BE:  MOVWF  29
+10BF:  BCF    03.5
+10C0:  BCF    0A.4
+10C1:  CALL   0AB
+10C2:  BSF    0A.4
+.................... 		} 
+10C3:  BSF    03.5
+10C4:  INCF   26,F
+10C5:  BCF    03.5
+10C6:  GOTO   088
+....................  
+.................... 	for (i = 0; i < MAX_DIGOUTPUT_CHAN; i++) 
+10C7:  BSF    03.5
+10C8:  CLRF   26
+10C9:  BCF    03.5
+10CA:  BSF    03.5
+10CB:  MOVF   26,W
+10CC:  SUBLW  0F
+10CD:  BTFSC  03.0
+10CE:  GOTO   0D1
+10CF:  BCF    03.5
+10D0:  GOTO   0FC
+10D1:  BCF    03.5
+.................... 		{ 
+.................... 			GetDefaultDigitalOut (&config, i); 
+10D2:  MOVLW  A2
+10D3:  BSF    03.5
+10D4:  MOVWF  27
+10D5:  MOVF   26,W
+10D6:  MOVWF  28
+10D7:  BCF    03.5
+....................  
+.................... 			WriteMidiConfig (&config, (byte) (i + DIGITAL_OUT_CONFIG_INDEX)); 
+*
+10EC:  MOVLW  28
+10ED:  BSF    03.5
+10EE:  ADDWF  26,W
+10EF:  MOVWF  27
+10F0:  MOVLW  A2
+10F1:  MOVWF  28
+10F2:  MOVF   27,W
+10F3:  MOVWF  29
+10F4:  BCF    03.5
+10F5:  BCF    0A.4
+10F6:  CALL   0AB
+10F7:  BSF    0A.4
+.................... 		} 
+10F8:  BSF    03.5
+10F9:  INCF   26,F
+10FA:  BCF    03.5
+10FB:  GOTO   0CA
+....................  
+.................... 	WriteConfigByte (VALID_CONFIG_ADDRESS, 0x00); 
+10FC:  BSF    03.5
+10FD:  CLRF   43
+10FE:  CLRF   44
+10FF:  BCF    03.5
+1100:  BCF    0A.4
+1101:  CALL   07F
+1102:  BSF    0A.4
+.................... } // end void ResetConfiguration() 
+....................  
+.................... // tests whether the config bit is valid (i.e between 0x80 and 0xEf) 
+.................... short ValidConfig () 
+.................... { 
+.................... 	return (!ReadConfigByte (VALID_CONFIG_ADDRESS)); 
+*
+1004:  BSF    03.5
+1005:  CLRF   50
+1006:  BCF    03.5
+*
+1014:  MOVF   78,F
+1015:  BTFSC  03.2
+1016:  GOTO   019
+1017:  MOVLW  00
+1018:  GOTO   01A
+1019:  MOVLW  01
+101A:  MOVWF  78
+.................... }// end short ValidConfig () 
+....................  
+.................... int ReadDeviceId() 
+.................... { 
+....................   int ret; 
+.................... 	ret = ReadConfigByte(DEVICE_ID_ADDRESS); 
+*
+0186:  MOVLW  01
+0187:  BSF    03.5
+0188:  MOVWF  50
+0189:  BCF    03.5
+*
+0197:  MOVF   78,W
+0198:  BSF    03.5
+0199:  MOVWF  41
+....................   return ret; 
+019A:  MOVF   41,W
+019B:  MOVWF  78
+019C:  BCF    03.5
+019D:  RETLW  00
+.................... } // end ReadDeviceId  
+....................  
+.................... // tests first config msg. If invalid, rewrites lot 
+.................... void ValidateStoredConfig () 
+.................... { 
+.................... 	if (!ValidConfig ()) 
+*
+101B:  MOVF   78,F
+101C:  BTFSS  03.2
+101D:  GOTO   103
+.................... 		{ 
+.................... 			ResetConfiguration(); 
+.................... 		} 
+....................  
+.................... } // end ValidateStoredConfig 
+....................  
+....................  
+....................  
+.................... // returns the number of bytes that need to be transmitted for this midi config 
+.................... int NumTxBytes (str_midiconfig* config) 
+.................... { 
+.................... 	int status_nibble; 
+....................  
+.................... 	status_nibble = config->status_chan & 0xF0; // first nibble 
+*
+0148:  BSF    03.5
+0149:  MOVF   3F,W
+014A:  MOVWF  04
+014B:  MOVF   00,W
+014C:  ANDLW  F0
+014D:  MOVWF  40
+....................  
+.................... 	switch (status_nibble) 
+014E:  MOVF   40,W
+014F:  MOVWF  77
+0150:  MOVLW  80
+0151:  SUBWF  77,W
+0152:  BTFSS  03.2
+0153:  GOTO   156
+0154:  BCF    03.5
+0155:  GOTO   17C
+0156:  MOVLW  90
+0157:  SUBWF  77,W
+0158:  BTFSS  03.2
+0159:  GOTO   15C
+015A:  BCF    03.5
+015B:  GOTO   17C
+015C:  MOVLW  A0
+015D:  SUBWF  77,W
+015E:  BTFSS  03.2
+015F:  GOTO   162
+0160:  BCF    03.5
+0161:  GOTO   17C
+0162:  MOVLW  B0
+0163:  SUBWF  77,W
+0164:  BTFSS  03.2
+0165:  GOTO   168
+0166:  BCF    03.5
+0167:  GOTO   17C
+0168:  MOVLW  E0
+0169:  SUBWF  77,W
+016A:  BTFSS  03.2
+016B:  GOTO   16E
+016C:  BCF    03.5
+016D:  GOTO   17C
+016E:  MOVLW  C0
+016F:  SUBWF  77,W
+0170:  BTFSS  03.2
+0171:  GOTO   174
+0172:  BCF    03.5
+0173:  GOTO   17F
+0174:  MOVLW  D0
+0175:  SUBWF  77,W
+0176:  BTFSS  03.2
+0177:  GOTO   17A
+0178:  BCF    03.5
+0179:  GOTO   17F
+017A:  BCF    03.5
+017B:  GOTO   182
+.................... 		{ 
+.................... 		case NOTEOFF_MASK: 
+.................... 		case NOTEON_MASK:  
+.................... 		case POLYPRESS_MASK: 
+.................... 		case CONTROLLER_MASK: 
+.................... 		case PITCHBEND_MASK: 
+.................... 			return 3; 
+017C:  MOVLW  03
+017D:  MOVWF  78
+017E:  GOTO   185
+....................  
+.................... 		case PROGCHANGE_MASK: 
+.................... 		case CHANPRESS_MASK: 
+.................... 			return 2; 
+017F:  MOVLW  02
+0180:  MOVWF  78
+0181:  GOTO   185
+.................... 		default: 
+.................... 			return 0; 
+0182:  MOVLW  00
+0183:  MOVWF  78
+0184:  GOTO   185
+.................... 		} 
+0185:  RETLW  00
+....................  
+.................... } // end int NumTxBytes (str_midiconfig* config) 
+....................  
+....................  
+....................  
+.................... #endif 
+.................... 
+.................... #include "max520.h" 
+....................  /********************************************************** 
+....................  * I2C driver for Max520 ADC 
+....................  *********************************************************/ 
+....................  
+.................... #define MAX520_SLAVE_MASK 0x50 // must be ORed with slave device number 
+.................... #define NUM_520_OP 4     // the maximum outputs of a Max 520 
+....................  
+....................  
+.................... #inline 
+.................... short WriteAnalogueOutput (int port_num, byte outval) 
+.................... { 
+.................... 	short ret; 
+.................... 	byte slave_num, op_num, device_address; 
+....................  
+.................... 	i2c_start(); 
+*
+030D:  BSF    03.5
+030E:  BSF    06.7
+030F:  MOVLW  04
+0310:  MOVWF  77
+0311:  BCF    03.5
+0312:  DECFSZ 77,F
+0313:  GOTO   312
+0314:  BSF    03.5
+0315:  BSF    06.6
+0316:  MOVLW  06
+0317:  MOVWF  77
+0318:  BCF    03.5
+0319:  DECFSZ 77,F
+031A:  GOTO   319
+031B:  BCF    06.7
+031C:  BSF    03.5
+031D:  BCF    06.7
+031E:  MOVLW  04
+031F:  MOVWF  77
+0320:  BCF    03.5
+0321:  DECFSZ 77,F
+0322:  GOTO   321
+0323:  BCF    06.6
+0324:  BSF    03.5
+0325:  BCF    06.6
+....................  
+.................... 	slave_num = port_num / NUM_520_OP; 
+0326:  BCF    03.0
+0327:  RRF    49,W
+0328:  MOVWF  4C
+0329:  RRF    4C,F
+032A:  MOVLW  3F
+032B:  ANDWF  4C,F
+....................   slave_num <<= 1; 
+032C:  BCF    03.0
+032D:  RLF    4C,F
+.................... 	device_address = MAX520_SLAVE_MASK | slave_num; 
+032E:  MOVF   4C,W
+032F:  IORLW  50
+0330:  MOVWF  4E
+.................... #ifndef _SIMULATE 
+.................... 	i2c_write (device_address); 
+0331:  MOVWF  4F
+0332:  BCF    03.5
+0333:  CALL   2BC
+.................... #endif 
+....................  
+.................... 	op_num = port_num % NUM_520_OP; 
+0334:  BSF    03.5
+0335:  MOVF   49,W
+0336:  ANDLW  03
+0337:  MOVWF  4D
+....................  
+.................... #ifndef _SIMULATE 
+.................... 	i2c_write (op_num); 
+0338:  MOVWF  4F
+0339:  BCF    03.5
+033A:  CALL   2BC
+.................... 	i2c_write (outval); 
+033B:  BSF    03.5
+033C:  MOVF   4A,W
+033D:  MOVWF  4F
+033E:  BCF    03.5
+033F:  CALL   2BC
+.................... 	i2c_stop(); 
+0340:  BSF    03.5
+0341:  BCF    06.7
+0342:  NOP
+0343:  BSF    06.6
+0344:  BCF    03.5
+0345:  BTFSS  06.6
+0346:  GOTO   345
+0347:  MOVLW  04
+0348:  MOVWF  77
+0349:  DECFSZ 77,F
+034A:  GOTO   349
+034B:  NOP
+034C:  NOP
+034D:  NOP
+034E:  BSF    03.5
+034F:  BSF    06.7
+0350:  MOVLW  04
+0351:  MOVWF  77
+0352:  BCF    03.5
+0353:  DECFSZ 77,F
+0354:  GOTO   353
+.................... #else 
+....................   op_num = port_num % NUM_520_OP; 
+.................... #endif 
+.................... } 
+.................... 
+.................... #include "anaout.h" 
+....................  /********************************************************************** 
+.................... Performs the ana;logue output using an SPI write 
+.................... ***********************************************************************/ 
+....................   
+....................  
+.................... void GenerateAnalogueOutput (int out_num, byte val) 
+.................... { 
+.................... 	WriteAnalogueOutput (out_num, val); 
+*
+0307:  BSF    03.5
+0308:  MOVF   47,W
+0309:  MOVWF  49
+030A:  MOVF   48,W
+030B:  MOVWF  4A
+030C:  BCF    03.5
+*
+0355:  RETLW  00
+.................... } 
+....................  
+....................  
+.................... 
+.................... #include "midiin.h" 
+....................  /************************************************************* 
+.................... * Author: Angelo Fraietta 
+.................... * Description Process the reception of Input and output using a  
+.................... * sixteen byte queue 
+.................... * Dependancy : calls ProcessMidiIn 
+.................... *************************************************************/ 
+.................... #byte PIR1 = 0x0C 
+.................... #byte TXREG = 0x19 
+....................  
+.................... // define a  volatile flag that becomes true when a char is received 
+.................... // and is reset by external program 
+.................... short input_unlocked;  
+....................                     
+....................  
+.................... #define QUEUE_SIZE  32 
+....................  
+.................... typedef struct 
+.................... { 
+....................   byte queue_data [QUEUE_SIZE]; 
+....................  
+....................   int  head :5; // the size is important as we just make the value  
+....................   int dummy :3; 
+....................   int  tail :5; // cycle from 0x0 to QUEUE_SIZE by incrementing 
+....................   int overflow :1; 
+....................   int empty :1; 
+....................  
+.................... } str_data_queue;   
+....................  
+.................... str_data_queue in_queue; 
+....................  
+....................  
+.................... // return true if flag was set when we cleared it 
+.................... #inline  
+.................... short ClearRxFlag() 
+.................... { 
+.................... 	short ret; 
+....................  
+.................... 	ret = input_unlocked; 
+*
+06D5:  BSF    03.5
+06D6:  BCF    22.0
+06D7:  BCF    03.5
+06D8:  BTFSS  29.0
+06D9:  GOTO   6DD
+06DA:  BSF    03.5
+06DB:  BSF    22.0
+06DC:  BCF    03.5
+.................... 	input_unlocked = 0; 
+06DD:  BCF    29.0
+.................... 	return ret; 
+06DE:  MOVLW  00
+06DF:  BSF    03.5
+06E0:  BTFSC  22.0
+06E1:  MOVLW  01
+06E2:  MOVWF  78
+06E3:  BCF    03.5
+.................... } 
+....................  
+.................... #inline  
+.................... short InQueueEmpty() 
+.................... { 
+....................   return in_queue.empty; 
+*
+05B8:  MOVLW  00
+05B9:  BTFSC  4B.6
+05BA:  MOVLW  01
+05BB:  MOVWF  78
+*
+0800:  MOVLW  00
+0801:  BTFSC  4B.6
+0802:  MOVLW  01
+0803:  MOVWF  78
+*
+11B8:  MOVLW  00
+11B9:  BTFSC  4B.6
+11BA:  MOVLW  01
+11BB:  MOVWF  78
+*
+127D:  MOVLW  00
+127E:  BTFSC  4B.6
+127F:  MOVLW  01
+1280:  MOVWF  78
+*
+14AF:  MOVLW  00
+14B0:  BTFSC  4B.6
+14B1:  MOVLW  01
+14B2:  MOVWF  78
+.................... } 
+....................  
+....................  
+.................... #ifdef _USE_OUT_BUFFER 
+.................... #inline  
+.................... short OutQueueEmpty() 
+.................... { 
+....................   return out_queue.empty; 
+.................... } 
+.................... #endif 
+....................  
+.................... #inline  
+.................... short InOverflow() 
+.................... { 
+....................   return in_queue.overflow; 
+*
+0688:  MOVLW  00
+0689:  BTFSC  4B.5
+068A:  MOVLW  01
+068B:  MOVWF  78
+*
+0694:  MOVLW  00
+0695:  BTFSC  4B.5
+0696:  MOVLW  01
+0697:  MOVWF  78
+*
+06C2:  MOVLW  00
+06C3:  BTFSC  4B.5
+06C4:  MOVLW  01
+06C5:  MOVWF  78
+.................... } 
+....................  
+.................... #inline  
+.................... short InQueueFull() 
+.................... { 
+.................... 	return (!in_queue.empty && in_queue.tail == in_queue.head); 
+*
+0051:  BTFSC  4B.6
+0052:  GOTO   061
+0053:  MOVF   4B,W
+0054:  ANDLW  1F
+0055:  BSF    03.5
+0056:  MOVWF  65
+0057:  BCF    03.5
+0058:  MOVF   4A,W
+0059:  ANDLW  1F
+005A:  BSF    03.5
+005B:  SUBWF  65,W
+005C:  BTFSS  03.2
+005D:  GOTO   060
+005E:  BCF    03.5
+005F:  GOTO   063
+0060:  BCF    03.5
+0061:  MOVLW  00
+0062:  GOTO   064
+0063:  MOVLW  01
+0064:  MOVWF  78
+.................... } 
+....................  
+....................  
+.................... #ifdef _USE_OUT_BUFFER 
+.................... #inline  
+.................... short OutQueueFull() 
+.................... { 
+.................... 	return (!out_queue.empty && out_queue.tail == out_queue.head); 
+.................... } 
+.................... #endif 
+....................  
+.................... #inline 
+.................... void InitialiseQueue(str_data_queue& q) 
+.................... { 
+....................   q.tail = 0;  
+*
+0675:  MOVLW  E0
+0676:  ANDWF  4B,W
+0677:  MOVWF  4B
+....................   q.head = 0; 
+0678:  MOVLW  E0
+0679:  ANDWF  4A,W
+067A:  MOVWF  4A
+....................   q.overflow = false; 
+067B:  BCF    4B.5
+....................   q.empty = true; 
+067C:  BSF    4B.6
+....................  
+.................... } 
+....................  
+....................  
+.................... void InitialiseInQueue() 
+.................... { 
+....................   disable_interrupts (INT_RDA); // disable any Midi in  
+*
+0672:  BSF    03.5
+0673:  BCF    0C.5
+0674:  BCF    03.5
+.................... 	InitialiseQueue (in_queue); 
+.................... 	input_unlocked = true; 
+*
+067D:  BSF    29.0
+....................   enable_interrupts (INT_RDA); // disable any Midi in   
+067E:  BSF    03.5
+067F:  BSF    0C.5
+0680:  BCF    03.5
+0681:  RETLW  00
+.................... } 
+....................  
+....................  
+....................  
+.................... // function called when adding function. Called by interrupt by input 
+.................... #inline 
+.................... void AddQueue (byte new_byte, str_data_queue& q) 
+.................... { 
+.................... 	q.queue_data [q.tail] = new_byte; 
+.................... 	q.tail++; 
+....................  
+.................... 	q.empty = false; 
+....................  
+.................... }   
+....................  
+.................... #inline  
+.................... byte GetQueue (str_data_queue& q) 
+.................... { 
+....................   byte ret; 
+....................   ret = q.queue_data [q.head];  
+*
+080B:  MOVF   4A,W
+080C:  ANDLW  1F
+080D:  ADDLW  2A
+080E:  MOVWF  04
+080F:  MOVF   00,W
+0810:  BSF    03.5
+0811:  MOVWF  40
+....................   q.head++; 
+0812:  BCF    03.5
+0813:  MOVF   4A,W
+0814:  ADDLW  01
+0815:  ANDLW  1F
+0816:  MOVWF  77
+0817:  MOVLW  E0
+0818:  ANDWF  4A,W
+0819:  IORWF  77,W
+081A:  MOVWF  4A
+....................  
+....................   if (q.tail == q.head) 
+081B:  MOVF   4B,W
+081C:  ANDLW  1F
+081D:  BSF    03.5
+081E:  MOVWF  41
+081F:  BCF    03.5
+0820:  MOVF   4A,W
+0821:  ANDLW  1F
+0822:  BSF    03.5
+0823:  SUBWF  41,W
+0824:  BTFSC  03.2
+0825:  GOTO   028
+0826:  BCF    03.5
+0827:  GOTO   02A
+0828:  BCF    03.5
+....................     { 
+....................       q.empty = true; 
+0829:  BSF    4B.6
+....................     } 
+.................... 	return ret; 
+082A:  BSF    03.5
+082B:  MOVF   40,W
+082C:  MOVWF  78
+082D:  BCF    03.5
+.................... } 
+....................  
+.................... #inline 
+.................... void ClearInQueueOverflow() 
+.................... { 
+....................   in_queue.overflow = false; 
+.................... } 
+....................  
+.................... #inline 
+.................... void AddInQueue (byte new_byte) 
+.................... { 
+.................... 	AddQueue (new_byte, in_queue); 
+.................... } 
+....................  
+.................... #int_rda 
+.................... DataReceived() 
+.................... { 
+....................   int midi_char; 
+....................   midi_char = getc(); 
+*
+004C:  GOTO   03E
+004D:  MOVF   78,W
+004E:  BSF    03.5
+004F:  MOVWF  64
+0050:  BCF    03.5
+....................   if (InQueueFull()) 
+*
+0065:  MOVF   78,F
+0066:  BTFSC  03.2
+0067:  GOTO   06A
+.................... 		{ 
+.................... 			in_queue.overflow = true; 
+0068:  BSF    4B.5
+.................... 		} 
+....................   else 
+0069:  GOTO   07A
+....................     {	 
+....................     in_queue.queue_data [in_queue.tail] = midi_char; 
+006A:  MOVF   4B,W
+006B:  ANDLW  1F
+006C:  ADDLW  2A
+006D:  MOVWF  04
+006E:  BSF    03.5
+006F:  MOVF   64,W
+0070:  MOVWF  00
+.................... 	  in_queue.tail++; 
+0071:  BCF    03.5
+0072:  MOVF   4B,W
+0073:  ADDLW  01
+0074:  ANDLW  1F
+0075:  MOVWF  77
+0076:  MOVLW  E0
+0077:  ANDWF  4B,W
+0078:  IORWF  77,W
+0079:  MOVWF  4B
+....................     } 
+....................  
+....................  
+.................... 	in_queue.empty = false; 
+007A:  BCF    4B.6
+....................  
+.................... } 
+....................  
+....................  
+007B:  BCF    0C.5
+007C:  BCF    0A.3
+007D:  BCF    0A.4
+007E:  GOTO   020
+.................... #inline  
+.................... void WriteOutData (byte out_byte) 
+.................... { 
+.................... #use rs232(baud=31250, xmit=MIDIOUT_1_PIN, rcv=MIDI_IN_PIN, ERRORS)  
+.................... #ifndef _SIMULATE 
+.................... 	putc (out_byte); 
+*
+01A2:  BSF    03.5
+01A3:  MOVF   44,W
+01A4:  BCF    03.5
+01A5:  BTFSS  0C.4
+01A6:  GOTO   1A5
+01A7:  MOVWF  19
+*
+01F3:  BSF    03.5
+01F4:  MOVF   44,W
+01F5:  BCF    03.5
+01F6:  BTFSS  0C.4
+01F7:  GOTO   1F6
+01F8:  MOVWF  19
+*
+01FD:  BSF    03.5
+01FE:  MOVF   44,W
+01FF:  BCF    03.5
+0200:  BTFSS  0C.4
+0201:  GOTO   200
+0202:  MOVWF  19
+*
+024D:  BSF    03.5
+024E:  MOVF   44,W
+024F:  BCF    03.5
+0250:  BTFSS  0C.4
+0251:  GOTO   250
+0252:  MOVWF  19
+*
+0257:  BSF    03.5
+0258:  MOVF   44,W
+0259:  BCF    03.5
+025A:  BTFSS  0C.4
+025B:  GOTO   25A
+025C:  MOVWF  19
+*
+02AA:  BSF    03.5
+02AB:  MOVF   44,W
+02AC:  BCF    03.5
+02AD:  BTFSS  0C.4
+02AE:  GOTO   2AD
+02AF:  MOVWF  19
+*
+02B4:  BSF    03.5
+02B5:  MOVF   44,W
+02B6:  BCF    03.5
+02B7:  BTFSS  0C.4
+02B8:  GOTO   2B7
+02B9:  MOVWF  19
+*
+060B:  BSF    03.5
+060C:  MOVF   44,W
+060D:  BCF    03.5
+060E:  BTFSS  0C.4
+060F:  GOTO   60E
+0610:  MOVWF  19
+*
+085C:  BSF    03.5
+085D:  MOVF   44,W
+085E:  BCF    03.5
+085F:  BTFSS  0C.4
+0860:  GOTO   05F
+0861:  MOVWF  19
+*
+0946:  BSF    03.5
+0947:  MOVF   44,W
+0948:  BCF    03.5
+0949:  BTFSS  0C.4
+094A:  GOTO   149
+094B:  MOVWF  19
+*
+0950:  BSF    03.5
+0951:  MOVF   44,W
+0952:  BCF    03.5
+0953:  BTFSS  0C.4
+0954:  GOTO   153
+0955:  MOVWF  19
+*
+095A:  BSF    03.5
+095B:  MOVF   44,W
+095C:  BCF    03.5
+095D:  BTFSS  0C.4
+095E:  GOTO   15D
+095F:  MOVWF  19
+*
+09AE:  BSF    03.5
+09AF:  MOVF   44,W
+09B0:  BCF    03.5
+09B1:  BTFSS  0C.4
+09B2:  GOTO   1B1
+09B3:  MOVWF  19
+*
+09B8:  BSF    03.5
+09B9:  MOVF   44,W
+09BA:  BCF    03.5
+09BB:  BTFSS  0C.4
+09BC:  GOTO   1BB
+09BD:  MOVWF  19
+*
+0A0C:  BSF    03.5
+0A0D:  MOVF   44,W
+0A0E:  BCF    03.5
+0A0F:  BTFSS  0C.4
+0A10:  GOTO   20F
+0A11:  MOVWF  19
+*
+0A16:  BSF    03.5
+0A17:  MOVF   44,W
+0A18:  BCF    03.5
+0A19:  BTFSS  0C.4
+0A1A:  GOTO   219
+0A1B:  MOVWF  19
+*
+0A78:  BSF    03.5
+0A79:  MOVF   44,W
+0A7A:  BCF    03.5
+0A7B:  BTFSS  0C.4
+0A7C:  GOTO   27B
+0A7D:  MOVWF  19
+*
+0A82:  BSF    03.5
+0A83:  MOVF   44,W
+0A84:  BCF    03.5
+0A85:  BTFSS  0C.4
+0A86:  GOTO   285
+0A87:  MOVWF  19
+*
+0AE6:  BSF    03.5
+0AE7:  MOVF   44,W
+0AE8:  BCF    03.5
+0AE9:  BTFSS  0C.4
+0AEA:  GOTO   2E9
+0AEB:  MOVWF  19
+*
+0AF0:  BSF    03.5
+0AF1:  MOVF   44,W
+0AF2:  BCF    03.5
+0AF3:  BTFSS  0C.4
+0AF4:  GOTO   2F3
+0AF5:  MOVWF  19
+*
+0B02:  BSF    03.5
+0B03:  MOVF   44,W
+0B04:  BCF    03.5
+0B05:  BTFSS  0C.4
+0B06:  GOTO   305
+0B07:  MOVWF  19
+*
+0B72:  BSF    03.5
+0B73:  MOVF   44,W
+0B74:  BCF    03.5
+0B75:  BTFSS  0C.4
+0B76:  GOTO   375
+0B77:  MOVWF  19
+*
+0CAD:  BSF    03.5
+0CAE:  MOVF   44,W
+0CAF:  BCF    03.5
+0CB0:  BTFSS  0C.4
+0CB1:  GOTO   4B0
+0CB2:  MOVWF  19
+*
+0CD8:  BSF    03.5
+0CD9:  MOVF   44,W
+0CDA:  BCF    03.5
+0CDB:  BTFSS  0C.4
+0CDC:  GOTO   4DB
+0CDD:  MOVWF  19
+*
+120F:  BSF    03.5
+1210:  MOVF   44,W
+1211:  BCF    03.5
+1212:  BTFSS  0C.4
+1213:  GOTO   212
+1214:  MOVWF  19
+*
+12D4:  BSF    03.5
+12D5:  MOVF   44,W
+12D6:  BCF    03.5
+12D7:  BTFSS  0C.4
+12D8:  GOTO   2D7
+12D9:  MOVWF  19
+*
+1506:  BSF    03.5
+1507:  MOVF   44,W
+1508:  BCF    03.5
+1509:  BTFSS  0C.4
+150A:  GOTO   509
+150B:  MOVWF  19
+.................... #endif 
+....................  
+.................... } 
+....................  
+.................... #inline 
+.................... byte GetInChar() 
+.................... { 
+....................   byte ret; 
+....................    
+....................   disable_interrupts (INT_RDA); // disable any Midi in  
+*
+0808:  BSF    03.5
+0809:  BCF    0C.5
+080A:  BCF    03.5
+....................  
+....................   ret = GetQueue (in_queue); 
+*
+082E:  MOVF   78,W
+082F:  BSF    03.5
+0830:  MOVWF  3F
+....................    
+....................   enable_interrupts (INT_RDA); // re-enable Midi in  
+0831:  BSF    0C.5
+....................  
+....................   input_unlocked = true; // set flag 
+0832:  BCF    03.5
+0833:  BSF    29.0
+....................  
+....................   return ret; 
+0834:  BSF    03.5
+0835:  MOVF   3F,W
+0836:  MOVWF  78
+0837:  BCF    03.5
+.................... } 
+....................  
+....................  
+....................  
+....................  
+....................  
+.................... #inline  
+.................... void WriteOutData2 (byte out_byte) 
+.................... { 
+.................... #use rs232(baud=31250, xmit=MIDIOUT_2_PIN, rcv=MIDI_IN_PIN, ERRORS)  
+*
+03F7:  BCF    4C.5
+03F8:  MOVF   4C,W
+03F9:  BSF    03.5
+03FA:  MOVWF  07
+03FB:  BCF    03.5
+03FC:  BCF    07.5
+03FD:  MOVLW  08
+03FE:  MOVWF  78
+03FF:  NOP
+0400:  NOP
+0401:  NOP
+0402:  BSF    78.7
+0403:  GOTO   416
+0404:  BCF    78.7
+0405:  BSF    03.5
+0406:  RRF    3D,F
+0407:  BCF    03.5
+0408:  BTFSC  03.0
+0409:  BSF    07.5
+040A:  BTFSS  03.0
+040B:  BCF    07.5
+040C:  BSF    78.6
+040D:  GOTO   416
+040E:  BCF    78.6
+040F:  DECFSZ 78,F
+0410:  GOTO   405
+0411:  NOP
+0412:  NOP
+0413:  NOP
+0414:  BSF    07.5
+0415:  GOTO   416
+0416:  MOVLW  2F
+0417:  MOVWF  04
+0418:  DECFSZ 04,F
+0419:  GOTO   418
+041A:  BTFSC  78.7
+041B:  GOTO   404
+041C:  BTFSC  78.6
+041D:  GOTO   40E
+041E:  RETLW  00
+....................   // we have to disable the interrupts here otherwise the data will become corrupted because it has no uart 
+....................   disable_interrupts(GLOBAL); 
+*
+05F7:  BCF    0B.6
+05F8:  BCF    0B.7
+05F9:  BTFSC  0B.7
+05FA:  GOTO   5F8
+*
+11F9:  BCF    0B.6
+11FA:  BCF    0B.7
+11FB:  BTFSC  0B.7
+11FC:  GOTO   1FA
+*
+12BE:  BCF    0B.6
+12BF:  BCF    0B.7
+12C0:  BTFSC  0B.7
+12C1:  GOTO   2BF
+*
+14F0:  BCF    0B.6
+14F1:  BCF    0B.7
+14F2:  BTFSC  0B.7
+14F3:  GOTO   4F1
+.................... #ifndef _SIMULATE 
+.................... 	putc (out_byte); 
+*
+05FB:  BSF    03.5
+05FC:  MOVF   3C,W
+05FD:  MOVWF  3D
+05FE:  BCF    03.5
+05FF:  CALL   3F7
+*
+11FD:  BSF    03.5
+11FE:  MOVF   3C,W
+11FF:  MOVWF  3D
+1200:  BCF    03.5
+1201:  BCF    0A.4
+1202:  CALL   3F7
+1203:  BSF    0A.4
+*
+12C2:  BSF    03.5
+12C3:  MOVF   3C,W
+12C4:  MOVWF  3D
+12C5:  BCF    03.5
+12C6:  BCF    0A.4
+12C7:  CALL   3F7
+12C8:  BSF    0A.4
+*
+14F4:  BSF    03.5
+14F5:  MOVF   3C,W
+14F6:  MOVWF  3D
+14F7:  BCF    03.5
+14F8:  BCF    0A.4
+14F9:  CALL   3F7
+14FA:  BSF    0A.4
+.................... #endif 
+....................   enable_interrupts(GLOBAL); 
+*
+0600:  MOVLW  C0
+0601:  IORWF  0B,F
+*
+1204:  MOVLW  C0
+1205:  IORWF  0B,F
+*
+12C9:  MOVLW  C0
+12CA:  IORWF  0B,F
+*
+14FB:  MOVLW  C0
+14FC:  IORWF  0B,F
+.................... } 
+....................  
+....................  
+.................... 
+.................... #include "sysexout.h" 
+....................  #ifndef SYSEX_OUT_H 
+.................... #define SYSEX_OUT_H 
+....................  
+.................... /* Sysex Out module used for Encoding Sysex Messages*/ 
+.................... #pragma inline 
+.................... void WriteSysexOutData (byte out_byte) 
+.................... { 
+.................... 	byte control_byte; 
+....................  
+.................... 	control_byte = EncodeMidiByte (&out_byte); 
+*
+01AD:  MOVLW  C2
+01AE:  BSF    03.5
+01AF:  MOVWF  44
+01B0:  BCF    03.5
+*
+01E6:  MOVF   78,W
+01E7:  BSF    03.5
+01E8:  MOVWF  43
+*
+0207:  MOVLW  C2
+0208:  BSF    03.5
+0209:  MOVWF  44
+020A:  BCF    03.5
+*
+0240:  MOVF   78,W
+0241:  BSF    03.5
+0242:  MOVWF  43
+*
+0264:  MOVLW  C2
+0265:  BSF    03.5
+0266:  MOVWF  44
+0267:  BCF    03.5
+*
+029D:  MOVF   78,W
+029E:  BSF    03.5
+029F:  MOVWF  43
+*
+0900:  MOVLW  C2
+0901:  BSF    03.5
+0902:  MOVWF  44
+0903:  BCF    03.5
+*
+0939:  MOVF   78,W
+093A:  BSF    03.5
+093B:  MOVWF  43
+*
+0968:  MOVLW  C2
+0969:  BSF    03.5
+096A:  MOVWF  44
+096B:  BCF    03.5
+*
+09A1:  MOVF   78,W
+09A2:  BSF    03.5
+09A3:  MOVWF  43
+*
+09C6:  MOVLW  C2
+09C7:  BSF    03.5
+09C8:  MOVWF  44
+09C9:  BCF    03.5
+*
+09FF:  MOVF   78,W
+0A00:  BSF    03.5
+0A01:  MOVWF  43
+*
+0A32:  MOVLW  C2
+0A33:  BSF    03.5
+0A34:  MOVWF  44
+0A35:  BCF    03.5
+*
+0A6B:  MOVF   78,W
+0A6C:  BSF    03.5
+0A6D:  MOVWF  43
+*
+0AA0:  MOVLW  C2
+0AA1:  BSF    03.5
+0AA2:  MOVWF  44
+0AA3:  BCF    03.5
+*
+0AD9:  MOVF   78,W
+0ADA:  BSF    03.5
+0ADB:  MOVWF  43
+....................  
+.................... 	if (control_byte) 
+*
+01E9:  MOVF   43,F
+01EA:  BTFSS  03.2
+01EB:  GOTO   1EE
+01EC:  BCF    03.5
+01ED:  GOTO   1F9
+01EE:  BCF    03.5
+*
+0243:  MOVF   43,F
+0244:  BTFSS  03.2
+0245:  GOTO   248
+0246:  BCF    03.5
+0247:  GOTO   253
+0248:  BCF    03.5
+*
+02A0:  MOVF   43,F
+02A1:  BTFSS  03.2
+02A2:  GOTO   2A5
+02A3:  BCF    03.5
+02A4:  GOTO   2B0
+02A5:  BCF    03.5
+*
+093C:  MOVF   43,F
+093D:  BTFSS  03.2
+093E:  GOTO   141
+093F:  BCF    03.5
+0940:  GOTO   14C
+0941:  BCF    03.5
+*
+09A4:  MOVF   43,F
+09A5:  BTFSS  03.2
+09A6:  GOTO   1A9
+09A7:  BCF    03.5
+09A8:  GOTO   1B4
+09A9:  BCF    03.5
+*
+0A02:  MOVF   43,F
+0A03:  BTFSS  03.2
+0A04:  GOTO   207
+0A05:  BCF    03.5
+0A06:  GOTO   212
+0A07:  BCF    03.5
+*
+0A6E:  MOVF   43,F
+0A6F:  BTFSS  03.2
+0A70:  GOTO   273
+0A71:  BCF    03.5
+0A72:  GOTO   27E
+0A73:  BCF    03.5
+*
+0ADC:  MOVF   43,F
+0ADD:  BTFSS  03.2
+0ADE:  GOTO   2E1
+0ADF:  BCF    03.5
+0AE0:  GOTO   2EC
+0AE1:  BCF    03.5
+.................... 		{ 
+.................... 			WriteOutData (control_byte); 
+*
+01EF:  BSF    03.5
+01F0:  MOVF   43,W
+01F1:  MOVWF  44
+01F2:  BCF    03.5
+*
+0249:  BSF    03.5
+024A:  MOVF   43,W
+024B:  MOVWF  44
+024C:  BCF    03.5
+*
+02A6:  BSF    03.5
+02A7:  MOVF   43,W
+02A8:  MOVWF  44
+02A9:  BCF    03.5
+*
+0942:  BSF    03.5
+0943:  MOVF   43,W
+0944:  MOVWF  44
+0945:  BCF    03.5
+*
+09AA:  BSF    03.5
+09AB:  MOVF   43,W
+09AC:  MOVWF  44
+09AD:  BCF    03.5
+*
+0A08:  BSF    03.5
+0A09:  MOVF   43,W
+0A0A:  MOVWF  44
+0A0B:  BCF    03.5
+*
+0A74:  BSF    03.5
+0A75:  MOVF   43,W
+0A76:  MOVWF  44
+0A77:  BCF    03.5
+*
+0AE2:  BSF    03.5
+0AE3:  MOVF   43,W
+0AE4:  MOVWF  44
+0AE5:  BCF    03.5
+.................... 		} 
+.................... 	WriteOutData (out_byte); 
+*
+01F9:  BSF    03.5
+01FA:  MOVF   42,W
+01FB:  MOVWF  44
+01FC:  BCF    03.5
+*
+0253:  BSF    03.5
+0254:  MOVF   42,W
+0255:  MOVWF  44
+0256:  BCF    03.5
+*
+02B0:  BSF    03.5
+02B1:  MOVF   42,W
+02B2:  MOVWF  44
+02B3:  BCF    03.5
+*
+094C:  BSF    03.5
+094D:  MOVF   42,W
+094E:  MOVWF  44
+094F:  BCF    03.5
+*
+09B4:  BSF    03.5
+09B5:  MOVF   42,W
+09B6:  MOVWF  44
+09B7:  BCF    03.5
+*
+0A12:  BSF    03.5
+0A13:  MOVF   42,W
+0A14:  MOVWF  44
+0A15:  BCF    03.5
+*
+0A7E:  BSF    03.5
+0A7F:  MOVF   42,W
+0A80:  MOVWF  44
+0A81:  BCF    03.5
+*
+0AEC:  BSF    03.5
+0AED:  MOVF   42,W
+0AEE:  MOVWF  44
+0AEF:  BCF    03.5
+.................... } // end WriteSysexOutData 
+....................  
+....................  
+.................... void WriteSysexHeader() 
+.................... { 
+....................   WriteOutData (SYSEX_BEGIN); 
+*
+019E:  MOVLW  F0
+019F:  BSF    03.5
+01A0:  MOVWF  44
+01A1:  BCF    03.5
+....................   restart_wdt();					 
+*
+01A8:  CLRWDT
+.................... 	WriteSysexOutData (SYSEX_ID); 
+01A9:  MOVLW  7D
+01AA:  BSF    03.5
+01AB:  MOVWF  42
+01AC:  BCF    03.5
+....................   restart_wdt();					   
+*
+0203:  CLRWDT
+.................... 	WriteSysexOutData (EQUIPMENT_TYPE); 
+0204:  BSF    03.5
+0205:  CLRF   42
+0206:  BCF    03.5
+....................   restart_wdt();					 
+*
+025D:  CLRWDT
+.................... 	WriteSysexOutData (ReadDeviceId()); 
+025E:  CALL   186
+025F:  MOVF   78,W
+0260:  BSF    03.5
+0261:  MOVWF  41
+0262:  MOVWF  42
+0263:  BCF    03.5
+....................   restart_wdt();					 
+*
+02BA:  CLRWDT
+02BB:  RETLW  00
+.................... } 
+....................  
+.................... #endif 
+....................  
+.................... 
+.................... #include "midiout.h" 
+....................  /************************************************************** 
+....................  * Author: Angelo Fraietta 
+....................  * Description: Midi output interface 
+....................  *************************************************************/ 
+....................  
+.................... // forward declarations 
+.................... void ProcessMidiInputStream(); 
+.................... short MidiOutFree(); 
+.................... void SetLastStatusChan(byte); 
+....................  
+.................... #inline 
+.................... void OutputMidi (str_midiconfig* midi_msg) 
+.................... { 
+.................... 	int num_bytes; 
+.................... 	byte* msg_ptr; 
+.................... 	int i; 
+....................   short midi_out_2; 
+....................  
+....................   midi_out_2 = midi_msg->config_flag & MIDI_OUTPUT2_MASK; 
+*
+0585:  MOVLW  03
+0586:  BSF    03.5
+0587:  ADDWF  36,W
+0588:  MOVWF  04
+0589:  MOVF   00,W
+058A:  ANDLW  08
+058B:  XORLW  00
+058C:  BTFSC  03.2
+058D:  GOTO   590
+058E:  BCF    03.5
+058F:  GOTO   595
+0590:  BCF    03.5
+0591:  BSF    03.5
+0592:  BCF    3A.0
+0593:  BCF    03.5
+0594:  GOTO   598
+0595:  BSF    03.5
+0596:  BSF    3A.0
+0597:  BCF    03.5
+*
+1183:  MOVLW  03
+1184:  BSF    03.5
+1185:  ADDWF  36,W
+1186:  MOVWF  04
+1187:  MOVF   00,W
+1188:  ANDLW  08
+1189:  XORLW  00
+118A:  BTFSC  03.2
+118B:  GOTO   18E
+118C:  BCF    03.5
+118D:  GOTO   193
+118E:  BCF    03.5
+118F:  BSF    03.5
+1190:  BCF    3A.0
+1191:  BCF    03.5
+1192:  GOTO   196
+1193:  BSF    03.5
+1194:  BSF    3A.0
+1195:  BCF    03.5
+*
+1248:  MOVLW  03
+1249:  BSF    03.5
+124A:  ADDWF  36,W
+124B:  MOVWF  04
+124C:  MOVF   00,W
+124D:  ANDLW  08
+124E:  XORLW  00
+124F:  BTFSC  03.2
+1250:  GOTO   253
+1251:  BCF    03.5
+1252:  GOTO   258
+1253:  BCF    03.5
+1254:  BSF    03.5
+1255:  BCF    3A.0
+1256:  BCF    03.5
+1257:  GOTO   25B
+1258:  BSF    03.5
+1259:  BSF    3A.0
+125A:  BCF    03.5
+*
+147A:  MOVLW  03
+147B:  BSF    03.5
+147C:  ADDWF  36,W
+147D:  MOVWF  04
+147E:  MOVF   00,W
+147F:  ANDLW  08
+1480:  XORLW  00
+1481:  BTFSC  03.2
+1482:  GOTO   485
+1483:  BCF    03.5
+1484:  GOTO   48A
+1485:  BCF    03.5
+1486:  BSF    03.5
+1487:  BCF    3A.0
+1488:  BCF    03.5
+1489:  GOTO   48D
+148A:  BSF    03.5
+148B:  BSF    3A.0
+148C:  BCF    03.5
+....................    
+....................    
+.................... 	num_bytes = NumTxBytes (midi_msg); 
+*
+0598:  BSF    03.5
+0599:  MOVF   36,W
+059A:  MOVWF  3F
+059B:  BCF    03.5
+059C:  CALL   148
+059D:  MOVF   78,W
+059E:  BSF    03.5
+059F:  MOVWF  37
+*
+1196:  BSF    03.5
+1197:  MOVF   36,W
+1198:  MOVWF  3F
+1199:  BCF    03.5
+119A:  BCF    0A.4
+119B:  CALL   148
+119C:  BSF    0A.4
+119D:  MOVF   78,W
+119E:  BSF    03.5
+119F:  MOVWF  37
+*
+125B:  BSF    03.5
+125C:  MOVF   36,W
+125D:  MOVWF  3F
+125E:  BCF    03.5
+125F:  BCF    0A.4
+1260:  CALL   148
+1261:  BSF    0A.4
+1262:  MOVF   78,W
+1263:  BSF    03.5
+1264:  MOVWF  37
+*
+148D:  BSF    03.5
+148E:  MOVF   36,W
+148F:  MOVWF  3F
+1490:  BCF    03.5
+1491:  BCF    0A.4
+1492:  CALL   148
+1493:  BSF    0A.4
+1494:  MOVF   78,W
+1495:  BSF    03.5
+1496:  MOVWF  37
+.................... 	msg_ptr = (byte*) midi_msg; 
+*
+05A0:  MOVF   36,W
+05A1:  MOVWF  38
+05A2:  BCF    03.5
+*
+11A0:  MOVF   36,W
+11A1:  MOVWF  38
+11A2:  BCF    03.5
+*
+1265:  MOVF   36,W
+1266:  MOVWF  38
+1267:  BCF    03.5
+*
+1497:  MOVF   36,W
+1498:  MOVWF  38
+1499:  BCF    03.5
+....................  
+.................... 	// make sure that there is no merge happening 
+.................... 	while (!MidiOutFree()) 
+*
+05CC:  MOVF   78,F
+05CD:  BTFSS  03.2
+05CE:  GOTO   5D3
+*
+11CC:  MOVF   78,F
+11CD:  BTFSS  03.2
+11CE:  GOTO   1D5
+*
+1291:  MOVF   78,F
+1292:  BTFSS  03.2
+1293:  GOTO   29A
+*
+14C3:  MOVF   78,F
+14C4:  BTFSS  03.2
+14C5:  GOTO   4CC
+.................... 		{ 
+.................... 			ProcessMidiInputStream(); 
+*
+05CF:  BSF    0A.3
+05D0:  CALL   000
+05D1:  BCF    0A.3
+*
+11CF:  BCF    0A.4
+11D0:  BSF    0A.3
+11D1:  CALL   000
+11D2:  BSF    0A.4
+11D3:  BCF    0A.3
+*
+1294:  BCF    0A.4
+1295:  BSF    0A.3
+1296:  CALL   000
+1297:  BSF    0A.4
+1298:  BCF    0A.3
+*
+14C6:  BCF    0A.4
+14C7:  BSF    0A.3
+14C8:  CALL   000
+14C9:  BSF    0A.4
+14CA:  BCF    0A.3
+.................... 		} 
+*
+05D2:  GOTO   5A3
+*
+11D4:  GOTO   1A3
+*
+1299:  GOTO   268
+*
+14CB:  GOTO   49A
+....................  
+.................... 	// store the last status that we are sending 
+.................... 	SetLastStatusChan (msg_ptr[0]); 
+*
+05D3:  BSF    03.5
+05D4:  MOVF   38,W
+05D5:  MOVWF  04
+05D6:  MOVF   00,W
+05D7:  MOVWF  3B
+05D8:  MOVWF  3C
+05D9:  BCF    03.5
+*
+11D5:  BSF    03.5
+11D6:  MOVF   38,W
+11D7:  MOVWF  04
+11D8:  MOVF   00,W
+11D9:  MOVWF  3B
+11DA:  MOVWF  3C
+11DB:  BCF    03.5
+*
+129A:  BSF    03.5
+129B:  MOVF   38,W
+129C:  MOVWF  04
+129D:  MOVF   00,W
+129E:  MOVWF  3B
+129F:  MOVWF  3C
+12A0:  BCF    03.5
+*
+14CC:  BSF    03.5
+14CD:  MOVF   38,W
+14CE:  MOVWF  04
+14CF:  MOVF   00,W
+14D0:  MOVWF  3B
+14D1:  MOVWF  3C
+14D2:  BCF    03.5
+....................  
+.................... 	for (i = 0; i < num_bytes; i++) 
+*
+05DE:  BSF    03.5
+05DF:  CLRF   39
+05E0:  BCF    03.5
+05E1:  BSF    03.5
+05E2:  MOVF   37,W
+05E3:  SUBWF  39,W
+05E4:  BTFSS  03.0
+05E5:  GOTO   5E8
+05E6:  BCF    03.5
+05E7:  GOTO   615
+05E8:  BCF    03.5
+*
+11E0:  BSF    03.5
+11E1:  CLRF   39
+11E2:  BCF    03.5
+11E3:  BSF    03.5
+11E4:  MOVF   37,W
+11E5:  SUBWF  39,W
+11E6:  BTFSS  03.0
+11E7:  GOTO   1EA
+11E8:  BCF    03.5
+11E9:  GOTO   219
+11EA:  BCF    03.5
+*
+12A5:  BSF    03.5
+12A6:  CLRF   39
+12A7:  BCF    03.5
+12A8:  BSF    03.5
+12A9:  MOVF   37,W
+12AA:  SUBWF  39,W
+12AB:  BTFSS  03.0
+12AC:  GOTO   2AF
+12AD:  BCF    03.5
+12AE:  GOTO   2DE
+12AF:  BCF    03.5
+*
+14D7:  BSF    03.5
+14D8:  CLRF   39
+14D9:  BCF    03.5
+14DA:  BSF    03.5
+14DB:  MOVF   37,W
+14DC:  SUBWF  39,W
+14DD:  BTFSS  03.0
+14DE:  GOTO   4E1
+14DF:  BCF    03.5
+14E0:  GOTO   510
+14E1:  BCF    03.5
+.................... 		{ 
+....................       if (midi_out_2) 
+*
+05E9:  BSF    03.5
+05EA:  BTFSC  3A.0
+05EB:  GOTO   5EE
+05EC:  BCF    03.5
+05ED:  GOTO   603
+05EE:  BCF    03.5
+*
+11EB:  BSF    03.5
+11EC:  BTFSC  3A.0
+11ED:  GOTO   1F0
+11EE:  BCF    03.5
+11EF:  GOTO   207
+11F0:  BCF    03.5
+*
+12B0:  BSF    03.5
+12B1:  BTFSC  3A.0
+12B2:  GOTO   2B5
+12B3:  BCF    03.5
+12B4:  GOTO   2CC
+12B5:  BCF    03.5
+*
+14E2:  BSF    03.5
+14E3:  BTFSC  3A.0
+14E4:  GOTO   4E7
+14E5:  BCF    03.5
+14E6:  GOTO   4FE
+14E7:  BCF    03.5
+....................       { 
+.................... 			  WriteOutData2 (msg_ptr [i]);  
+*
+05EF:  BSF    03.5
+05F0:  MOVF   38,W
+05F1:  ADDWF  39,W
+05F2:  MOVWF  04
+05F3:  MOVF   00,W
+05F4:  MOVWF  3B
+05F5:  MOVWF  3C
+05F6:  BCF    03.5
+*
+11F1:  BSF    03.5
+11F2:  MOVF   38,W
+11F3:  ADDWF  39,W
+11F4:  MOVWF  04
+11F5:  MOVF   00,W
+11F6:  MOVWF  3B
+11F7:  MOVWF  3C
+11F8:  BCF    03.5
+*
+12B6:  BSF    03.5
+12B7:  MOVF   38,W
+12B8:  ADDWF  39,W
+12B9:  MOVWF  04
+12BA:  MOVF   00,W
+12BB:  MOVWF  3B
+12BC:  MOVWF  3C
+12BD:  BCF    03.5
+*
+14E8:  BSF    03.5
+14E9:  MOVF   38,W
+14EA:  ADDWF  39,W
+14EB:  MOVWF  04
+14EC:  MOVF   00,W
+14ED:  MOVWF  3B
+14EE:  MOVWF  3C
+14EF:  BCF    03.5
+....................       } 
+....................  
+....................       else 
+*
+0602:  GOTO   611
+*
+1206:  GOTO   215
+*
+12CB:  GOTO   2DA
+*
+14FD:  GOTO   50C
+....................       { 
+.................... 			  WriteOutData (msg_ptr [i]);  
+*
+0603:  BSF    03.5
+0604:  MOVF   38,W
+0605:  ADDWF  39,W
+0606:  MOVWF  04
+0607:  MOVF   00,W
+0608:  MOVWF  3B
+0609:  MOVWF  44
+060A:  BCF    03.5
+*
+1207:  BSF    03.5
+1208:  MOVF   38,W
+1209:  ADDWF  39,W
+120A:  MOVWF  04
+120B:  MOVF   00,W
+120C:  MOVWF  3B
+120D:  MOVWF  44
+120E:  BCF    03.5
+*
+12CC:  BSF    03.5
+12CD:  MOVF   38,W
+12CE:  ADDWF  39,W
+12CF:  MOVWF  04
+12D0:  MOVF   00,W
+12D1:  MOVWF  3B
+12D2:  MOVWF  44
+12D3:  BCF    03.5
+*
+14FE:  BSF    03.5
+14FF:  MOVF   38,W
+1500:  ADDWF  39,W
+1501:  MOVWF  04
+1502:  MOVF   00,W
+1503:  MOVWF  3B
+1504:  MOVWF  44
+1505:  BCF    03.5
+....................       } 
+.................... 		} 
+*
+0611:  BSF    03.5
+0612:  INCF   39,F
+0613:  BCF    03.5
+0614:  GOTO   5E1
+*
+1215:  BSF    03.5
+1216:  INCF   39,F
+1217:  BCF    03.5
+1218:  GOTO   1E3
+*
+12DA:  BSF    03.5
+12DB:  INCF   39,F
+12DC:  BCF    03.5
+12DD:  GOTO   2A8
+*
+150C:  BSF    03.5
+150D:  INCF   39,F
+150E:  BCF    03.5
+150F:  GOTO   4DA
+....................  
+.................... 	 
+.................... } 
+.................... #inline 
+.................... short OutputAnalog (int channel, int value) 
+.................... { 
+....................   int num_bytes; 
+....................    
+.................... 	str_midiconfig midi_msg; 
+....................  
+.................... 	ReadAnalogueInConfig (&midi_msg, channel); 
+*
+141F:  MOVLW  AD
+1420:  BSF    03.5
+1421:  MOVWF  31
+1422:  MOVF   2A,W
+1423:  MOVWF  32
+1424:  BCF    03.5
+....................  
+....................   if (!(MUTE_CONFIG_MASK  & midi_msg.config_flag)) 
+*
+142E:  BSF    03.5
+142F:  MOVF   30,W
+1430:  ANDLW  04
+1431:  XORLW  00
+1432:  BTFSC  03.2
+1433:  GOTO   436
+1434:  BCF    03.5
+1435:  GOTO   510
+1436:  BCF    03.5
+....................     { 
+....................     num_bytes = NumTxBytes (&midi_msg); 
+1437:  MOVLW  AD
+1438:  BSF    03.5
+1439:  MOVWF  3F
+143A:  BCF    03.5
+143B:  BCF    0A.4
+143C:  CALL   148
+143D:  BSF    0A.4
+143E:  MOVF   78,W
+143F:  BSF    03.5
+1440:  MOVWF  2C
+....................  
+.................... 		if (INVERT_VALUE_MASK & midi_msg.config_flag) 
+1441:  MOVF   30,W
+1442:  ANDLW  02
+1443:  XORLW  00
+1444:  BTFSS  03.2
+1445:  GOTO   448
+1446:  BCF    03.5
+1447:  GOTO   44D
+1448:  BCF    03.5
+.................... 			{ 
+.................... 				value ^= 0x7f; // flip all but msb 
+1449:  MOVLW  7F
+144A:  BSF    03.5
+144B:  XORWF  2B,F
+144C:  BCF    03.5
+.................... 			} 
+.................... 		 
+.................... 		switch (num_bytes) 
+144D:  BSF    03.5
+144E:  MOVF   2C,W
+144F:  MOVWF  77
+1450:  MOVLW  03
+1451:  SUBWF  77,W
+1452:  BTFSS  03.2
+1453:  GOTO   456
+1454:  BCF    03.5
+1455:  GOTO   45E
+1456:  MOVLW  02
+1457:  SUBWF  77,W
+1458:  BTFSS  03.2
+1459:  GOTO   45C
+145A:  BCF    03.5
+145B:  GOTO   471
+145C:  BCF    03.5
+145D:  GOTO   476
+.................... 			{ 
+.................... 			case 3: 
+.................... 				if (DATA_1_VARY_MASK & midi_msg.config_flag) 
+145E:  BSF    03.5
+145F:  MOVF   30,W
+1460:  ANDLW  01
+1461:  XORLW  00
+1462:  BTFSS  03.2
+1463:  GOTO   466
+1464:  BCF    03.5
+1465:  GOTO   46C
+1466:  BCF    03.5
+.................... 					{ 
+.................... 						midi_msg.data_1 = value; 
+1467:  BSF    03.5
+1468:  MOVF   2B,W
+1469:  MOVWF  2E
+.................... 					} 
+.................... 				else 
+146A:  BCF    03.5
+146B:  GOTO   470
+.................... 					{ 
+.................... 						midi_msg.data_2 = value; 
+146C:  BSF    03.5
+146D:  MOVF   2B,W
+146E:  MOVWF  2F
+146F:  BCF    03.5
+.................... 					} 
+.................... 				break; 
+1470:  GOTO   476
+.................... 				 
+.................... 			case 2: 
+.................... 				midi_msg.data_1 = value; 
+1471:  BSF    03.5
+1472:  MOVF   2B,W
+1473:  MOVWF  2E
+.................... 				break; 
+1474:  BCF    03.5
+1475:  GOTO   476
+.................... 				 
+.................... 			default: 
+.................... 			} 
+.................... 		 
+.................... 		OutputMidi (&midi_msg); 
+1476:  MOVLW  AD
+1477:  BSF    03.5
+1478:  MOVWF  36
+1479:  BCF    03.5
+.................... 		} 
+....................   return true; 
+*
+1510:  MOVLW  01
+1511:  MOVWF  78
+.................... } 
+....................  
+.................... #inline 
+.................... short OutputDigital (int channel, int value) 
+.................... { 
+....................   int num_bytes; 
+.................... 	str_midiconfig midi_msg; 
+....................  
+.................... 	ReadDigitalInConfig (&midi_msg, channel); 
+*
+052B:  MOVLW  B2
+052C:  BSF    03.5
+052D:  MOVWF  36
+052E:  MOVF   2F,W
+052F:  MOVWF  37
+0530:  BCF    03.5
+....................  
+....................   if (!(MUTE_CONFIG_MASK  & midi_msg.config_flag)) 
+*
+053B:  BSF    03.5
+053C:  MOVF   35,W
+053D:  ANDLW  04
+053E:  XORLW  00
+053F:  BTFSC  03.2
+0540:  GOTO   543
+0541:  BCF    03.5
+0542:  GOTO   615
+0543:  BCF    03.5
+....................     { 
+....................     num_bytes = NumTxBytes (&midi_msg); 
+0544:  MOVLW  B2
+0545:  BSF    03.5
+0546:  MOVWF  3F
+0547:  BCF    03.5
+0548:  CALL   148
+0549:  MOVF   78,W
+054A:  BSF    03.5
+054B:  MOVWF  31
+....................  
+.................... 		if (INVERT_VALUE_MASK & midi_msg.config_flag) 
+054C:  MOVF   35,W
+054D:  ANDLW  02
+054E:  XORLW  00
+054F:  BTFSS  03.2
+0550:  GOTO   553
+0551:  BCF    03.5
+0552:  GOTO   558
+0553:  BCF    03.5
+.................... 			{ 
+.................... 				value ^= 0x7f; // flip all but msb 
+0554:  MOVLW  7F
+0555:  BSF    03.5
+0556:  XORWF  30,F
+0557:  BCF    03.5
+.................... 			} 
+.................... 		 
+.................... 		switch (num_bytes) 
+0558:  BSF    03.5
+0559:  MOVF   31,W
+055A:  MOVWF  77
+055B:  MOVLW  03
+055C:  SUBWF  77,W
+055D:  BTFSS  03.2
+055E:  GOTO   561
+055F:  BCF    03.5
+0560:  GOTO   569
+0561:  MOVLW  02
+0562:  SUBWF  77,W
+0563:  BTFSS  03.2
+0564:  GOTO   567
+0565:  BCF    03.5
+0566:  GOTO   57C
+0567:  BCF    03.5
+0568:  GOTO   581
+.................... 			{ 
+.................... 			case 3: 
+.................... 				if (DATA_1_VARY_MASK & midi_msg.config_flag) 
+0569:  BSF    03.5
+056A:  MOVF   35,W
+056B:  ANDLW  01
+056C:  XORLW  00
+056D:  BTFSS  03.2
+056E:  GOTO   571
+056F:  BCF    03.5
+0570:  GOTO   577
+0571:  BCF    03.5
+.................... 					{ 
+.................... 						midi_msg.data_1 = value; 
+0572:  BSF    03.5
+0573:  MOVF   30,W
+0574:  MOVWF  33
+.................... 					} 
+.................... 				else 
+0575:  BCF    03.5
+0576:  GOTO   57B
+.................... 					{ 
+.................... 						midi_msg.data_2 = value; 
+0577:  BSF    03.5
+0578:  MOVF   30,W
+0579:  MOVWF  34
+057A:  BCF    03.5
+.................... 					} 
+.................... 				 
+.................... 				break; 
+057B:  GOTO   581
+.................... 				 
+.................... 			case 2: 
+.................... 				midi_msg.data_1 = value; 
+057C:  BSF    03.5
+057D:  MOVF   30,W
+057E:  MOVWF  33
+.................... 				break; 
+057F:  BCF    03.5
+0580:  GOTO   581
+.................... 				 
+.................... 			default: 
+.................... 			} 
+.................... 		 
+.................... 		 
+.................... 		OutputMidi (&midi_msg); 
+0581:  MOVLW  B2
+0582:  BSF    03.5
+0583:  MOVWF  36
+0584:  BCF    03.5
+.................... 		} 
+....................   return true; 
+*
+0615:  MOVLW  01
+0616:  MOVWF  78
+.................... } 
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+.................... 
+.................... #include "spi_read.h" 
+....................  /******************************************************************************* 
+.................... *	Author: Angelo Fraietta 
+.................... *	Description: General SPI Read function 
+.................... *	Processor N/A 
+.................... * Inputs:  
+.................... *    data_size: size of the data structure receiving the data 
+.................... *    data_pin: the I/O pin that receives the data*      
+.................... * Outputs: 
+.................... *           ret_data: pointer to structure to receive data  
+.................... * 
+.................... * Global 
+.................... *    SPI_IN_LATCH: the I/O pin that latches input registers 
+.................... *    SPI_CLOCK: the I/O pin that clocks the device shift registers 
+....................  
+....................  
+.................... *	Description: 
+.................... *  
+.................... *		The registers are latched.  
+.................... *   [iterate] 
+.................... *   The state of the Input is read and shifted left 
+.................... *   When 8 bits are read and shifted, the value is stored into ret_data 
+....................  
+....................  
+.................... * Notes: asuumes the I/O pins are configured if not using standard I/O 
+.................... * Assumes a Low latch and a Low to High clock 
+.................... *******************************************************************************/ 
+.................... #inline 
+.................... void Spi_read_data (int* ret_data,  
+.................... 											int data_size,  
+.................... 											int data_pin) 
+.................... { 
+.................... 	int byte_num; 
+.................... 	int bit_num; 
+.................... 	byte in_val; 
+.................... 	short data_val; 
+....................  
+.................... 	// prepare clock 
+.................... 	output_low (SPI_CLOCK); 
+*
+042E:  BCF    4C.3
+042F:  MOVF   4C,W
+0430:  BSF    03.5
+0431:  MOVWF  07
+0432:  BCF    03.5
+0433:  BCF    07.3
+....................  
+....................   // latch the data 
+....................   switch (data_pin) 
+0434:  BSF    03.5
+0435:  MOVF   2A,W
+0436:  MOVWF  77
+0437:  MOVLW  3C
+0438:  SUBWF  77,W
+0439:  BTFSS  03.2
+043A:  GOTO   43D
+043B:  BCF    03.5
+043C:  GOTO   43F
+043D:  BCF    03.5
+043E:  GOTO   44C
+....................   { 
+....................     case DIGITAL_IN_DATA: 
+.................... 	 
+.................... 	    output_low (SPI_IN_LATCH); 
+043F:  BCF    4C.2
+0440:  MOVF   4C,W
+0441:  BSF    03.5
+0442:  MOVWF  07
+0443:  BCF    03.5
+0444:  BCF    07.2
+.................... 	    output_high (SPI_IN_LATCH); 
+0445:  BCF    4C.2
+0446:  MOVF   4C,W
+0447:  BSF    03.5
+0448:  MOVWF  07
+0449:  BCF    03.5
+044A:  BSF    07.2
+....................       break; 
+044B:  GOTO   44D
+....................  
+....................     default: 
+....................       break; 
+044C:  GOTO   44D
+....................   } 
+....................  
+.................... 	 
+.................... 	for (byte_num = 0; byte_num < data_size; byte_num++) 
+044D:  BSF    03.5
+044E:  CLRF   2B
+044F:  BCF    03.5
+0450:  BSF    03.5
+0451:  MOVF   29,W
+0452:  SUBWF  2B,W
+0453:  BTFSS  03.0
+0454:  GOTO   457
+0455:  BCF    03.5
+0456:  GOTO   4A4
+0457:  BCF    03.5
+.................... 		{ 
+.................... 			in_val = 0; 
+0458:  BSF    03.5
+0459:  CLRF   2D
+....................  
+.................... 			for (bit_num = 0; bit_num < 8; bit_num++) 
+045A:  CLRF   2C
+045B:  BCF    03.5
+045C:  BSF    03.5
+045D:  MOVF   2C,W
+045E:  SUBLW  07
+045F:  BTFSC  03.0
+0460:  GOTO   463
+0461:  BCF    03.5
+0462:  GOTO   499
+0463:  BCF    03.5
+.................... 				{ 
+.................... 					in_val <<= 1; // first shift is a dummy. Only seven are really shifted 
+0464:  BCF    03.0
+0465:  BSF    03.5
+0466:  RLF    2D,F
+....................  
+.................... 					// read the input 
+.................... 					switch (data_pin) 
+0467:  MOVF   2A,W
+0468:  MOVWF  77
+0469:  MOVLW  3C
+046A:  SUBWF  77,W
+046B:  BTFSS  03.2
+046C:  GOTO   46F
+046D:  BCF    03.5
+046E:  GOTO   471
+046F:  BCF    03.5
+0470:  GOTO   480
+.................... 						{ 
+.................... 							case DIGITAL_IN_DATA: 
+.................... 								data_val = input (DIGITAL_IN_DATA); 
+0471:  BSF    4C.4
+0472:  MOVF   4C,W
+0473:  BSF    03.5
+0474:  MOVWF  07
+0475:  BCF    03.5
+0476:  BTFSC  07.4
+0477:  GOTO   47C
+0478:  BSF    03.5
+0479:  BCF    2E.0
+047A:  BCF    03.5
+047B:  GOTO   47F
+047C:  BSF    03.5
+047D:  BSF    2E.0
+047E:  BCF    03.5
+.................... 								break; 
+047F:  GOTO   480
+....................                
+.................... 						} 
+....................  
+.................... 					if (data_val) 
+0480:  BSF    03.5
+0481:  BTFSC  2E.0
+0482:  GOTO   485
+0483:  BCF    03.5
+0484:  GOTO   489
+0485:  BCF    03.5
+.................... 						{ 
+.................... 							in_val |= 0x0001; 
+0486:  BSF    03.5
+0487:  BSF    2D.0
+0488:  BCF    03.5
+.................... 						} 
+....................  
+.................... 					// now clock register 
+.................... 					output_high (SPI_CLOCK); 
+0489:  BCF    4C.3
+048A:  MOVF   4C,W
+048B:  BSF    03.5
+048C:  MOVWF  07
+048D:  BCF    03.5
+048E:  BSF    07.3
+.................... 					output_low (SPI_CLOCK); 
+048F:  BCF    4C.3
+0490:  MOVF   4C,W
+0491:  BSF    03.5
+0492:  MOVWF  07
+0493:  BCF    03.5
+0494:  BCF    07.3
+.................... 				} 
+0495:  BSF    03.5
+0496:  INCF   2C,F
+0497:  BCF    03.5
+0498:  GOTO   45C
+....................  
+.................... 			// now store that byte in ret_data 
+.................... 			ret_data [byte_num] = in_val; 
+0499:  BSF    03.5
+049A:  MOVF   28,W
+049B:  ADDWF  2B,W
+049C:  MOVWF  04
+049D:  MOVF   2D,W
+049E:  MOVWF  00
+049F:  BCF    03.5
+.................... 		} 
+04A0:  BSF    03.5
+04A1:  INCF   2B,F
+04A2:  BCF    03.5
+04A3:  GOTO   450
+.................... } 
+....................  
+....................  
+.................... /******************************************************************************* 
+.................... *	Author: Angelo Fraietta 
+.................... *	Description: General SPI Write function 
+.................... *	Processor N/A 
+.................... * Inputs:  
+.................... *    out_data: structure containing the data to be written 
+.................... *    data_size: size of the data structure receiving the data 
+.................... *    latch_pin: the I/O pin that receives the data*      
+.................... * Outputs: 
+.................... *           Data written to the outputs after being latched 
+.................... * 
+.................... * Global 
+.................... *    SPI_CLOCK: the I/O pin that clocks the device shift registers 
+.................... *    SPI_DATA_OUT: the data I/O pin that receives the output data 
+....................  
+.................... *	Description: 
+.................... *  
+.................... *		The registers are latched.  
+.................... *   [iterate] 
+.................... *   The state of the Output is written and shifted left 
+.................... *   When 8 bits are read and shifted, the value is stored into ret_data 
+....................  
+....................  
+.................... * Notes: asuumes the I/O pins are configured if not using standard I/O 
+.................... * Assumes a Low latch and a Low to High clock 
+.................... *******************************************************************************/ 
+.................... #inline 
+.................... void Spi_write_data (int* out_data,  
+.................... 											int data_size,  
+.................... 											int latch_pin) 
+.................... { 
+.................... 	int byte_num; 
+.................... 	int bit_num; 
+.................... 	byte out_val; 
+.................... 	short data_val; 
+....................    
+.................... 	// prepare clock 
+.................... 	output_low (SPI_CLOCK); 
+*
+039C:  BCF    4C.3
+039D:  MOVF   4C,W
+039E:  BSF    03.5
+039F:  MOVWF  07
+03A0:  BCF    03.5
+03A1:  BCF    07.3
+....................  
+.................... 	for (byte_num = 0; byte_num < data_size; byte_num++) 
+03A2:  BSF    03.5
+03A3:  CLRF   4C
+03A4:  BCF    03.5
+03A5:  BSF    03.5
+03A6:  MOVF   4A,W
+03A7:  SUBWF  4C,W
+03A8:  BTFSS  03.0
+03A9:  GOTO   3AC
+03AA:  BCF    03.5
+03AB:  GOTO   3E2
+03AC:  BCF    03.5
+.................... 		{ 
+.................... 			out_val = out_data [byte_num]; 
+03AD:  BSF    03.5
+03AE:  MOVF   49,W
+03AF:  ADDWF  4C,W
+03B0:  MOVWF  04
+03B1:  MOVF   00,W
+03B2:  MOVWF  4E
+....................   
+....................  
+.................... 			for (bit_num = 0; bit_num < 8; bit_num++) 
+03B3:  CLRF   4D
+03B4:  BCF    03.5
+03B5:  BSF    03.5
+03B6:  MOVF   4D,W
+03B7:  SUBLW  07
+03B8:  BTFSC  03.0
+03B9:  GOTO   3BC
+03BA:  BCF    03.5
+03BB:  GOTO   3DE
+03BC:  BCF    03.5
+.................... 				{ 
+.................... 					// write the high bit 
+....................           output_bit (SPI_DATA_OUT, out_val & 0x80); 
+03BD:  BSF    03.5
+03BE:  MOVF   4E,W
+03BF:  ANDLW  80
+03C0:  XORLW  00
+03C1:  BTFSC  03.2
+03C2:  GOTO   3C5
+03C3:  BCF    03.5
+03C4:  GOTO   3C8
+03C5:  BCF    03.5
+03C6:  BCF    08.1
+03C7:  GOTO   3C9
+03C8:  BSF    08.1
+03C9:  BSF    03.5
+03CA:  BCF    08.1
+....................           out_val<<=1; 
+03CB:  BCF    03.0
+03CC:  RLF    4E,F
+....................  
+.................... 					// now clock register 
+.................... 					output_high (SPI_CLOCK); 
+03CD:  BCF    03.5
+03CE:  BCF    4C.3
+03CF:  MOVF   4C,W
+03D0:  BSF    03.5
+03D1:  MOVWF  07
+03D2:  BCF    03.5
+03D3:  BSF    07.3
+.................... 					output_low (SPI_CLOCK); 
+03D4:  BCF    4C.3
+03D5:  MOVF   4C,W
+03D6:  BSF    03.5
+03D7:  MOVWF  07
+03D8:  BCF    03.5
+03D9:  BCF    07.3
+.................... 				} 
+03DA:  BSF    03.5
+03DB:  INCF   4D,F
+03DC:  BCF    03.5
+03DD:  GOTO   3B5
+....................  
+....................  
+.................... 		} 
+03DE:  BSF    03.5
+03DF:  INCF   4C,F
+03E0:  BCF    03.5
+03E1:  GOTO   3A5
+....................  
+.................... 	// latch the data 
+....................   switch (latch_pin) 
+03E2:  BSF    03.5
+03E3:  MOVF   4B,W
+03E4:  MOVWF  77
+03E5:  MOVLW  42
+03E6:  SUBWF  77,W
+03E7:  BTFSS  03.2
+03E8:  GOTO   3EB
+03E9:  BCF    03.5
+03EA:  GOTO   3ED
+03EB:  BCF    03.5
+03EC:  GOTO   3F6
+....................   { 
+....................     case DIGITAL_OUT_LATCH: 
+.................... 	    output_low (DIGITAL_OUT_LATCH); 
+03ED:  BSF    03.5
+03EE:  BCF    08.2
+03EF:  BCF    03.5
+03F0:  BCF    08.2
+.................... 	    output_high (DIGITAL_OUT_LATCH); 
+03F1:  BSF    03.5
+03F2:  BCF    08.2
+03F3:  BCF    03.5
+03F4:  BSF    08.2
+....................       break; 
+03F5:  GOTO   3F6
+....................  
+....................   } 
+.................... } 
+....................  
+....................  
+....................  
+.................... 
+.................... #include "watchdog.h" 
+....................   
+.................... #define NUM_WD_FLASHES	8 
+....................  
+.................... //#ifndef WATCHDOG_PIN 
+.................... #define WATCHDOG_PIN	PIN_C0 
+.................... //#endif 
+....................  
+.................... void FlashWatchdog(int16 ms_time) 
+.................... { 
+.................... 		output_high (WATCHDOG_PIN); 
+*
+1113:  BCF    4C.0
+1114:  MOVF   4C,W
+1115:  BSF    03.5
+1116:  MOVWF  07
+1117:  BCF    03.5
+1118:  BSF    07.0
+.................... 		restart_wdt(); 
+1119:  CLRWDT
+.................... #ifndef _SIMULATE 
+.................... 		delay_ms (ms_time); 
+111A:  BSF    03.5
+111B:  MOVF   23,W
+111C:  MOVWF  25
+111D:  BCF    03.5
+111E:  BCF    0A.4
+111F:  CALL   0D5
+1120:  BSF    0A.4
+.................... #endif 
+.................... 		restart_wdt(); 
+1121:  CLRWDT
+.................... 		output_low (WATCHDOG_PIN); 
+1122:  BCF    4C.0
+1123:  MOVF   4C,W
+1124:  BSF    03.5
+1125:  MOVWF  07
+1126:  BCF    03.5
+1127:  BCF    07.0
+.................... #ifndef _SIMULATE 
+.................... 		delay_ms (ms_time); 
+1128:  BSF    03.5
+1129:  MOVF   23,W
+112A:  MOVWF  25
+112B:  BCF    03.5
+112C:  BCF    0A.4
+112D:  CALL   0D5
+112E:  BSF    0A.4
+.................... #endif 
+.................... 		restart_wdt(); 
+112F:  CLRWDT
+.................... } 
+....................  
+.................... void SetWatchdogLed (short value) 
+.................... { 
+.................... 	output_bit (WATCHDOG_PIN, value); 
+*
+06B3:  BSF    03.5
+06B4:  MOVF   23,F
+06B5:  BTFSC  03.2
+06B6:  GOTO   6B9
+06B7:  BCF    03.5
+06B8:  GOTO   6BC
+06B9:  BCF    03.5
+06BA:  BCF    07.0
+06BB:  GOTO   6BD
+06BC:  BSF    07.0
+06BD:  BCF    4C.0
+06BE:  MOVF   4C,W
+06BF:  BSF    03.5
+06C0:  MOVWF  07
+06C1:  BCF    03.5
+.................... } 
+....................  
+.................... void InitialiseWatchdog() 
+.................... { 
+.................... 	int i; 
+.................... 	for (i = 0; i < NUM_WD_FLASHES; i++) 
+*
+1103:  BSF    03.5
+1104:  CLRF   22
+1105:  BCF    03.5
+1106:  BSF    03.5
+1107:  MOVF   22,W
+1108:  SUBLW  07
+1109:  BTFSC  03.0
+110A:  GOTO   10D
+110B:  BCF    03.5
+110C:  GOTO   135
+110D:  BCF    03.5
+.................... 		{ 
+.................... 			FlashWatchdog(100); 
+110E:  BSF    03.5
+110F:  CLRF   24
+1110:  MOVLW  64
+1111:  MOVWF  23
+1112:  BCF    03.5
+.................... 			restart_wdt(); 
+*
+1130:  CLRWDT
+.................... 		} 
+1131:  BSF    03.5
+1132:  INCF   22,F
+1133:  BCF    03.5
+1134:  GOTO   106
+.................... } 
+....................  
+.................... 
+.................... #include "decmidi.h" 
+....................  /********************************************************************** 
+....................  * decodes midi message and produces an output if we are configured to 
+....................  * 
+....................  *dependant uponf midicfg.h,   
+....................  *********************************************************************/ 
+....................  
+.................... void GenerateAnalogueOutput (int out_num, byte val); 
+.................... void GenerateDigitalOutput (int out_num, byte val); 
+....................  
+....................  
+.................... #inline 
+.................... short MatchingConfig (str_midiconfig* test, str_midiconfig* reference) 
+.................... { 
+....................   short ret; 
+....................   byte match_only_status; 
+....................  
+....................   ret = !(MUTE_CONFIG_MASK  & reference->config_flag); 
+*
+0D27:  MOVLW  03
+0D28:  BSF    03.5
+0D29:  ADDWF  47,W
+0D2A:  MOVWF  04
+0D2B:  MOVF   00,W
+0D2C:  ANDLW  04
+0D2D:  XORLW  00
+0D2E:  BTFSS  03.2
+0D2F:  GOTO   532
+0D30:  BCF    03.5
+0D31:  GOTO   537
+0D32:  BCF    03.5
+0D33:  BSF    03.5
+0D34:  BCF    48.0
+0D35:  BCF    03.5
+0D36:  GOTO   53A
+0D37:  BSF    03.5
+0D38:  BSF    48.0
+0D39:  BCF    03.5
+*
+0DD8:  MOVLW  03
+0DD9:  BSF    03.5
+0DDA:  ADDWF  47,W
+0DDB:  MOVWF  04
+0DDC:  MOVF   00,W
+0DDD:  ANDLW  04
+0DDE:  XORLW  00
+0DDF:  BTFSS  03.2
+0DE0:  GOTO   5E3
+0DE1:  BCF    03.5
+0DE2:  GOTO   5E8
+0DE3:  BCF    03.5
+0DE4:  BSF    03.5
+0DE5:  BCF    48.0
+0DE6:  BCF    03.5
+0DE7:  GOTO   5EB
+0DE8:  BSF    03.5
+0DE9:  BSF    48.0
+0DEA:  BCF    03.5
+....................  
+....................    
+....................   ret = ret && (test->status_chan == reference->status_chan); 
+*
+0D3A:  BSF    03.5
+0D3B:  BTFSC  48.0
+0D3C:  GOTO   53F
+0D3D:  BCF    03.5
+0D3E:  GOTO   54E
+0D3F:  BCF    03.5
+0D40:  BSF    03.5
+0D41:  MOVF   46,W
+0D42:  MOVWF  04
+0D43:  MOVF   00,W
+0D44:  MOVWF  4B
+0D45:  MOVF   47,W
+0D46:  MOVWF  04
+0D47:  MOVF   00,W
+0D48:  SUBWF  4B,W
+0D49:  BTFSS  03.2
+0D4A:  GOTO   54D
+0D4B:  BCF    03.5
+0D4C:  GOTO   552
+0D4D:  BCF    03.5
+0D4E:  BSF    03.5
+0D4F:  BCF    48.0
+0D50:  BCF    03.5
+0D51:  GOTO   555
+0D52:  BSF    03.5
+0D53:  BSF    48.0
+0D54:  BCF    03.5
+*
+0DEB:  BSF    03.5
+0DEC:  BTFSC  48.0
+0DED:  GOTO   5F0
+0DEE:  BCF    03.5
+0DEF:  GOTO   5FF
+0DF0:  BCF    03.5
+0DF1:  BSF    03.5
+0DF2:  MOVF   46,W
+0DF3:  MOVWF  04
+0DF4:  MOVF   00,W
+0DF5:  MOVWF  4B
+0DF6:  MOVF   47,W
+0DF7:  MOVWF  04
+0DF8:  MOVF   00,W
+0DF9:  SUBWF  4B,W
+0DFA:  BTFSS  03.2
+0DFB:  GOTO   5FE
+0DFC:  BCF    03.5
+0DFD:  GOTO   603
+0DFE:  BCF    03.5
+0DFF:  BSF    03.5
+0E00:  BCF    48.0
+0E01:  BCF    03.5
+0E02:  GOTO   606
+0E03:  BSF    03.5
+0E04:  BSF    48.0
+0E05:  BCF    03.5
+....................    
+....................   match_only_status = DATA_1_VARY_MASK & reference->config_flag; 
+*
+0D55:  MOVLW  03
+0D56:  BSF    03.5
+0D57:  ADDWF  47,W
+0D58:  MOVWF  04
+0D59:  MOVF   00,W
+0D5A:  ANDLW  01
+0D5B:  MOVWF  49
+*
+0E06:  MOVLW  03
+0E07:  BSF    03.5
+0E08:  ADDWF  47,W
+0E09:  MOVWF  04
+0E0A:  MOVF   00,W
+0E0B:  ANDLW  01
+0E0C:  MOVWF  49
+....................    
+....................   if (!match_only_status) 
+*
+0D5C:  MOVF   49,F
+0D5D:  BTFSC  03.2
+0D5E:  GOTO   561
+0D5F:  BCF    03.5
+0D60:  GOTO   57F
+0D61:  BCF    03.5
+*
+0E0D:  MOVF   49,F
+0E0E:  BTFSC  03.2
+0E0F:  GOTO   612
+0E10:  BCF    03.5
+0E11:  GOTO   630
+0E12:  BCF    03.5
+....................     { 
+....................     ret = ret	&& (test->data_1 == reference->data_1); 
+*
+0D62:  BSF    03.5
+0D63:  BTFSC  48.0
+0D64:  GOTO   567
+0D65:  BCF    03.5
+0D66:  GOTO   578
+0D67:  BCF    03.5
+0D68:  MOVLW  01
+0D69:  BSF    03.5
+0D6A:  ADDWF  46,W
+0D6B:  MOVWF  04
+0D6C:  MOVF   00,W
+0D6D:  MOVWF  4B
+0D6E:  MOVLW  01
+0D6F:  ADDWF  47,W
+0D70:  MOVWF  04
+0D71:  MOVF   00,W
+0D72:  SUBWF  4B,W
+0D73:  BTFSS  03.2
+0D74:  GOTO   577
+0D75:  BCF    03.5
+0D76:  GOTO   57C
+0D77:  BCF    03.5
+0D78:  BSF    03.5
+0D79:  BCF    48.0
+0D7A:  BCF    03.5
+0D7B:  GOTO   57F
+0D7C:  BSF    03.5
+0D7D:  BSF    48.0
+0D7E:  BCF    03.5
+*
+0E13:  BSF    03.5
+0E14:  BTFSC  48.0
+0E15:  GOTO   618
+0E16:  BCF    03.5
+0E17:  GOTO   629
+0E18:  BCF    03.5
+0E19:  MOVLW  01
+0E1A:  BSF    03.5
+0E1B:  ADDWF  46,W
+0E1C:  MOVWF  04
+0E1D:  MOVF   00,W
+0E1E:  MOVWF  4B
+0E1F:  MOVLW  01
+0E20:  ADDWF  47,W
+0E21:  MOVWF  04
+0E22:  MOVF   00,W
+0E23:  SUBWF  4B,W
+0E24:  BTFSS  03.2
+0E25:  GOTO   628
+0E26:  BCF    03.5
+0E27:  GOTO   62D
+0E28:  BCF    03.5
+0E29:  BSF    03.5
+0E2A:  BCF    48.0
+0E2B:  BCF    03.5
+0E2C:  GOTO   630
+0E2D:  BSF    03.5
+0E2E:  BSF    48.0
+0E2F:  BCF    03.5
+....................     } 
+....................  
+....................   return ret; 
+*
+0D7F:  MOVLW  00
+0D80:  BSF    03.5
+0D81:  BTFSC  48.0
+0D82:  MOVLW  01
+0D83:  MOVWF  78
+0D84:  BCF    03.5
+*
+0E30:  MOVLW  00
+0E31:  BSF    03.5
+0E32:  BTFSC  48.0
+0E33:  MOVLW  01
+0E34:  MOVWF  78
+0E35:  BCF    03.5
+.................... } 
+....................  
+.................... // test all analogs and digitals for a match 
+.................... void DecodeMidiMessage (str_midiconfig* test_msg) 
+.................... { 
+.................... 	str_midiconfig config; 
+.................... 	int i; 
+....................   byte outval; 
+....................  
+....................   outval = test_msg->data_2; 
+*
+0CFF:  MOVLW  02
+0D00:  BSF    03.5
+0D01:  ADDWF  3F,W
+0D02:  MOVWF  04
+0D03:  MOVF   00,W
+0D04:  MOVWF  45
+....................   
+.................... 	for (i = 0; i < NUM_ANALOGUE_OUT; i++) 
+0D05:  CLRF   44
+0D06:  BCF    03.5
+0D07:  BSF    03.5
+0D08:  MOVF   44,W
+0D09:  SUBLW  07
+0D0A:  BTFSC  03.0
+0D0B:  GOTO   50E
+0D0C:  BCF    03.5
+0D0D:  GOTO   5B5
+0D0E:  BCF    03.5
+.................... 		{ 
+.................... #ifndef _SIMULATE 
+.................... 			ReadAnalogueOutConfig (&config, i); 
+0D0F:  MOVLW  C0
+0D10:  BSF    03.5
+0D11:  MOVWF  46
+0D12:  MOVF   44,W
+0D13:  MOVWF  47
+0D14:  BCF    03.5
+.................... #else 
+....................       GetDefaultAnalogueOut (&config, i); 
+.................... #endif 
+.................... 			if (MatchingConfig (test_msg, &config)) 
+*
+0D21:  BSF    03.5
+0D22:  MOVF   3F,W
+0D23:  MOVWF  46
+0D24:  MOVLW  C0
+0D25:  MOVWF  47
+0D26:  BCF    03.5
+*
+0D85:  MOVF   78,F
+0D86:  BTFSC  03.2
+0D87:  GOTO   5B1
+.................... 				{ 
+....................           if (DATA_1_VARY_MASK & config.config_flag) 
+0D88:  BSF    03.5
+0D89:  MOVF   43,W
+0D8A:  ANDLW  01
+0D8B:  XORLW  00
+0D8C:  BTFSS  03.2
+0D8D:  GOTO   590
+0D8E:  BCF    03.5
+0D8F:  GOTO   598
+0D90:  BCF    03.5
+....................             { 
+.................... 					  outval = test_msg->data_1;   
+0D91:  MOVLW  01
+0D92:  BSF    03.5
+0D93:  ADDWF  3F,W
+0D94:  MOVWF  04
+0D95:  MOVF   00,W
+0D96:  MOVWF  45
+0D97:  BCF    03.5
+....................             } 
+....................  
+....................           if (INVERT_VALUE_MASK & config.config_flag) 
+0D98:  BSF    03.5
+0D99:  MOVF   43,W
+0D9A:  ANDLW  02
+0D9B:  XORLW  00
+0D9C:  BTFSS  03.2
+0D9D:  GOTO   5A0
+0D9E:  BCF    03.5
+0D9F:  GOTO   5A5
+0DA0:  BCF    03.5
+....................             { 
+....................             outval ^= 0x7f; // flip all but msb 
+0DA1:  MOVLW  7F
+0DA2:  BSF    03.5
+0DA3:  XORWF  45,F
+0DA4:  BCF    03.5
+....................             } 
+....................  
+....................           GenerateAnalogueOutput (i, outval << 1); // multiply by 2 
+0DA5:  BCF    03.0
+0DA6:  BSF    03.5
+0DA7:  RLF    45,W
+0DA8:  MOVWF  46
+0DA9:  MOVF   44,W
+0DAA:  MOVWF  47
+0DAB:  MOVF   46,W
+0DAC:  MOVWF  48
+0DAD:  BCF    03.5
+0DAE:  BCF    0A.3
+0DAF:  CALL   307
+0DB0:  BSF    0A.3
+....................               
+.................... 				} 
+.................... 		} 
+0DB1:  BSF    03.5
+0DB2:  INCF   44,F
+0DB3:  BCF    03.5
+0DB4:  GOTO   507
+....................  
+.................... 	for (i = 0; i < NUM_DIGITAL_OUT; i++) 
+0DB5:  BSF    03.5
+0DB6:  CLRF   44
+0DB7:  BCF    03.5
+0DB8:  BSF    03.5
+0DB9:  MOVF   44,W
+0DBA:  SUBLW  0F
+0DBB:  BTFSC  03.0
+0DBC:  GOTO   5BF
+0DBD:  BCF    03.5
+0DBE:  GOTO   663
+0DBF:  BCF    03.5
+.................... 		{ 
+.................... #ifndef _SIMULATE 
+.................... 			ReadDigitalOutConfig (&config, i); 
+0DC0:  MOVLW  C0
+0DC1:  BSF    03.5
+0DC2:  MOVWF  46
+0DC3:  MOVF   44,W
+0DC4:  MOVWF  47
+0DC5:  BCF    03.5
+.................... #else 
+....................       GetDefaultDigitalOut (&config, i); 
+.................... #endif		 
+.................... 	if ( MatchingConfig (test_msg, &config)) 
+*
+0DD2:  BSF    03.5
+0DD3:  MOVF   3F,W
+0DD4:  MOVWF  46
+0DD5:  MOVLW  C0
+0DD6:  MOVWF  47
+0DD7:  BCF    03.5
+*
+0E36:  MOVF   78,F
+0E37:  BTFSC  03.2
+0E38:  GOTO   65F
+.................... 				{ 
+....................           if (DATA_1_VARY_MASK & config.config_flag) 
+0E39:  BSF    03.5
+0E3A:  MOVF   43,W
+0E3B:  ANDLW  01
+0E3C:  XORLW  00
+0E3D:  BTFSS  03.2
+0E3E:  GOTO   641
+0E3F:  BCF    03.5
+0E40:  GOTO   649
+0E41:  BCF    03.5
+....................             { 
+.................... 					  outval = test_msg->data_1;   
+0E42:  MOVLW  01
+0E43:  BSF    03.5
+0E44:  ADDWF  3F,W
+0E45:  MOVWF  04
+0E46:  MOVF   00,W
+0E47:  MOVWF  45
+0E48:  BCF    03.5
+....................             } 
+....................            
+....................           if (INVERT_VALUE_MASK & config.config_flag) 
+0E49:  BSF    03.5
+0E4A:  MOVF   43,W
+0E4B:  ANDLW  02
+0E4C:  XORLW  00
+0E4D:  BTFSS  03.2
+0E4E:  GOTO   651
+0E4F:  BCF    03.5
+0E50:  GOTO   656
+0E51:  BCF    03.5
+....................             { 
+....................             outval ^= 0x7f; // flip all but msb 
+0E52:  MOVLW  7F
+0E53:  BSF    03.5
+0E54:  XORWF  45,F
+0E55:  BCF    03.5
+....................             } 
+....................  
+....................              
+.................... 					GenerateDigitalOutput (i, outval); 
+0E56:  BSF    03.5
+0E57:  MOVF   44,W
+0E58:  MOVWF  46
+0E59:  MOVF   45,W
+0E5A:  MOVWF  47
+0E5B:  BCF    03.5
+0E5C:  BCF    0A.3
+0E5D:  CALL   356
+0E5E:  BSF    0A.3
+.................... 				} 
+.................... 		} 
+0E5F:  BSF    03.5
+0E60:  INCF   44,F
+0E61:  BCF    03.5
+0E62:  GOTO   5B8
+....................  
+.................... } 
+.................... 
+.................... #include "procmidi.h" 
+....................  /************************************************************** 
+....................  * Module for processing Midi input on PIC 
+....................  * Contains running status, and determines how many bytes left to  
+....................  * read in an input midi message 
+....................  * 
+....................  * dependant upon midicfg.h, decmidi.h 
+....................  *************************************************************/ 
+....................  
+....................  
+.................... // forward declaration 
+.................... void ResetController (); 
+.................... short DecodeSysexByte (byte byte_val); 
+.................... void ResetSysex(); 
+.................... void ExecuteSysexMessage(); 
+....................  
+.................... typedef struct 
+.................... { 
+.................... 	str_midiconfig current_msg; 
+.................... 	byte in_sysex :1; 
+.................... 	byte bytes_left :2; // the number of bytes remaining in this message 
+.................... 	byte our_sysex :1; // this could be our sysex 
+.................... 	byte byte_num:4 ;   // the byte number within current message 
+.................... 	byte last_status_chan; 
+.................... 	byte control_char; // for sysex commands 
+.................... } str_midistatus; 
+....................  
+.................... str_midistatus midi_status; 
+....................  
+.................... void InitialiseMidiStatus() 
+.................... { 
+.................... 	midi_status.current_msg.status_chan = 0; 
+*
+0668:  CLRF   4D
+.................... 	midi_status.in_sysex = 0; 
+0669:  BCF    51.0
+.................... 	midi_status.bytes_left = 0; 
+066A:  MOVLW  F9
+066B:  ANDWF  51,W
+066C:  MOVWF  51
+.................... 	midi_status.byte_num = 0; 
+066D:  MOVLW  0F
+066E:  ANDWF  51,W
+066F:  MOVWF  51
+.................... 	midi_status.last_status_chan = 0; // the last status sent by us 
+0670:  CLRF   52
+0671:  RETLW  00
+.................... } 
+....................  
+.................... void SetLastStatusChan (byte status_chan) 
+.................... { 
+.................... 	midi_status.last_status_chan = status_chan; 
+*
+05DA:  BSF    03.5
+05DB:  MOVF   3C,W
+05DC:  BCF    03.5
+05DD:  MOVWF  52
+*
+11DC:  BSF    03.5
+11DD:  MOVF   3C,W
+11DE:  BCF    03.5
+11DF:  MOVWF  52
+*
+12A1:  BSF    03.5
+12A2:  MOVF   3C,W
+12A3:  BCF    03.5
+12A4:  MOVWF  52
+*
+14D3:  BSF    03.5
+14D4:  MOVF   3C,W
+14D5:  BCF    03.5
+14D6:  MOVWF  52
+.................... } 
+....................  
+.................... #ifdef MIDI_CONTROLLER_BUILD 
+.................... // returns true if the merge is currently free 
+.................... short MidiOutFree() 
+.................... { 
+.................... 	return (!DoMidiMerge()) || (InQueueEmpty ()  
+....................           && !midi_status.bytes_left  
+....................           && !midi_status.in_sysex); 
+*
+05B5:  MOVF   78,F
+05B6:  BTFSC  03.2
+05B7:  GOTO   5CA
+*
+05BC:  MOVF   78,F
+05BD:  BTFSC  03.2
+05BE:  GOTO   5C8
+05BF:  MOVF   51,W
+05C0:  MOVWF  77
+05C1:  RRF    77,W
+05C2:  ANDLW  03
+05C3:  XORLW  00
+05C4:  BTFSS  03.2
+05C5:  GOTO   5C8
+05C6:  BTFSS  51.0
+05C7:  GOTO   5CA
+05C8:  MOVLW  00
+05C9:  GOTO   5CB
+05CA:  MOVLW  01
+05CB:  MOVWF  78
+*
+11B5:  MOVF   78,F
+11B6:  BTFSC  03.2
+11B7:  GOTO   1CA
+*
+11BC:  MOVF   78,F
+11BD:  BTFSC  03.2
+11BE:  GOTO   1C8
+11BF:  MOVF   51,W
+11C0:  MOVWF  77
+11C1:  RRF    77,W
+11C2:  ANDLW  03
+11C3:  XORLW  00
+11C4:  BTFSS  03.2
+11C5:  GOTO   1C8
+11C6:  BTFSS  51.0
+11C7:  GOTO   1CA
+11C8:  MOVLW  00
+11C9:  GOTO   1CB
+11CA:  MOVLW  01
+11CB:  MOVWF  78
+*
+127A:  MOVF   78,F
+127B:  BTFSC  03.2
+127C:  GOTO   28F
+*
+1281:  MOVF   78,F
+1282:  BTFSC  03.2
+1283:  GOTO   28D
+1284:  MOVF   51,W
+1285:  MOVWF  77
+1286:  RRF    77,W
+1287:  ANDLW  03
+1288:  XORLW  00
+1289:  BTFSS  03.2
+128A:  GOTO   28D
+128B:  BTFSS  51.0
+128C:  GOTO   28F
+128D:  MOVLW  00
+128E:  GOTO   290
+128F:  MOVLW  01
+1290:  MOVWF  78
+*
+14AC:  MOVF   78,F
+14AD:  BTFSC  03.2
+14AE:  GOTO   4C1
+*
+14B3:  MOVF   78,F
+14B4:  BTFSC  03.2
+14B5:  GOTO   4BF
+14B6:  MOVF   51,W
+14B7:  MOVWF  77
+14B8:  RRF    77,W
+14B9:  ANDLW  03
+14BA:  XORLW  00
+14BB:  BTFSS  03.2
+14BC:  GOTO   4BF
+14BD:  BTFSS  51.0
+14BE:  GOTO   4C1
+14BF:  MOVLW  00
+14C0:  GOTO   4C2
+14C1:  MOVLW  01
+14C2:  MOVWF  78
+.................... } 
+....................  
+.................... #endif 
+....................  
+.................... #pragma  inline 
+.................... void ProcessSystemMessage ( byte midi_byte) 
+.................... { 
+.................... 	switch (midi_byte) 
+*
+0871:  BSF    03.5
+0872:  MOVF   3F,W
+0873:  MOVWF  77
+0874:  MOVLW  F0
+0875:  SUBWF  77,W
+0876:  BTFSS  03.2
+0877:  GOTO   07A
+0878:  BCF    03.5
+0879:  GOTO   09A
+087A:  MOVLW  F1
+087B:  SUBWF  77,W
+087C:  BTFSS  03.2
+087D:  GOTO   080
+087E:  BCF    03.5
+087F:  GOTO   0A9
+0880:  MOVLW  F2
+0881:  SUBWF  77,W
+0882:  BTFSS  03.2
+0883:  GOTO   086
+0884:  BCF    03.5
+0885:  GOTO   0B1
+0886:  MOVLW  F3
+0887:  SUBWF  77,W
+0888:  BTFSS  03.2
+0889:  GOTO   08C
+088A:  BCF    03.5
+088B:  GOTO   0B9
+088C:  MOVLW  F7
+088D:  SUBWF  77,W
+088E:  BTFSS  03.2
+088F:  GOTO   092
+0890:  BCF    03.5
+0891:  GOTO   0C1
+0892:  MOVLW  FF
+0893:  SUBWF  77,W
+0894:  BTFSS  03.2
+0895:  GOTO   098
+0896:  BCF    03.5
+0897:  GOTO   32D
+0898:  BCF    03.5
+0899:  GOTO   32F
+.................... 		{ 
+.................... 		case SYSEX_BEGIN: 
+.................... 			midi_status.in_sysex = 1; 
+089A:  BSF    51.0
+.................... 			midi_status.our_sysex = 1; 
+089B:  BSF    51.3
+.................... 			midi_status.current_msg.status_chan = 0; 
+089C:  CLRF   4D
+.................... 			midi_status.byte_num = 0; 
+089D:  MOVLW  0F
+089E:  ANDWF  51,W
+089F:  MOVWF  51
+.................... 			midi_status.last_status_chan = 0; 
+08A0:  CLRF   52
+.................... 			midi_status.control_char = 0x00; 
+08A1:  CLRF   53
+.................... 			ResetSysex(); 
+.................... 			break; 
+*
+08A8:  GOTO   330
+....................  
+.................... 		case SYSTEM_QUARTER_FRAME: 
+.................... 			midi_status.byte_num = 0; 
+08A9:  MOVLW  0F
+08AA:  ANDWF  51,W
+08AB:  MOVWF  51
+.................... 			midi_status.bytes_left = 1; 
+08AC:  MOVLW  F9
+08AD:  ANDWF  51,W
+08AE:  IORLW  02
+08AF:  MOVWF  51
+.................... 			break; 
+08B0:  GOTO   330
+....................  
+.................... 		case SYSTEM_SONG_POS: 
+.................... 			midi_status.byte_num = 0; 
+08B1:  MOVLW  0F
+08B2:  ANDWF  51,W
+08B3:  MOVWF  51
+.................... 			midi_status.bytes_left = 2; 
+08B4:  MOVLW  F9
+08B5:  ANDWF  51,W
+08B6:  IORLW  04
+08B7:  MOVWF  51
+.................... 			break; 
+08B8:  GOTO   330
+....................  
+.................... 		case SYSTEM_SONG_SELECT: 
+.................... 			midi_status.byte_num = 0; 
+08B9:  MOVLW  0F
+08BA:  ANDWF  51,W
+08BB:  MOVWF  51
+.................... 			midi_status.bytes_left = 1; 
+08BC:  MOVLW  F9
+08BD:  ANDWF  51,W
+08BE:  IORLW  02
+08BF:  MOVWF  51
+.................... 			break; 
+08C0:  GOTO   330
+....................  
+.................... 		case SYSEX_END: 
+.................... 			if (midi_status.our_sysex)  
+08C1:  BTFSS  51.3
+08C2:  GOTO   325
+.................... 				{ 
+.................... 					ExecuteSysexMessage(); 
+.................... 				} 
+.................... 			midi_status.in_sysex = 0; 
+*
+0B25:  BCF    51.0
+.................... 			midi_status.our_sysex = 0; 
+0B26:  BCF    51.3
+.................... 			midi_status.current_msg.status_chan = 0; 
+0B27:  CLRF   4D
+.................... 			midi_status.byte_num = 0; 
+0B28:  MOVLW  0F
+0B29:  ANDWF  51,W
+0B2A:  MOVWF  51
+.................... 			midi_status.last_status_chan = 0; 
+0B2B:  CLRF   52
+.................... 			 
+....................       break; 
+0B2C:  GOTO   330
+....................  
+.................... 		case SYSTEM_RESET: 
+.................... 			//reset_cpu(); 
+.................... #ifdef MIDI_CONTROLLER_BUILD 
+.................... 			while (1); // wait for watchdog 
+.................... #endif 
+0B2D:  GOTO   32D
+.................... 			break; 
+0B2E:  GOTO   330
+.................... 		default: 
+....................       break; 
+0B2F:  GOTO   330
+.................... 			// just ignore 
+.................... 		} 
+.................... } // end void ProcessSystemMessage ( byte midi_byte) 
+....................  
+.................... #ifdef MIDI_CONTROLLER_BUILD 
+.................... // ensures that complete midi word is transmitted  
+.................... void ProcessMidiInputStream() 
+.................... { 
+.................... 	byte midi_byte; 
+.................... 	byte status_nibble; 
+.................... 	byte* msg_ptr; 
+....................   short valid_byte; 
+.................... 	 
+.................... 	while (!InQueueEmpty()) 
+*
+0804:  MOVF   78,F
+0805:  BTFSS  03.2
+0806:  GOTO   664
+.................... 		{ 
+.................... 			restart_wdt(); 
+0807:  CLRWDT
+.................... 			midi_byte = GetInChar(); 
+*
+0838:  MOVF   78,W
+0839:  BSF    03.5
+083A:  MOVWF  3B
+....................  
+.................... 			if (midi_byte & STATUS_BYTE_MASK) // then this is a status byte 
+083B:  MOVF   3B,W
+083C:  ANDLW  80
+083D:  XORLW  00
+083E:  BTFSS  03.2
+083F:  GOTO   042
+0840:  BCF    03.5
+0841:  GOTO   34F
+0842:  BCF    03.5
+.................... 				{ 
+....................           if (DoMidiMerge()) 
+*
+0855:  MOVF   78,F
+0856:  BTFSC  03.2
+0857:  GOTO   062
+....................   					{ 
+.................... 							WriteOutData (midi_byte); 
+0858:  BSF    03.5
+0859:  MOVF   3B,W
+085A:  MOVWF  44
+085B:  BCF    03.5
+.................... 						} 
+....................  
+.................... 					status_nibble = midi_byte & STATUS_NIBBLE_MASK; 
+*
+0862:  BSF    03.5
+0863:  MOVF   3B,W
+0864:  ANDLW  F0
+0865:  MOVWF  3C
+....................  
+.................... 					if (status_nibble == SYSTEM_MSG_VAL) // then this is system message 
+0866:  MOVF   3C,W
+0867:  SUBLW  F0
+0868:  BTFSC  03.2
+0869:  GOTO   06C
+086A:  BCF    03.5
+086B:  GOTO   331
+086C:  BCF    03.5
+....................             { 
+.................... 							ProcessSystemMessage (midi_byte); 
+086D:  BSF    03.5
+086E:  MOVF   3B,W
+086F:  MOVWF  3F
+0870:  BCF    03.5
+....................             } 
+....................           else 
+*
+0B30:  GOTO   34E
+.................... 						{ 
+.................... 							midi_status.in_sysex = 0; // clear in sysex flag 
+0B31:  BCF    51.0
+.................... 							midi_status.current_msg.status_chan = midi_byte; 
+0B32:  BSF    03.5
+0B33:  MOVF   3B,W
+0B34:  BCF    03.5
+0B35:  MOVWF  4D
+....................  
+.................... 							midi_status.bytes_left = NumTxBytes (&(midi_status.current_msg)) -1; 
+0B36:  MOVLW  4D
+0B37:  BSF    03.5
+0B38:  MOVWF  3F
+0B39:  BCF    03.5
+0B3A:  BCF    0A.3
+0B3B:  CALL   148
+0B3C:  BSF    0A.3
+0B3D:  MOVLW  01
+0B3E:  SUBWF  78,W
+0B3F:  ANDLW  03
+0B40:  MOVWF  77
+0B41:  BCF    03.0
+0B42:  RLF    77,F
+0B43:  MOVLW  F9
+0B44:  ANDWF  51,W
+0B45:  IORWF  77,W
+0B46:  MOVWF  51
+.................... 							// store the last status that we have transmitted 
+.................... 							midi_status.last_status_chan = midi_byte; 
+0B47:  BSF    03.5
+0B48:  MOVF   3B,W
+0B49:  BCF    03.5
+0B4A:  MOVWF  52
+.................... 					 
+.................... 							midi_status.byte_num = 0;		 
+0B4B:  MOVLW  0F
+0B4C:  ANDWF  51,W
+0B4D:  MOVWF  51
+.................... 						} 
+.................... 					 
+.................... 				} 
+.................... 			else // not a status byte 
+0B4E:  GOTO   663
+.................... 				{ 
+.................... 					midi_status.byte_num++; 
+0B4F:  MOVF   51,W
+0B50:  ADDLW  10
+0B51:  ANDLW  F0
+0B52:  MOVWF  77
+0B53:  MOVLW  0F
+0B54:  ANDWF  51,W
+0B55:  IORWF  77,W
+0B56:  MOVWF  51
+....................  
+.................... 					if (midi_status.in_sysex) 
+0B57:  BTFSS  51.0
+0B58:  GOTO   45E
+.................... 						{ 
+.................... 							// we need to write data out 
+....................               if (DoMidiMerge()) 
+*
+0B6B:  MOVF   78,F
+0B6C:  BTFSC  03.2
+0B6D:  GOTO   378
+.................... 								{ 
+.................... 									WriteOutData (midi_byte); 
+0B6E:  BSF    03.5
+0B6F:  MOVF   3B,W
+0B70:  MOVWF  44
+0B71:  BCF    03.5
+.................... 								} 
+....................  
+.................... 							if (midi_status.our_sysex) 
+*
+0B78:  BTFSS  51.3
+0B79:  GOTO   45D
+.................... 								{ 
+....................                 if (DecodeMidiByte (&midi_status.control_char, &midi_byte)) 
+0B7A:  MOVLW  53
+0B7B:  BSF    03.5
+0B7C:  MOVWF  3F
+0B7D:  MOVLW  BB
+0B7E:  MOVWF  40
+0B7F:  BCF    03.5
+*
+0BCF:  MOVF   78,F
+0BD0:  BTFSC  03.2
+0BD1:  GOTO   45D
+....................   								{ 
+....................                   midi_status.our_sysex = DecodeSysexByte (midi_byte);	 
+0BD2:  BSF    03.5
+0BD3:  MOVF   3B,W
+0BD4:  MOVWF  3F
+0BD5:  BCF    03.5
+*
+0C57:  MOVF   78,F
+0C58:  BTFSS  03.2
+0C59:  GOTO   45C
+0C5A:  BCF    51.3
+0C5B:  GOTO   45D
+0C5C:  BSF    51.3
+....................                   } 
+.................... 								} 
+.................... 						} 
+.................... 					else // not in sysex 
+0C5D:  GOTO   663
+.................... 						{ 
+....................               valid_byte = 1; 
+0C5E:  BSF    03.5
+0C5F:  BSF    3E.0
+....................  
+.................... 							if (!midi_status.bytes_left)// must be using running status 
+0C60:  BCF    03.5
+0C61:  MOVF   51,W
+0C62:  MOVWF  77
+0C63:  RRF    77,W
+0C64:  ANDLW  03
+0C65:  XORLW  00
+0C66:  BTFSS  03.2
+0C67:  GOTO   4B9
+.................... 								{ 
+.................... 									valid_byte = (NumTxBytes (&(midi_status.current_msg))); 
+0C68:  MOVLW  4D
+0C69:  BSF    03.5
+0C6A:  MOVWF  3F
+0C6B:  BCF    03.5
+0C6C:  BCF    0A.3
+0C6D:  CALL   148
+0C6E:  BSF    0A.3
+0C6F:  MOVF   78,F
+0C70:  BTFSS  03.2
+0C71:  GOTO   476
+0C72:  BSF    03.5
+0C73:  BCF    3E.0
+0C74:  BCF    03.5
+0C75:  GOTO   479
+0C76:  BSF    03.5
+0C77:  BSF    3E.0
+0C78:  BCF    03.5
+....................      
+....................                   if (valid_byte) 
+0C79:  BSF    03.5
+0C7A:  BTFSC  3E.0
+0C7B:  GOTO   47E
+0C7C:  BCF    03.5
+0C7D:  GOTO   4B9
+0C7E:  BCF    03.5
+....................                     { 
+.................... 											midi_status.bytes_left = NumTxBytes (&(midi_status.current_msg)) -1; 
+0C7F:  MOVLW  4D
+0C80:  BSF    03.5
+0C81:  MOVWF  3F
+0C82:  BCF    03.5
+0C83:  BCF    0A.3
+0C84:  CALL   148
+0C85:  BSF    0A.3
+0C86:  MOVLW  01
+0C87:  SUBWF  78,W
+0C88:  ANDLW  03
+0C89:  MOVWF  77
+0C8A:  BCF    03.0
+0C8B:  RLF    77,F
+0C8C:  MOVLW  F9
+0C8D:  ANDWF  51,W
+0C8E:  IORWF  77,W
+0C8F:  MOVWF  51
+....................  
+.................... 											if (midi_status.last_status_chan  
+.................... 													!= midi_status.current_msg.status_chan) 
+0C90:  MOVF   4D,W
+0C91:  SUBWF  52,W
+0C92:  BTFSC  03.2
+0C93:  GOTO   4B5
+.................... 												{ 
+....................                           if (DoMidiMerge()) 
+*
+0CA6:  MOVF   78,F
+0CA7:  BTFSC  03.2
+0CA8:  GOTO   4B3
+.................... 														{ 
+.................... 															WriteOutData (midi_status.current_msg.status_chan); 
+0CA9:  MOVF   4D,W
+0CAA:  BSF    03.5
+0CAB:  MOVWF  44
+0CAC:  BCF    03.5
+.................... 														} 
+....................  
+.................... 													midi_status.last_status_chan = midi_status.current_msg.status_chan; 
+*
+0CB3:  MOVF   4D,W
+0CB4:  MOVWF  52
+.................... 												} 
+....................  
+.................... 											midi_status.byte_num = 1; 
+0CB5:  MOVLW  0F
+0CB6:  ANDWF  51,W
+0CB7:  IORLW  10
+0CB8:  MOVWF  51
+....................                     } 
+.................... 								} 
+.................... 							 
+....................               if (valid_byte) 
+0CB9:  BSF    03.5
+0CBA:  BTFSC  3E.0
+0CBB:  GOTO   4BE
+0CBC:  BCF    03.5
+0CBD:  GOTO   663
+0CBE:  BCF    03.5
+.................... 								{ 
+....................                 if (DoMidiMerge()) 
+*
+0CD1:  MOVF   78,F
+0CD2:  BTFSC  03.2
+0CD3:  GOTO   4DE
+.................... 									{ 
+.................... 										WriteOutData (midi_byte); 
+0CD4:  BSF    03.5
+0CD5:  MOVF   3B,W
+0CD6:  MOVWF  44
+0CD7:  BCF    03.5
+.................... 									} 
+....................  
+.................... 									// store current byte  
+.................... 									msg_ptr = (byte*)(&midi_status.current_msg); 
+*
+0CDE:  MOVLW  4D
+0CDF:  BSF    03.5
+0CE0:  MOVWF  3D
+.................... 									msg_ptr [midi_status.byte_num] = midi_byte; 
+0CE1:  BCF    03.5
+0CE2:  MOVF   51,W
+0CE3:  MOVWF  77
+0CE4:  SWAPF  77,W
+0CE5:  ANDLW  0F
+0CE6:  BSF    03.5
+0CE7:  ADDWF  3D,W
+0CE8:  MOVWF  04
+0CE9:  MOVF   3B,W
+0CEA:  MOVWF  00
+.................... 							 
+.................... 									midi_status.bytes_left--; 
+0CEB:  BCF    03.5
+0CEC:  MOVF   51,W
+0CED:  ADDLW  06
+0CEE:  ANDLW  06
+0CEF:  MOVWF  77
+0CF0:  MOVLW  F9
+0CF1:  ANDWF  51,W
+0CF2:  IORWF  77,W
+0CF3:  MOVWF  51
+.................... 							 
+.................... 									// if no bytes to tx, we need to decode to see if we need to produce some sort of o/p 
+.................... 									if (!midi_status.bytes_left) 
+0CF4:  MOVF   51,W
+0CF5:  MOVWF  77
+0CF6:  RRF    77,W
+0CF7:  ANDLW  03
+0CF8:  XORLW  00
+0CF9:  BTFSS  03.2
+0CFA:  GOTO   663
+.................... 										{ 
+.................... 											DecodeMidiMessage (&midi_status.current_msg); 
+0CFB:  MOVLW  4D
+0CFC:  BSF    03.5
+0CFD:  MOVWF  3F
+0CFE:  BCF    03.5
+.................... 										} 
+.................... 								} 
+.................... 						} 
+.................... 				} 
+.................... 		} 
+*
+0E63:  GOTO   000
+0E64:  RETLW  00
+.................... } 
+....................  
+.................... #endif  
+.................... 
+.................... #include "digout.h" 
+....................  /********************************************************************** 
+.................... Performs the digital output using an SPI write 
+.................... ***********************************************************************/ 
+.................... typedef struct  
+.................... { 
+....................   byte upper; 
+....................   byte lower; 
+.................... }str_digout; 
+....................  
+.................... str_digout current_value; // this is the current state of the digital pins 
+....................  
+....................  
+.................... void GenerateDigitalOutput (int out_num, byte val) 
+.................... { 
+*
+0356:  MOVLW  55
+0357:  BSF    03.5
+0358:  MOVWF  48
+....................   byte* byte_to_write = &current_value.lower; 
+....................    
+....................  
+....................   if (out_num >= 8) 
+0359:  MOVF   46,W
+035A:  SUBLW  07
+035B:  BTFSS  03.0
+035C:  GOTO   35F
+035D:  BCF    03.5
+035E:  GOTO   364
+035F:  BCF    03.5
+....................     { 
+....................     byte_to_write = &current_value.upper; 
+0360:  MOVLW  54
+0361:  BSF    03.5
+0362:  MOVWF  48
+0363:  BCF    03.5
+....................     } 
+....................    
+....................   // now define the bit num 
+....................   out_num %= 8; 
+0364:  MOVLW  07
+0365:  BSF    03.5
+0366:  ANDWF  46,F
+....................  
+.................... 	if (val > 63) 
+0367:  MOVF   47,W
+0368:  SUBLW  3F
+0369:  BTFSS  03.0
+036A:  GOTO   36D
+036B:  BCF    03.5
+036C:  GOTO   381
+036D:  BCF    03.5
+.................... 		{ 
+.................... 			bit_set (*byte_to_write, out_num); 
+036E:  BSF    03.5
+036F:  MOVF   48,W
+0370:  MOVWF  04
+0371:  MOVLW  01
+0372:  MOVWF  77
+0373:  MOVF   46,W
+0374:  MOVWF  78
+0375:  BTFSS  03.2
+0376:  GOTO   379
+0377:  BCF    03.5
+0378:  GOTO   37E
+0379:  BCF    03.5
+037A:  BCF    03.0
+037B:  RLF    77,F
+037C:  DECFSZ 78,F
+037D:  GOTO   37A
+037E:  MOVF   77,W
+037F:  IORWF  00,F
+.................... 		} 
+.................... 	else 
+0380:  GOTO   394
+.................... 		{ 
+.................... 			bit_clear (*byte_to_write, out_num); 
+0381:  BSF    03.5
+0382:  MOVF   48,W
+0383:  MOVWF  04
+0384:  MOVLW  01
+0385:  MOVWF  77
+0386:  MOVF   46,W
+0387:  MOVWF  78
+0388:  BTFSS  03.2
+0389:  GOTO   38C
+038A:  BCF    03.5
+038B:  GOTO   391
+038C:  BCF    03.5
+038D:  BCF    03.0
+038E:  RLF    77,F
+038F:  DECFSZ 78,F
+0390:  GOTO   38D
+0391:  MOVF   77,W
+0392:  XORLW  FF
+0393:  ANDWF  00,F
+.................... 		} 
+....................  
+.................... 	Spi_write_data (&current_value, sizeof(current_value), DIGITAL_OUT_LATCH); 
+0394:  MOVLW  54
+0395:  BSF    03.5
+0396:  MOVWF  49
+0397:  MOVLW  02
+0398:  MOVWF  4A
+0399:  MOVLW  42
+039A:  MOVWF  4B
+039B:  BCF    03.5
+*
+03F6:  RETLW  00
+.................... } 
+....................  
+.................... void InitialiseDigitalOut() 
+.................... { 
+....................   current_value.upper = 0; 
+....................   current_value.lower = 0; 
+....................   GenerateDigitalOutput (0, 0); 
+.................... } 
+.................... 
+.................... #include "sysex.h" 
+....................  /*************************************************** 
+.................... Module for decoding Incoming sysex messages 
+....................  note that all messages must have a MSB of 0 
+.................... **************************************************/ 
+....................  
+.................... #define MAX_MIDIDCONTROLLER_PARAMS 4 
+....................  
+.................... #ifndef MIDI_CONTROLLER_BUILD 
+.................... typedef int int32; 
+....................  
+.................... #define MAX_PARAMS 256 
+.................... void ProcessAcknowledge(); 
+.................... #else 
+.................... #define MAX_PARAMS MAX_MIDIDCONTROLLER_PARAMS 
+.................... #endif 
+....................  
+....................  
+....................  
+.................... #ifndef MIDI_CONTROLLER_BUILD 
+.................... void ProcessreadConfigMsg(); 
+.................... #endif 
+....................  
+.................... typedef struct 
+.................... { 
+.................... 	int command_type; // the command type of this message 
+.................... 	int config_index; // the start index 
+.................... 	int32 byte_num; // the byte number of the byte coming in 
+.................... 	int config_data_size; // the current index for config bytes 
+.................... 	byte config_data [MAX_PARAMS]; 
+....................  
+.................... } STR_SYSEX_MSG; 
+.................... 	 
+.................... STR_SYSEX_MSG current_sysex_msg; 
+....................  
+....................  
+....................  
+.................... #pragma inline 
+.................... void SetFactoryDefault() 
+.................... { 
+....................   byte i; 
+....................    
+....................   for (i = 0; i < 0xff; i++) 
+*
+0B09:  BSF    03.5
+0B0A:  CLRF   40
+0B0B:  BCF    03.5
+0B0C:  BSF    03.5
+0B0D:  INCFSZ 40,W
+0B0E:  GOTO   310
+0B0F:  GOTO   312
+0B10:  BCF    03.5
+0B11:  GOTO   314
+0B12:  BCF    03.5
+0B13:  GOTO   322
+....................     { 
+.................... #ifdef MIDI_CONTROLLER_BUILD 
+....................     restart_wdt(); 
+0B14:  CLRWDT
+.................... #endif 
+....................     WriteConfigByte (i, 0xff); 
+0B15:  BSF    03.5
+0B16:  MOVF   40,W
+0B17:  MOVWF  43
+0B18:  MOVLW  FF
+0B19:  MOVWF  44
+0B1A:  BCF    03.5
+0B1B:  BCF    0A.3
+0B1C:  CALL   07F
+0B1D:  BSF    0A.3
+....................     } 
+.................... #ifdef MIDI_CONTROLLER_BUILD 
+0B1E:  BSF    03.5
+0B1F:  INCF   40,F
+0B20:  BCF    03.5
+0B21:  GOTO   30C
+....................   while (1); // wait till we watchdog 
+.................... #endif 
+0B22:  GOTO   322
+.................... } 
+....................  
+.................... #pragma inline 
+.................... void ProcessReadConfigMsg() 
+.................... { 
+.................... 	byte i; // must be byte so will cycle around 0xff 
+.................... #ifdef MIDI_CONTROLLER_BUILD 
+.................... 	// now write the config 
+....................   WriteSysexHeader(); 
+*
+0961:  BCF    0A.3
+0962:  CALL   19E
+0963:  BSF    0A.3
+....................  
+.................... 	WriteSysexOutData (WRITE_CONGFIG_BYTE); 
+0964:  MOVLW  01
+0965:  BSF    03.5
+0966:  MOVWF  42
+0967:  BCF    03.5
+.................... #endif 
+....................  
+.................... 	i = (byte) current_sysex_msg.config_index; 
+*
+09BE:  MOVF   57,W
+09BF:  BSF    03.5
+09C0:  MOVWF  40
+....................  
+.................... #ifdef MIDI_CONTROLLER_BUILD 
+....................   WriteSysexOutData (current_sysex_msg.config_index); 
+09C1:  BCF    03.5
+09C2:  MOVF   57,W
+09C3:  BSF    03.5
+09C4:  MOVWF  42
+09C5:  BCF    03.5
+.................... 	WriteSysexOutData (ReadConfigByte (i)); 
+*
+0A1C:  BSF    03.5
+0A1D:  MOVF   40,W
+0A1E:  MOVWF  50
+0A1F:  BCF    03.5
+*
+0A2D:  MOVF   78,W
+0A2E:  BSF    03.5
+0A2F:  MOVWF  41
+0A30:  MOVWF  42
+0A31:  BCF    03.5
+.................... #endif 
+....................  
+....................  
+....................   do 
+.................... 	  { 
+....................       i++;  
+*
+0A88:  BSF    03.5
+0A89:  INCF   40,F
+.................... #ifdef MIDI_CONTROLLER_BUILD 
+.................... 			restart_wdt(); 
+0A8A:  CLRWDT
+.................... 			WriteSysexOutData (ReadConfigByte (i)); 
+0A8B:  MOVF   40,W
+0A8C:  MOVWF  50
+0A8D:  BCF    03.5
+*
+0A9B:  MOVF   78,W
+0A9C:  BSF    03.5
+0A9D:  MOVWF  41
+0A9E:  MOVWF  42
+0A9F:  BCF    03.5
+.................... #endif 
+.................... 		} while (i != current_sysex_msg.config_data[0]); // end index 
+....................  
+.................... #ifdef MIDI_CONTROLLER_BUILD     
+*
+0AF6:  MOVF   5D,W
+0AF7:  BSF    03.5
+0AF8:  SUBWF  40,W
+0AF9:  BTFSC  03.2
+0AFA:  GOTO   2FD
+0AFB:  BCF    03.5
+0AFC:  GOTO   288
+0AFD:  BCF    03.5
+.................... 	WriteOutData (SYSEX_END); 
+0AFE:  MOVLW  F7
+0AFF:  BSF    03.5
+0B00:  MOVWF  44
+0B01:  BCF    03.5
+.................... #endif 
+.................... }// end ProcessReadConfigMsg 
+....................  
+.................... #pragma inline 
+.................... void ProcessWriteConfigMsg() 
+.................... { 
+.................... 	int i; 
+....................  
+.................... #ifdef MIDI_CONTROLLER_BUILD 
+.................... 	disable_interrupts (GLOBAL); 
+*
+08D1:  BCF    0B.6
+08D2:  BCF    0B.7
+08D3:  BTFSC  0B.7
+08D4:  GOTO   0D2
+.................... #endif 
+....................  
+.................... 	for (i = 0; i < current_sysex_msg.config_data_size; i++) 
+08D5:  BSF    03.5
+08D6:  CLRF   40
+08D7:  BCF    03.5
+08D8:  MOVF   5C,W
+08D9:  BSF    03.5
+08DA:  SUBWF  40,W
+08DB:  BTFSS  03.0
+08DC:  GOTO   0DF
+08DD:  BCF    03.5
+08DE:  GOTO   0F7
+08DF:  BCF    03.5
+.................... 		{ 
+.................... #ifdef MIDI_CONTROLLER_BUILD 
+....................       restart_wdt(); 
+08E0:  CLRWDT
+.................... #endif 
+.................... 			WriteConfigByte (i + current_sysex_msg.config_index,  
+.................... 											 current_sysex_msg.config_data[i]); 
+08E1:  MOVF   57,W
+08E2:  BSF    03.5
+08E3:  ADDWF  40,W
+08E4:  MOVWF  41
+08E5:  MOVLW  07
+08E6:  ADDWF  40,W
+08E7:  ADDLW  56
+08E8:  MOVWF  04
+08E9:  MOVF   00,W
+08EA:  MOVWF  42
+08EB:  MOVF   41,W
+08EC:  MOVWF  43
+08ED:  MOVF   42,W
+08EE:  MOVWF  44
+08EF:  BCF    03.5
+08F0:  BCF    0A.3
+08F1:  CALL   07F
+08F2:  BSF    0A.3
+.................... 		} 
+.................... #ifdef MIDI_CONTROLLER_BUILD 
+08F3:  BSF    03.5
+08F4:  INCF   40,F
+08F5:  BCF    03.5
+08F6:  GOTO   0D8
+.................... 	enable_interrupts (GLOBAL); 
+08F7:  MOVLW  C0
+08F8:  IORWF  0B,F
+....................  
+....................   WriteSysexHeader(); 
+08F9:  BCF    0A.3
+08FA:  CALL   19E
+08FB:  BSF    0A.3
+....................  
+.................... 	WriteSysexOutData (WRITE_ACKNOWLEDGE); 
+08FC:  MOVLW  03
+08FD:  BSF    03.5
+08FE:  MOVWF  42
+08FF:  BCF    03.5
+....................  
+.................... 	WriteOutData (SYSEX_END); 
+*
+0956:  MOVLW  F7
+0957:  BSF    03.5
+0958:  MOVWF  44
+0959:  BCF    03.5
+....................  
+.................... #endif //#ifdef MIDI_CONTROLLER_BUILD 
+....................  
+.................... } // end  ProcessWriteConfigMsg() 
+....................  
+....................  
+.................... void ResetSysex() 
+.................... { 
+.................... 	current_sysex_msg.byte_num = 0; 
+*
+08A2:  CLRF   5B
+08A3:  CLRF   5A
+08A4:  CLRF   59
+08A5:  CLRF   58
+.................... 	current_sysex_msg.config_index = 0; 
+08A6:  CLRF   57
+.................... 	current_sysex_msg.config_data_size = 0; 
+08A7:  CLRF   5C
+.................... } 
+....................  
+.................... short DecodeSysexByte (byte byte_val) 
+.................... { 
+.................... 	short ret; 
+.................... 	current_sysex_msg.byte_num++; 
+*
+0BD6:  INCF   58,F
+0BD7:  BTFSC  03.2
+0BD8:  INCF   59,F
+0BD9:  BTFSC  03.2
+0BDA:  INCF   5A,F
+0BDB:  BTFSC  03.2
+0BDC:  INCF   5B,F
+....................  
+....................  	switch (current_sysex_msg.byte_num) 
+0BDD:  MOVF   58,W
+0BDE:  MOVWF  77
+0BDF:  MOVLW  01
+0BE0:  SUBWF  77,W
+0BE1:  BTFSC  03.2
+0BE2:  GOTO   3F4
+0BE3:  MOVLW  02
+0BE4:  SUBWF  77,W
+0BE5:  BTFSC  03.2
+0BE6:  GOTO   404
+0BE7:  MOVLW  03
+0BE8:  SUBWF  77,W
+0BE9:  BTFSC  03.2
+0BEA:  GOTO   413
+0BEB:  MOVLW  04
+0BEC:  SUBWF  77,W
+0BED:  BTFSC  03.2
+0BEE:  GOTO   42E
+0BEF:  MOVLW  05
+0BF0:  SUBWF  77,W
+0BF1:  BTFSC  03.2
+0BF2:  GOTO   436
+0BF3:  GOTO   43F
+.................... 		{ 
+.................... 		case SYSEX_ID_NUM: 
+.................... 			ret = (byte_val == SYSEX_ID); 
+0BF4:  BSF    03.5
+0BF5:  MOVF   3F,W
+0BF6:  SUBLW  7D
+0BF7:  BTFSS  03.2
+0BF8:  GOTO   3FB
+0BF9:  BCF    03.5
+0BFA:  GOTO   400
+0BFB:  BCF    03.5
+0BFC:  BSF    03.5
+0BFD:  BCF    40.0
+0BFE:  BCF    03.5
+0BFF:  GOTO   403
+0C00:  BSF    03.5
+0C01:  BSF    40.0
+0C02:  BCF    03.5
+.................... 			break; 
+0C03:  GOTO   451
+....................  
+.................... 		case SYSEX_EQUIPMENT_NUM: 
+.................... 			ret = (byte_val == EQUIPMENT_TYPE); 
+0C04:  BSF    03.5
+0C05:  MOVF   3F,F
+0C06:  BTFSS  03.2
+0C07:  GOTO   40A
+0C08:  BCF    03.5
+0C09:  GOTO   40F
+0C0A:  BCF    03.5
+0C0B:  BSF    03.5
+0C0C:  BCF    40.0
+0C0D:  BCF    03.5
+0C0E:  GOTO   412
+0C0F:  BSF    03.5
+0C10:  BSF    40.0
+0C11:  BCF    03.5
+.................... 			break;  
+0C12:  GOTO   451
+....................  
+.................... 		case SYSEX_DEVICE_NUM: 
+.................... 			ret = (byte_val == ReadDeviceId() || byte_val == ANY_DEVICE_ID_NUM); 
+0C13:  BCF    0A.3
+0C14:  CALL   186
+0C15:  BSF    0A.3
+0C16:  MOVF   78,W
+0C17:  BSF    03.5
+0C18:  SUBWF  3F,W
+0C19:  BTFSS  03.2
+0C1A:  GOTO   41D
+0C1B:  BCF    03.5
+0C1C:  GOTO   42A
+0C1D:  BCF    03.5
+0C1E:  BSF    03.5
+0C1F:  INCFSZ 3F,W
+0C20:  GOTO   422
+0C21:  GOTO   424
+0C22:  BCF    03.5
+0C23:  GOTO   426
+0C24:  BCF    03.5
+0C25:  GOTO   42A
+0C26:  BSF    03.5
+0C27:  BCF    40.0
+0C28:  BCF    03.5
+0C29:  GOTO   42D
+0C2A:  BSF    03.5
+0C2B:  BSF    40.0
+0C2C:  BCF    03.5
+.................... 			break; 
+0C2D:  GOTO   451
+....................  
+.................... 		case SYSEX_COMMAND_NUM: 
+.................... 			current_sysex_msg.command_type = byte_val; 
+0C2E:  BSF    03.5
+0C2F:  MOVF   3F,W
+0C30:  BCF    03.5
+0C31:  MOVWF  56
+....................       ret = true; 
+0C32:  BSF    03.5
+0C33:  BSF    40.0
+.................... 			break; 
+0C34:  BCF    03.5
+0C35:  GOTO   451
+....................  
+.................... 		case SYSEX_CONGIG_INDEX_NUM: 
+.................... 			current_sysex_msg.config_index = byte_val; 
+0C36:  BSF    03.5
+0C37:  MOVF   3F,W
+0C38:  BCF    03.5
+0C39:  MOVWF  57
+....................       current_sysex_msg.config_data_size = 0; 
+0C3A:  CLRF   5C
+.................... 			ret = true; 
+0C3B:  BSF    03.5
+0C3C:  BSF    40.0
+.................... 			break; 
+0C3D:  BCF    03.5
+0C3E:  GOTO   451
+....................  
+.................... 		default: 
+.................... 			if (current_sysex_msg.config_data_size < MAX_PARAMS) 
+0C3F:  MOVF   5C,W
+0C40:  SUBLW  03
+0C41:  BTFSS  03.0
+0C42:  GOTO   44D
+.................... 				{ 
+.................... 					current_sysex_msg.config_data [current_sysex_msg.config_data_size]  
+.................... 						= byte_val; 
+0C43:  MOVLW  07
+0C44:  ADDWF  5C,W
+0C45:  ADDLW  56
+0C46:  MOVWF  04
+0C47:  BSF    03.5
+0C48:  MOVF   3F,W
+0C49:  MOVWF  00
+.................... 					ret = true; 
+0C4A:  BSF    40.0
+.................... 				} 
+.................... 			else 
+0C4B:  BCF    03.5
+0C4C:  GOTO   450
+.................... 				{ 
+.................... 					ret = false; 
+0C4D:  BSF    03.5
+0C4E:  BCF    40.0
+0C4F:  BCF    03.5
+.................... 				} 
+....................  
+.................... 			current_sysex_msg.config_data_size++; 
+0C50:  INCF   5C,F
+....................  
+.................... 		} // end case 
+....................  
+....................  
+.................... 	return ret; 
+0C51:  MOVLW  00
+0C52:  BSF    03.5
+0C53:  BTFSC  40.0
+0C54:  MOVLW  01
+0C55:  MOVWF  78
+0C56:  BCF    03.5
+.................... } // end DecodeSysexByte 
+....................  
+.................... void ExecuteSysexMessage() 
+.................... { 
+.................... 	switch (current_sysex_msg.command_type) 
+*
+08C3:  MOVF   56,W
+08C4:  MOVWF  77
+08C5:  MOVLW  01
+08C6:  SUBWF  77,W
+08C7:  BTFSC  03.2
+08C8:  GOTO   0D1
+08C9:  MOVF   77,W
+08CA:  BTFSC  03.2
+08CB:  GOTO   161
+08CC:  MOVLW  02
+08CD:  SUBWF  77,W
+08CE:  BTFSC  03.2
+08CF:  GOTO   309
+08D0:  GOTO   324
+.................... 		{  
+.................... 		case WRITE_CONGFIG_BYTE: 
+.................... 			ProcessWriteConfigMsg(); 
+.................... 			break; 
+*
+0960:  GOTO   325
+.................... 			 
+.................... 		case READ_CONFIG_BYTE: 
+.................... 			 
+.................... 			ProcessReadConfigMsg(); 
+.................... 			break; 
+*
+0B08:  GOTO   325
+....................  
+.................... 		case FACTORY_DEFAULT: // we will never return 
+.................... 			SetFactoryDefault(); 
+.................... 			break; 
+*
+0B23:  GOTO   325
+....................  
+.................... #ifndef MIDI_CONTROLLER_BUILD       
+....................     case WRITE_ACKNOWLEDGE: 
+....................       ProcessAcknowledge(); 
+....................       break; 
+.................... #endif 
+.................... 		default: 
+....................       break; 
+0B24:  GOTO   325
+.................... 		} 
+.................... } // end ExecuteSysexMessage() 
+....................  
+....................  
+....................  
+.................... 
+.................... #include "anain.h" 
+....................  /********************************************************************* 
+.................... Module defines functions used for Reading Analogue In 
+.................... *********************************************************************/ 
+.................... int current_analogue_val[NUM_ANALOGUE_IN_CHANS]; 
+....................  
+.................... #ifdef MIDI_CONTROLLER_BUILD 
+.................... int16 current_analogue_lsb [NUM_ANALOGUE_IN_BANKS]; 
+.................... #endif 
+....................  
+.................... void ReadAnalogueIn(byte produce_output); 
+....................  
+.................... // initialise the previous analogue in values 
+.................... // Sets RA0, RA1 and RA3 as analogue inputs 
+.................... // Sets the B1 to B3 as Outputs 
+.................... #USE FAST_IO(B) 
+....................  
+.................... #define CLEAR_BANK_MASK 0b11110001 // ANDing Mask will clear bits 1-3 
+.................... void InitialiseAnalogueIn() 
+.................... { 
+.................... 	int i; 
+.................... 	setup_adc (ADC_CLOCK_INTERNAL); 
+*
+1135:  MOVF   1F,W
+1136:  ANDLW  38
+1137:  IORLW  C1
+1138:  MOVWF  1F
+.................... 	setup_adc_ports (RA0_RA1_ANALOG_RA3_REF); 
+1139:  MOVLW  05
+113A:  BSF    03.5
+113B:  MOVWF  1F
+....................  
+.................... 	set_tris_b (CLEAR_BANK_MASK); 
+113C:  MOVLW  F1
+113D:  MOVWF  06
+....................  
+....................  	for (i = 0; i < NUM_ANALOG_VALID_READS; i++) 
+113E:  CLRF   22
+113F:  BCF    03.5
+1140:  BSF    03.5
+1141:  MOVF   22,W
+1142:  SUBLW  01
+1143:  BTFSC  03.0
+1144:  GOTO   147
+1145:  BCF    03.5
+1146:  GOTO   152
+1147:  BCF    03.5
+....................  		{ 
+....................  			current_analogue_val[i] = 0; 
+1148:  MOVLW  61
+1149:  BSF    03.5
+114A:  ADDWF  22,W
+114B:  MOVWF  04
+114C:  CLRF   00
+114D:  BCF    03.5
+....................  		} 
+114E:  BSF    03.5
+114F:  INCF   22,F
+1150:  BCF    03.5
+1151:  GOTO   140
+....................  
+.................... } 
+....................  
+.................... // reads the analogue in and produces output if different 
+.................... short ProcessAnalogueIn() 
+.................... { 
+.................... 	return ReadAnalogueIn (true); 
+*
+1393:  MOVLW  01
+1394:  BSF    03.5
+1395:  MOVWF  22
+1396:  BCF    03.5
+*
+1533:  MOVF   78,W
+1534:  BCF    0A.3
+1535:  BCF    0A.4
+1536:  GOTO   71E (RETURN)
+.................... } 
+....................  
+....................  
+.................... // if produce_output is true, the result will be sent to the output  
+.................... // if different from previous value 
+.................... short ReadAnalogueIn(byte produce_output) 
+.................... { 
+....................   short ret = false; 
+.................... 	int sub_bank; 
+.................... 	int init_b; 
+.................... 	int bank_num; 
+.................... 	int adc_val; 
+....................   int adc_val_second_read; 
+*
+1397:  BSF    03.5
+1398:  BCF    23.0
+.................... 	int channel_num; 
+....................  
+.................... 	init_b = PORTB;	 
+1399:  BCF    03.5
+139A:  MOVF   06,W
+139B:  BSF    03.5
+139C:  MOVWF  25
+.................... 	// clear sub_bank bits 
+.................... 	init_b &= CLEAR_BANK_MASK; 
+139D:  MOVLW  F1
+139E:  ANDWF  25,F
+....................  
+.................... 	for (sub_bank = 0; sub_bank < NUM_ANALOGUE_IN_SUB_BANKS; sub_bank++) 
+139F:  CLRF   24
+13A0:  BCF    03.5
+13A1:  BSF    03.5
+13A2:  MOVF   24,W
+13A3:  SUBLW  07
+13A4:  BTFSC  03.0
+13A5:  GOTO   3A8
+13A6:  BCF    03.5
+13A7:  GOTO   52D
+13A8:  BCF    03.5
+.................... 		{ 
+.................... 			restart_wdt(); 
+13A9:  CLRWDT
+.................... 			// now write the sub_bank address to PORTB bits 1-3 
+.................... 			PORTB = init_b | (sub_bank<<1); 
+13AA:  BCF    03.0
+13AB:  BSF    03.5
+13AC:  RLF    24,W
+13AD:  MOVWF  77
+13AE:  IORWF  25,W
+13AF:  BCF    03.5
+13B0:  MOVWF  06
+....................  
+.................... 			delay_us (AD_SWITCH_DELAY); 
+13B1:  NOP
+13B2:  NOP
+13B3:  NOP
+13B4:  NOP
+13B5:  NOP
+....................  
+.................... 			for (bank_num = 0; bank_num < NUM_ANALOGUE_IN_BANKS; bank_num++) 
+13B6:  BSF    03.5
+13B7:  CLRF   26
+13B8:  BCF    03.5
+13B9:  BSF    03.5
+13BA:  MOVF   26,W
+13BB:  SUBLW  01
+13BC:  BTFSC  03.0
+13BD:  GOTO   3C0
+13BE:  BCF    03.5
+13BF:  GOTO   529
+13C0:  BCF    03.5
+.................... 				{ 
+....................  
+.................... #ifdef IOCARD_BUILD 
+....................           if (MessageWaiting()) 
+....................           { 
+.................... 						ret = ProcessPlaInputStream();  
+.................... 					} 
+....................  
+.................... #endif 
+....................  
+.................... 					channel_num = bank_num * NUM_ANALOGUE_IN_SUB_BANKS + sub_bank; 
+13C1:  BCF    03.0
+13C2:  BSF    03.5
+13C3:  RLF    26,W
+13C4:  MOVWF  77
+13C5:  RLF    77,F
+13C6:  RLF    77,F
+13C7:  MOVLW  F8
+13C8:  ANDWF  77,F
+13C9:  MOVF   77,W
+13CA:  ADDWF  24,W
+13CB:  MOVWF  29
+....................  
+.................... 					set_adc_channel (bank_num); 
+13CC:  BCF    03.0
+13CD:  RLF    26,W
+13CE:  MOVWF  77
+13CF:  RLF    77,F
+13D0:  RLF    77,F
+13D1:  MOVLW  F8
+13D2:  ANDWF  77,F
+13D3:  MOVF   77,W
+13D4:  MOVWF  78
+13D5:  BCF    03.5
+13D6:  MOVF   1F,W
+13D7:  ANDLW  C7
+13D8:  IORWF  78,W
+13D9:  MOVWF  1F
+.................... 					delay_us (AD_READ_DELAY); 
+13DA:  MOVLW  21
+13DB:  MOVWF  77
+13DC:  DECFSZ 77,F
+13DD:  GOTO   3DC
+....................  
+.................... 					// only eight bits of AD required 
+.................... 					adc_val = read_adc(); 
+13DE:  BSF    1F.2
+13DF:  BTFSC  1F.2
+13E0:  GOTO   3DF
+13E1:  MOVF   1E,W
+13E2:  BSF    03.5
+13E3:  MOVWF  27
+....................  
+....................           // now read channel second time 
+.................... 					set_adc_channel (bank_num); 
+13E4:  BCF    03.0
+13E5:  RLF    26,W
+13E6:  MOVWF  77
+13E7:  RLF    77,F
+13E8:  RLF    77,F
+13E9:  MOVLW  F8
+13EA:  ANDWF  77,F
+13EB:  MOVF   77,W
+13EC:  MOVWF  78
+13ED:  BCF    03.5
+13EE:  MOVF   1F,W
+13EF:  ANDLW  C7
+13F0:  IORWF  78,W
+13F1:  MOVWF  1F
+.................... 					delay_us (AD_READ_DELAY); 
+13F2:  MOVLW  21
+13F3:  MOVWF  77
+13F4:  DECFSZ 77,F
+13F5:  GOTO   3F4
+....................           adc_val_second_read = read_adc(); 
+13F6:  BSF    1F.2
+13F7:  BTFSC  1F.2
+13F8:  GOTO   3F7
+13F9:  MOVF   1E,W
+13FA:  BSF    03.5
+13FB:  MOVWF  28
+....................  
+.................... #ifdef SEVEN_BIT_AD 
+.................... 					adc_val >>= 1; 
+13FC:  BCF    03.0
+13FD:  RRF    27,F
+....................           adc_val_second_read >>= 1; 
+13FE:  BCF    03.0
+13FF:  RRF    28,F
+.................... #endif 
+....................  
+....................  
+.................... 					// see if this read and last matched 
+....................  
+.................... 					if (adc_val_second_read == adc_val && current_analogue_val[channel_num] != adc_val ) 
+1400:  MOVF   27,W
+1401:  SUBWF  28,W
+1402:  BTFSC  03.2
+1403:  GOTO   406
+1404:  BCF    03.5
+1405:  GOTO   525
+1406:  BCF    03.5
+1407:  MOVLW  61
+1408:  BSF    03.5
+1409:  ADDWF  29,W
+140A:  MOVWF  04
+140B:  MOVF   27,W
+140C:  SUBWF  00,W
+140D:  BTFSS  03.2
+140E:  GOTO   411
+140F:  BCF    03.5
+1410:  GOTO   525
+1411:  BCF    03.5
+.................... 						{ 
+....................  
+.................... 							if (produce_output) 
+1412:  BSF    03.5
+1413:  MOVF   22,F
+1414:  BTFSS  03.2
+1415:  GOTO   418
+1416:  BCF    03.5
+1417:  GOTO   51E
+1418:  BCF    03.5
+.................... 								{ 
+.................... 									if (OutputAnalog (channel_num, adc_val)) 
+1419:  BSF    03.5
+141A:  MOVF   29,W
+141B:  MOVWF  2A
+141C:  MOVF   27,W
+141D:  MOVWF  2B
+141E:  BCF    03.5
+*
+1512:  MOVF   78,F
+1513:  BTFSC  03.2
+1514:  GOTO   51D
+.................... 										{ 
+.................... 											current_analogue_val[channel_num] = adc_val; 
+1515:  MOVLW  61
+1516:  BSF    03.5
+1517:  ADDWF  29,W
+1518:  MOVWF  04
+1519:  MOVF   27,W
+151A:  MOVWF  00
+....................                       ret = true; 
+151B:  BSF    23.0
+151C:  BCF    03.5
+.................... 										} 
+.................... 								} 
+.................... 							else 
+151D:  GOTO   525
+.................... 								{ 
+.................... 									current_analogue_val[channel_num] = adc_val; 
+151E:  MOVLW  61
+151F:  BSF    03.5
+1520:  ADDWF  29,W
+1521:  MOVWF  04
+1522:  MOVF   27,W
+1523:  MOVWF  00
+1524:  BCF    03.5
+.................... 								} 
+....................  						} 
+....................  
+.................... 				} 
+1525:  BSF    03.5
+1526:  INCF   26,F
+1527:  BCF    03.5
+1528:  GOTO   3B9
+.................... 		} 
+1529:  BSF    03.5
+152A:  INCF   24,F
+152B:  BCF    03.5
+152C:  GOTO   3A1
+....................   return ret; 
+152D:  MOVLW  00
+152E:  BSF    03.5
+152F:  BTFSC  23.0
+1530:  MOVLW  01
+1531:  MOVWF  78
+1532:  BCF    03.5
+.................... } 
+....................  
+....................  
+.................... 
+.................... #include "digin.h" 
+....................  /****************************************************************************** 
+.................... Module for processing Digital Inputs 
+.................... ******************************************************************************/ 
+.................... // digital Read variables 
+.................... int16 prev_digital_val; 
+.................... int16 current_digital_val; 
+....................  
+....................  
+.................... short ProcessDigitalInputs(int produce_output) 
+.................... { 
+....................   short ret = false; 
+.................... 	int bit_num; 
+.................... 	int byte_num; 
+.................... 	byte *cur_val = &current_digital_val; 
+*
+041F:  BSF    03.5
+0420:  BCF    23.0
+0421:  MOVLW  7C
+0422:  MOVWF  26
+0423:  MOVLW  75
+0424:  MOVWF  27
+.................... 	byte *prev_val = &prev_digital_val; 
+....................  
+.................... 	current_digital_val = 0; 
+0425:  CLRF   7D
+0426:  CLRF   7C
+....................  
+.................... 	Spi_read_data (&current_digital_val, sizeof(current_digital_val), DIGITAL_IN_DATA); 
+0427:  MOVLW  7C
+0428:  MOVWF  28
+0429:  MOVLW  02
+042A:  MOVWF  29
+042B:  MOVLW  3C
+042C:  MOVWF  2A
+042D:  BCF    03.5
+....................  
+.................... 	if (current_digital_val != prev_digital_val) 
+*
+04A4:  MOVF   75,W
+04A5:  SUBWF  7C,W
+04A6:  BTFSS  03.2
+04A7:  GOTO   4AC
+04A8:  MOVF   76,W
+04A9:  SUBWF  7D,W
+04AA:  BTFSC  03.2
+04AB:  GOTO   661
+.................... 		{ 
+.................... 			if (produce_output) 
+04AC:  BSF    03.5
+04AD:  MOVF   22,F
+04AE:  BTFSS  03.2
+04AF:  GOTO   4B2
+04B0:  BCF    03.5
+04B1:  GOTO   661
+04B2:  BCF    03.5
+.................... 				{ 
+....................           // iterate through each byte 
+.................... 					for (byte_num = 0; byte_num < sizeof(current_digital_val); byte_num++) 
+04B3:  BSF    03.5
+04B4:  CLRF   25
+04B5:  BCF    03.5
+04B6:  BSF    03.5
+04B7:  MOVF   25,W
+04B8:  SUBLW  01
+04B9:  BTFSC  03.0
+04BA:  GOTO   4BD
+04BB:  BCF    03.5
+04BC:  GOTO   661
+04BD:  BCF    03.5
+.................... 						{ 
+.................... 							// iterate through each bit 
+.................... 							for (bit_num = 0; bit_num < 8; bit_num++) 
+04BE:  BSF    03.5
+04BF:  CLRF   24
+04C0:  BCF    03.5
+04C1:  BSF    03.5
+04C2:  MOVF   24,W
+04C3:  SUBLW  07
+04C4:  BTFSC  03.0
+04C5:  GOTO   4C8
+04C6:  BCF    03.5
+04C7:  GOTO   65D
+04C8:  BCF    03.5
+.................... 								{ 
+.................... #ifdef IOCARD_BUILD 
+....................                 if (MessageWaiting()) 
+....................                   { 
+....................                     ProcessPlaInputStream();  
+....................                     ret = true; 
+....................                   } 
+.................... #endif 
+.................... 									if (Bit_test (cur_val[byte_num], bit_num)  
+.................... 											!= bit_test(prev_val[byte_num], bit_num)) 
+04C9:  BSF    03.5
+04CA:  MOVF   26,W
+04CB:  ADDWF  25,W
+04CC:  MOVWF  04
+04CD:  MOVF   00,W
+04CE:  MOVWF  28
+04CF:  MOVWF  77
+04D0:  MOVF   24,W
+04D1:  MOVWF  78
+04D2:  BTFSS  03.2
+04D3:  GOTO   4D6
+04D4:  BCF    03.5
+04D5:  GOTO   4DB
+04D6:  BCF    03.5
+04D7:  BCF    03.0
+04D8:  RRF    77,F
+04D9:  DECFSZ 78,F
+04DA:  GOTO   4D7
+04DB:  MOVLW  00
+04DC:  BTFSC  77.0
+04DD:  MOVLW  01
+04DE:  BSF    03.5
+04DF:  MOVWF  29
+04E0:  MOVF   27,W
+04E1:  ADDWF  25,W
+04E2:  MOVWF  04
+04E3:  MOVF   00,W
+04E4:  MOVWF  2A
+04E5:  MOVWF  77
+04E6:  MOVF   24,W
+04E7:  MOVWF  78
+04E8:  BTFSS  03.2
+04E9:  GOTO   4EC
+04EA:  BCF    03.5
+04EB:  GOTO   4F1
+04EC:  BCF    03.5
+04ED:  BCF    03.0
+04EE:  RRF    77,F
+04EF:  DECFSZ 78,F
+04F0:  GOTO   4ED
+04F1:  MOVLW  00
+04F2:  BTFSC  77.0
+04F3:  MOVLW  01
+04F4:  BSF    03.5
+04F5:  SUBWF  29,W
+04F6:  BTFSS  03.2
+04F7:  GOTO   4FA
+04F8:  BCF    03.5
+04F9:  GOTO   659
+04FA:  BCF    03.5
+.................... 										{ 
+.................... 											// we use this fancy calculation because of the endian of an int16 
+.................... 											// we want the first byte to be the high order byte 
+....................                       // also, a one will produce a zero ouitput 
+.................... 											if (OutputDigital ((sizeof(current_digital_val)-1 - byte_num) * 8 + bit_num,  
+.................... 																				 (!Bit_test (cur_val[byte_num], bit_num)) * DIG_ON_VAL)) 
+04FB:  BSF    03.5
+04FC:  MOVF   25,W
+04FD:  SUBLW  01
+04FE:  MOVWF  77
+04FF:  BCF    03.0
+0500:  RLF    77,F
+0501:  RLF    77,F
+0502:  RLF    77,F
+0503:  MOVLW  F8
+0504:  ANDWF  77,F
+0505:  MOVF   77,W
+0506:  ADDWF  24,W
+0507:  MOVWF  2A
+0508:  MOVF   26,W
+0509:  ADDWF  25,W
+050A:  MOVWF  04
+050B:  MOVF   00,W
+050C:  MOVWF  2B
+050D:  MOVWF  77
+050E:  MOVF   24,W
+050F:  MOVWF  78
+0510:  BTFSS  03.2
+0511:  GOTO   514
+0512:  BCF    03.5
+0513:  GOTO   519
+0514:  BCF    03.5
+0515:  BCF    03.0
+0516:  RRF    77,F
+0517:  DECFSZ 78,F
+0518:  GOTO   515
+0519:  MOVLW  00
+051A:  BTFSS  77.0
+051B:  MOVLW  01
+051C:  BSF    03.5
+051D:  MOVWF  2D
+051E:  MOVWF  2E
+051F:  MOVLW  7F
+0520:  MOVWF  2F
+0521:  BCF    03.5
+0522:  GOTO   0E8
+0523:  MOVF   78,W
+0524:  BSF    03.5
+0525:  MOVWF  2E
+0526:  MOVF   2A,W
+0527:  MOVWF  2F
+0528:  MOVF   2E,W
+0529:  MOVWF  30
+052A:  BCF    03.5
+*
+0617:  MOVF   78,F
+0618:  BTFSC  03.2
+0619:  GOTO   659
+.................... 												{ 
+.................... 													if (Bit_test (cur_val[byte_num], bit_num) ) 
+061A:  BSF    03.5
+061B:  MOVF   26,W
+061C:  ADDWF  25,W
+061D:  MOVWF  04
+061E:  MOVF   00,W
+061F:  MOVWF  28
+0620:  MOVWF  77
+0621:  MOVF   24,W
+0622:  MOVWF  78
+0623:  BTFSS  03.2
+0624:  GOTO   627
+0625:  BCF    03.5
+0626:  GOTO   62C
+0627:  BCF    03.5
+0628:  BCF    03.0
+0629:  RRF    77,F
+062A:  DECFSZ 78,F
+062B:  GOTO   628
+062C:  BTFSS  77.0
+062D:  GOTO   642
+.................... 														{ 
+.................... 															Bit_set(prev_val[byte_num], bit_num); 
+062E:  BSF    03.5
+062F:  MOVF   27,W
+0630:  ADDWF  25,W
+0631:  MOVWF  04
+0632:  MOVLW  01
+0633:  MOVWF  77
+0634:  MOVF   24,W
+0635:  MOVWF  78
+0636:  BTFSS  03.2
+0637:  GOTO   63A
+0638:  BCF    03.5
+0639:  GOTO   63F
+063A:  BCF    03.5
+063B:  BCF    03.0
+063C:  RLF    77,F
+063D:  DECFSZ 78,F
+063E:  GOTO   63B
+063F:  MOVF   77,W
+0640:  IORWF  00,F
+.................... 														} 
+.................... 													else 
+0641:  GOTO   656
+.................... 														{ 
+.................... 															Bit_clear(prev_val[byte_num], bit_num); 
+0642:  BSF    03.5
+0643:  MOVF   27,W
+0644:  ADDWF  25,W
+0645:  MOVWF  04
+0646:  MOVLW  01
+0647:  MOVWF  77
+0648:  MOVF   24,W
+0649:  MOVWF  78
+064A:  BTFSS  03.2
+064B:  GOTO   64E
+064C:  BCF    03.5
+064D:  GOTO   653
+064E:  BCF    03.5
+064F:  BCF    03.0
+0650:  RLF    77,F
+0651:  DECFSZ 78,F
+0652:  GOTO   64F
+0653:  MOVF   77,W
+0654:  XORLW  FF
+0655:  ANDWF  00,F
+.................... 														} 
+....................                           ret = true; 
+0656:  BSF    03.5
+0657:  BSF    23.0
+0658:  BCF    03.5
+.................... 												} 
+.................... 										} 
+.................... 								} 
+0659:  BSF    03.5
+065A:  INCF   24,F
+065B:  BCF    03.5
+065C:  GOTO   4C1
+.................... 						} 
+065D:  BSF    03.5
+065E:  INCF   25,F
+065F:  BCF    03.5
+0660:  GOTO   4B6
+.................... 				} 
+.................... 			 
+.................... 		} 
+....................  
+....................   return ret; 
+0661:  MOVLW  00
+0662:  BSF    03.5
+0663:  BTFSC  23.0
+0664:  MOVLW  01
+0665:  MOVWF  78
+0666:  BCF    03.5
+0667:  RETLW  00
+.................... } 
+.................... 
+....................  
+....................  
+....................  
+....................  
+....................  
+.................... // LED timers 
+.................... int16 watchdog_flash_count = 0; // when becomes zero, changes state of LED 
+.................... short watchdog_led = 0; 
+.................... short overflow_val = 0; 
+....................  
+....................  
+.................... void BlinkWatchdog() 
+.................... { 
+....................   if (overflow_val != InOverflow()) 
+*
+0682:  MOVLW  00
+0683:  BTFSC  29.2
+0684:  MOVLW  01
+0685:  BSF    03.5
+0686:  MOVWF  22
+0687:  BCF    03.5
+*
+068C:  MOVF   78,W
+068D:  BSF    03.5
+068E:  SUBWF  22,W
+068F:  BTFSS  03.2
+0690:  GOTO   693
+0691:  BCF    03.5
+0692:  GOTO   6A2
+0693:  BCF    03.5
+....................     { 
+....................     overflow_val = InOverflow(); 
+*
+0698:  MOVF   78,F
+0699:  BTFSS  03.2
+069A:  GOTO   69D
+069B:  BCF    29.2
+069C:  GOTO   69E
+069D:  BSF    29.2
+....................     watchdog_flash_count = 0; 
+069E:  BSF    03.5
+069F:  CLRF   21
+06A0:  CLRF   20
+06A1:  BCF    03.5
+....................     } 
+....................  
+....................   if (!watchdog_flash_count) 
+06A2:  BSF    03.5
+06A3:  MOVF   20,W
+06A4:  IORWF  21,W
+06A5:  BTFSC  03.2
+06A6:  GOTO   6A9
+06A7:  BCF    03.5
+06A8:  GOTO   6EA
+06A9:  BCF    03.5
+....................     { 
+....................     watchdog_led = ~watchdog_led; 
+06AA:  MOVLW  02
+06AB:  XORWF  29,F
+....................     SetWatchdogLed (watchdog_led); 
+06AC:  MOVLW  00
+06AD:  BTFSC  29.1
+06AE:  MOVLW  01
+06AF:  BSF    03.5
+06B0:  MOVWF  22
+06B1:  MOVWF  23
+06B2:  BCF    03.5
+....................      
+....................     if (InOverflow()) 
+*
+06C6:  MOVF   78,F
+06C7:  BTFSC  03.2
+06C8:  GOTO   6CF
+....................       { 
+....................       watchdog_flash_count = WATCHDOG_OVERFLOW_COUNT; 
+06C9:  BSF    03.5
+06CA:  CLRF   21
+06CB:  MOVLW  FF
+06CC:  MOVWF  20
+....................       } 
+....................  
+....................     else 
+06CD:  BCF    03.5
+06CE:  GOTO   6D5
+....................       { 
+....................       watchdog_flash_count = WATCHDOG_NORMAL_COUNT; 
+06CF:  MOVLW  13
+06D0:  BSF    03.5
+06D1:  MOVWF  21
+06D2:  MOVLW  88
+06D3:  MOVWF  20
+06D4:  BCF    03.5
+....................       } 
+....................  
+.................... 		if (!ClearRxFlag()) // then we are locked inside a merge 
+*
+06E4:  MOVF   78,F
+06E5:  BTFSS  03.2
+06E6:  GOTO   6E9
+.................... 			{ 
+.................... 				InitialiseMidiStatus(); 
+06E7:  CALL   668
+....................  
+.................... 				InitialiseInQueue(); 
+06E8:  CALL   672
+.................... 			} 
+....................     } 
+....................   else 
+06E9:  GOTO   6F0
+....................     { 
+....................     watchdog_flash_count--; 
+06EA:  BSF    03.5
+06EB:  MOVF   20,W
+06EC:  BTFSC  03.2
+06ED:  DECF   21,F
+06EE:  DECF   20,F
+06EF:  BCF    03.5
+....................     } 
+06F0:  BCF    0A.3
+06F1:  BCF    0A.4
+06F2:  GOTO   726 (RETURN)
+.................... } 
+....................  
+.................... void GenerateResetConfigData() 
+.................... { 
+.................... 	// configure analog in first 
+.................... 	str_midiconfig config; 
+.................... 	int i; 
+....................   byte outval; 
+....................  
+.................... 	for (i = 0; i < MAX_INPUT_CHAN; i++) 
+*
+115B:  BSF    03.5
+115C:  CLRF   26
+115D:  BCF    03.5
+115E:  BSF    03.5
+115F:  MOVF   26,W
+1160:  SUBLW  0F
+1161:  BTFSC  03.0
+1162:  GOTO   165
+1163:  BCF    03.5
+1164:  GOTO   21D
+1165:  BCF    03.5
+.................... 		{ 
+....................       restart_wdt(); 
+1166:  CLRWDT
+.................... 			ReadAnalogueInConfig (&config, i); 
+1167:  MOVLW  A2
+1168:  BSF    03.5
+1169:  MOVWF  31
+116A:  MOVF   26,W
+116B:  MOVWF  32
+116C:  BCF    03.5
+....................       if (config.config_flag & PRESET_VALUE_FLAG) 
+*
+1176:  BSF    03.5
+1177:  MOVF   25,W
+1178:  ANDLW  10
+1179:  XORLW  00
+117A:  BTFSS  03.2
+117B:  GOTO   17E
+117C:  BCF    03.5
+117D:  GOTO   219
+117E:  BCF    03.5
+....................       { 
+....................         OutputMidi (&config); 
+117F:  MOVLW  A2
+1180:  BSF    03.5
+1181:  MOVWF  36
+1182:  BCF    03.5
+....................       } 
+.................... 		} 
+*
+1219:  BSF    03.5
+121A:  INCF   26,F
+121B:  BCF    03.5
+121C:  GOTO   15E
+....................  
+....................  
+.................... 	for (i = 0; i < MAX_INPUT_CHAN; i++) 
+121D:  BSF    03.5
+121E:  CLRF   26
+121F:  BCF    03.5
+1220:  BSF    03.5
+1221:  MOVF   26,W
+1222:  SUBLW  0F
+1223:  BTFSC  03.0
+1224:  GOTO   227
+1225:  BCF    03.5
+1226:  GOTO   2E2
+1227:  BCF    03.5
+.................... 		{ 
+....................       restart_wdt(); 
+1228:  CLRWDT
+.................... 			ReadDigitalInConfig (&config, i); 
+1229:  MOVLW  A2
+122A:  BSF    03.5
+122B:  MOVWF  36
+122C:  MOVF   26,W
+122D:  MOVWF  37
+122E:  BCF    03.5
+....................  
+....................       if (config.config_flag & PRESET_VALUE_FLAG) 
+*
+123B:  BSF    03.5
+123C:  MOVF   25,W
+123D:  ANDLW  10
+123E:  XORLW  00
+123F:  BTFSS  03.2
+1240:  GOTO   243
+1241:  BCF    03.5
+1242:  GOTO   2DE
+1243:  BCF    03.5
+....................       { 
+....................         OutputMidi (&config); 
+1244:  MOVLW  A2
+1245:  BSF    03.5
+1246:  MOVWF  36
+1247:  BCF    03.5
+....................       } 
+.................... 		} 
+*
+12DE:  BSF    03.5
+12DF:  INCF   26,F
+12E0:  BCF    03.5
+12E1:  GOTO   220
+....................  
+.................... 	for (i = 0; i < MAX_ANAOUTPUT_CHAN; i++) 
+12E2:  BSF    03.5
+12E3:  CLRF   26
+12E4:  BCF    03.5
+12E5:  BSF    03.5
+12E6:  MOVF   26,W
+12E7:  SUBLW  07
+12E8:  BTFSC  03.0
+12E9:  GOTO   2EC
+12EA:  BCF    03.5
+12EB:  GOTO   338
+12EC:  BCF    03.5
+.................... 		{ 
+....................       restart_wdt(); 
+12ED:  CLRWDT
+.................... 			ReadAnalogueOutConfig (&config, i); 
+12EE:  MOVLW  A2
+12EF:  BSF    03.5
+12F0:  MOVWF  46
+12F1:  MOVF   26,W
+12F2:  MOVWF  47
+12F3:  BCF    03.5
+....................  
+....................       if (config.config_flag & PRESET_VALUE_FLAG) 
+*
+1300:  BSF    03.5
+1301:  MOVF   25,W
+1302:  ANDLW  10
+1303:  XORLW  00
+1304:  BTFSS  03.2
+1305:  GOTO   308
+1306:  BCF    03.5
+1307:  GOTO   334
+1308:  BCF    03.5
+....................       { 
+....................           if (DATA_1_VARY_MASK & config.config_flag) 
+1309:  BSF    03.5
+130A:  MOVF   25,W
+130B:  ANDLW  01
+130C:  XORLW  00
+130D:  BTFSS  03.2
+130E:  GOTO   311
+130F:  BCF    03.5
+1310:  GOTO   317
+1311:  BCF    03.5
+....................             { 
+.................... 					  outval = config.data_1;   
+1312:  BSF    03.5
+1313:  MOVF   23,W
+1314:  MOVWF  27
+....................             } 
+....................           else 
+1315:  BCF    03.5
+1316:  GOTO   31B
+....................             { 
+.................... 					  outval = config.data_2;   
+1317:  BSF    03.5
+1318:  MOVF   24,W
+1319:  MOVWF  27
+131A:  BCF    03.5
+....................             } 
+....................  
+....................           if (INVERT_VALUE_MASK & config.config_flag) 
+131B:  BSF    03.5
+131C:  MOVF   25,W
+131D:  ANDLW  02
+131E:  XORLW  00
+131F:  BTFSS  03.2
+1320:  GOTO   323
+1321:  BCF    03.5
+1322:  GOTO   328
+1323:  BCF    03.5
+....................             { 
+....................             outval ^= 0x7f; // flip all but msb 
+1324:  MOVLW  7F
+1325:  BSF    03.5
+1326:  XORWF  27,F
+1327:  BCF    03.5
+....................             } 
+....................  
+....................           GenerateAnalogueOutput (i, outval << 1); // multiply by 2 
+1328:  BCF    03.0
+1329:  BSF    03.5
+132A:  RLF    27,W
+132B:  MOVWF  28
+132C:  MOVF   26,W
+132D:  MOVWF  47
+132E:  MOVF   28,W
+132F:  MOVWF  48
+1330:  BCF    03.5
+1331:  BCF    0A.4
+1332:  CALL   307
+1333:  BSF    0A.4
+....................  
+....................       } 
+....................  
+.................... 		} 
+1334:  BSF    03.5
+1335:  INCF   26,F
+1336:  BCF    03.5
+1337:  GOTO   2E5
+....................  
+.................... 	for (i = 0; i < MAX_DIGOUTPUT_CHAN; i++) 
+1338:  BSF    03.5
+1339:  CLRF   26
+133A:  BCF    03.5
+133B:  BSF    03.5
+133C:  MOVF   26,W
+133D:  SUBLW  0F
+133E:  BTFSC  03.0
+133F:  GOTO   342
+1340:  BCF    03.5
+1341:  GOTO   38B
+1342:  BCF    03.5
+.................... 		{ 
+....................       restart_wdt(); 
+1343:  CLRWDT
+.................... 			ReadDigitalOutConfig (&config, i); 
+1344:  MOVLW  A2
+1345:  BSF    03.5
+1346:  MOVWF  46
+1347:  MOVF   26,W
+1348:  MOVWF  47
+1349:  BCF    03.5
+....................  
+....................       if (config.config_flag & PRESET_VALUE_FLAG) 
+*
+1356:  BSF    03.5
+1357:  MOVF   25,W
+1358:  ANDLW  10
+1359:  XORLW  00
+135A:  BTFSS  03.2
+135B:  GOTO   35E
+135C:  BCF    03.5
+135D:  GOTO   387
+135E:  BCF    03.5
+....................       { 
+....................  
+....................           if (DATA_1_VARY_MASK & config.config_flag) 
+135F:  BSF    03.5
+1360:  MOVF   25,W
+1361:  ANDLW  01
+1362:  XORLW  00
+1363:  BTFSS  03.2
+1364:  GOTO   367
+1365:  BCF    03.5
+1366:  GOTO   36D
+1367:  BCF    03.5
+....................             { 
+.................... 					  outval = config.data_1;   
+1368:  BSF    03.5
+1369:  MOVF   23,W
+136A:  MOVWF  27
+....................             } 
+....................           else 
+136B:  BCF    03.5
+136C:  GOTO   371
+....................             { 
+.................... 					  outval = config.data_2;   
+136D:  BSF    03.5
+136E:  MOVF   24,W
+136F:  MOVWF  27
+1370:  BCF    03.5
+....................             } 
+....................            
+....................           if (INVERT_VALUE_MASK & config.config_flag) 
+1371:  BSF    03.5
+1372:  MOVF   25,W
+1373:  ANDLW  02
+1374:  XORLW  00
+1375:  BTFSS  03.2
+1376:  GOTO   379
+1377:  BCF    03.5
+1378:  GOTO   37E
+1379:  BCF    03.5
+....................             { 
+....................             outval ^= 0x7f; // flip all but msb 
+137A:  MOVLW  7F
+137B:  BSF    03.5
+137C:  XORWF  27,F
+137D:  BCF    03.5
+....................             } 
+....................  
+....................              
+.................... 					GenerateDigitalOutput (i, outval); 
+137E:  BSF    03.5
+137F:  MOVF   26,W
+1380:  MOVWF  46
+1381:  MOVF   27,W
+1382:  MOVWF  47
+1383:  BCF    03.5
+1384:  BCF    0A.4
+1385:  CALL   356
+1386:  BSF    0A.4
+....................       } 
+.................... 		} 
+1387:  BSF    03.5
+1388:  INCF   26,F
+1389:  BCF    03.5
+138A:  GOTO   33B
+.................... } 
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+.................... void ResetController () 
+.................... { 
+....................   disable_interrupts(GLOBAL); 
+*
+1000:  BCF    0B.6
+1001:  BCF    0B.7
+1002:  BTFSC  0B.7
+1003:  GOTO   001
+.................... #ifndef _SIMULATE 
+....................   ValidateStoredConfig(); 
+....................   InitialiseWatchdog(); 
+.................... #endif 
+....................  
+.................... #ifdef _USE_OUT_BUFFER 
+.................... 	InitialiseOutQueue(); 
+.................... #endif 
+....................  
+.................... 	InitialiseAnalogueIn(); 
+.................... 	ProcessDigitalInputs(false);			 
+*
+1152:  BSF    03.5
+1153:  CLRF   22
+1154:  BCF    03.5
+1155:  BCF    0A.4
+1156:  CALL   41F
+1157:  BSF    0A.4
+....................   InitialiseMidiStatus(); 
+1158:  BCF    0A.4
+1159:  CALL   668
+115A:  BSF    0A.4
+....................  
+....................   GenerateResetConfigData(); 
+....................   InitialiseInQueue(); 
+*
+138B:  BCF    0A.4
+138C:  CALL   672
+138D:  BSF    0A.4
+....................   enable_interrupts(GLOBAL); 
+138E:  MOVLW  C0
+138F:  IORWF  0B,F
+1390:  BCF    0A.3
+1391:  BCF    0A.4
+1392:  GOTO   71B (RETURN)
+....................  
+.................... } 
+....................  
+.................... main() { 
+*
+06F3:  CLRF   04
+06F4:  MOVLW  1F
+06F5:  ANDWF  03,F
+06F6:  MOVLW  9F
+06F7:  MOVWF  04
+06F8:  MOVLW  07
+06F9:  MOVWF  00
+06FA:  CLRF   28
+06FB:  MOVLW  09
+06FC:  BSF    03.5
+06FD:  MOVWF  19
+06FE:  MOVLW  22
+06FF:  MOVWF  18
+0700:  MOVLW  90
+0701:  BCF    03.5
+0702:  MOVWF  18
+0703:  MOVLW  09
+0704:  BSF    03.5
+0705:  MOVWF  19
+0706:  MOVLW  22
+0707:  MOVWF  18
+0708:  MOVLW  90
+0709:  BCF    03.5
+070A:  MOVWF  18
+070B:  MOVLW  FF
+070C:  MOVWF  4C
+070D:  BCF    4C.5
+070E:  MOVF   4C,W
+070F:  BSF    03.5
+0710:  MOVWF  07
+0711:  BCF    03.5
+0712:  BSF    07.5
+0713:  BSF    03.5
+0714:  CLRF   20
+0715:  CLRF   21
+0716:  BCF    03.5
+0717:  BCF    29.1
+0718:  BCF    29.2
+.................... 	ResetController (); 
+0719:  BSF    0A.4
+071A:  GOTO   000
+071B:  BCF    0A.4
+....................    do { 
+....................       ProcessAnalogueIn(); 
+071C:  BSF    0A.4
+071D:  GOTO   393
+071E:  BCF    0A.4
+.................... 	    ProcessDigitalInputs(true);			 
+071F:  MOVLW  01
+0720:  BSF    03.5
+0721:  MOVWF  22
+0722:  BCF    03.5
+0723:  CALL   41F
+.................... 			restart_wdt(); 
+0724:  CLRWDT
+....................       BlinkWatchdog(); 
+0725:  GOTO   682
+....................       ProcessMidiInputStream();  
+0726:  BSF    0A.3
+0727:  CALL   000
+0728:  BCF    0A.3
+....................    } while (TRUE); 
+0729:  GOTO   71C
+....................  
+.................... } 
+....................  
+072A:  SLEEP
+....................  
+....................  
+.................... 

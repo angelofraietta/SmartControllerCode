@@ -1,0 +1,6 @@
+LIBRARY     HTM.DLL
+
+EXPORTS
+    CloseHTMSocket                 @1   
+    OpenHTMSocket                  @2   
+    SendHTMSocket                  @3   

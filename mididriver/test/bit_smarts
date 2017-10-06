@@ -1,0 +1,24 @@
+CURRENT_DIR=$PWD
+echo $CURRENT_DIR
+
+# make the midi driver library
+cd ../hal_rtems
+echo Making mididriver in $PWD
+make 
+
+#return to original dir
+cd $CURRENT_DIR
+
+# make the thread library
+cd ../../threads/source
+echo Making  active objects in $PWD
+make $1
+
+cd hal_rtems
+echo Making rtems threads in $PWD
+make $1
+
+
+cd $CURRENT_DIR
+rm o-optimize/*.exe
+make $1

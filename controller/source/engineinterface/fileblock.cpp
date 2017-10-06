@@ -1,0 +1,682 @@
+//## begin module%3D80249300BC.cm preserve=no
+//	  %X% %Q% %Z% %W%
+//## end module%3D80249300BC.cm
+
+//## begin module%3D80249300BC.cp preserve=no
+//	Angelo Fraietta
+//## end module%3D80249300BC.cp
+
+//## Module: FileBlock%3D80249300BC; Pseudo Package body
+//## Subsystem: engineinterface%3A9C858C00CB
+//## Source file: c:\develop\smartcontroller\controller\source\engineinterface\fileblock.cpp
+
+//## begin module%3D80249300BC.additionalIncludes preserve=no
+#include "stdafx.h"
+//## end module%3D80249300BC.additionalIncludes
+
+//## begin module%3D80249300BC.includes preserve=yes
+#include "crc32.h"
+#include <stdio.h>
+#include <fcntl.h>
+
+// SessionInterface
+#include "sessioninterface.h"
+// PresentationAnswer
+#include "presentationanswer.h"
+// AnswerTask
+#include "answertask.h"
+
+#ifdef _HAL_WINDOWS
+#include <sys\stat.h>
+#else
+#include <sys/stat.h>
+#endif
+
+//## end module%3D80249300BC.includes
+
+// FileBlock
+#include "fileblock.h"
+//## begin module%3D80249300BC.additionalDeclarations preserve=yes
+#define SHOW_DIAG
+//## end module%3D80249300BC.additionalDeclarations
+
+
+// Class FileBlock 
+
+
+
+
+
+
+
+
+
+
+
+//## begin FileBlock::<the_NVRAMStore>%3D8024C801B2.role preserve=no  public: static NVRAMStore {0..n -> RHG}
+//## end FileBlock::<the_NVRAMStore>%3D8024C801B2.role
+
+FileBlock::FileBlock(const FileBlock &right)
+  //## begin FileBlock::FileBlock%copy.hasinit preserve=no
+      : _CRC(0xFFFFFFFF), _temp_buf(0), _index(0), _state(init), _fp(0), _failed(false)
+  //## end FileBlock::FileBlock%copy.hasinit
+  //## begin FileBlock::FileBlock%copy.initialization preserve=yes
+  //## end FileBlock::FileBlock%copy.initialization
+{
+  //## begin FileBlock::FileBlock%copy.body preserve=yes
+	_filename = right._filename;
+	_CRC = right._CRC;
+  _file_length = right._file_length;
+  //## end FileBlock::FileBlock%copy.body
+}
+
+//## Operation: FileBlock%1031879365
+//	Constructor
+FileBlock::FileBlock (const char* filename)
+  //## begin FileBlock::FileBlock%1031879365.hasinit preserve=no
+      : _CRC(0xFFFFFFFF), _temp_buf(0), _index(0), _state(init), _fp(0), _failed(false)
+  //## end FileBlock::FileBlock%1031879365.hasinit
+  //## begin FileBlock::FileBlock%1031879365.initialization preserve=yes
+	,_filename(filename)
+  //## end FileBlock::FileBlock%1031879365.initialization
+{
+  //## begin FileBlock::FileBlock%1031879365.body preserve=yes
+	if (strlen(filename))
+		{
+			_CRC = crc_file (filename);
+			_file_length = GetFileLength ();
+		}
+	else
+		{
+			_file_length = 0;
+		}
+  //## end FileBlock::FileBlock%1031879365.body
+}
+
+
+FileBlock::~FileBlock()
+{
+  //## begin FileBlock::~FileBlock%.body preserve=yes
+  if (_temp_buf)
+  {
+    delete []_temp_buf;
+  }
+  if (_fp)
+  {
+    fclose (_fp);
+
+  }
+  
+  //## end FileBlock::~FileBlock%.body
+}
+
+
+
+//## Other Operations (implementation)
+//## Operation: GetFileLength%1031879367
+unsigned FileBlock::GetFileLength ()
+{
+  //## begin FileBlock::GetFileLength%1031879367.body preserve=yes
+	unsigned ret = 0;
+
+	FILE* fp;
+	struct stat statbuf;
+	
+	fp = fopen (_filename.c_str(), "r+b");
+
+	if (fp)
+		{
+			fstat(fileno(fp), &statbuf);
+			ret = statbuf.st_size;
+			fclose (fp);
+		}
+	return ret;
+
+  //## end FileBlock::GetFileLength%1031879367.body
+}
+
+//## Operation: ReadBytes%1032126385
+//	Reads the bytes into a buffer, returning the number of
+//	bytes read
+//## Postconditions:
+//	_state may change as reading
+unsigned FileBlock::ReadBytes (char* ret_buf, unsigned buf_len)
+{
+  //## begin FileBlock::ReadBytes%1032126385.body preserve=yes
+  unsigned ret_bytes = 0;
+
+  while (ret_bytes < buf_len && !Complete())
+  {
+    switch (_state)
+    {
+      case init:
+        ret_buf [ret_bytes] = (char)_filename.length() + 1; // add NULL also
+        _index = 0;
+        _state = name;
+        ret_bytes++;
+        break;
+
+      case name:
+        ret_bytes += ReadFilenameBytes (ret_buf + ret_bytes, buf_len - ret_bytes);
+        break;
+
+      case data_len:
+        ret_bytes += ReadDataLenBytes (ret_buf + ret_bytes, buf_len - ret_bytes);
+        break;
+
+      case data:
+        ret_bytes += ReadDataBytes (ret_buf + ret_bytes, buf_len - ret_bytes);
+        break;
+
+      case crc:
+        ret_bytes += ReadCRCBytes (ret_buf + ret_bytes, buf_len - ret_bytes);
+        break;
+
+      default:
+        _state = complete;
+    }
+  } // end while
+
+  return ret_bytes;
+  //## end FileBlock::ReadBytes%1032126385.body
+}
+
+//## Operation: WriteBytes%1032126386
+//	Writes the bytes from a buffer, returning the number of
+//	bytes written
+//## Postconditions:
+//	_state may change as reading
+//	data may be written to the local file_system
+unsigned FileBlock::WriteBytes (const char* buf, unsigned buf_len, bool write_to_file)
+{
+  //## begin FileBlock::WriteBytes%1032126386.body preserve=yes
+  unsigned ret_bytes = 0;
+
+  while (ret_bytes < buf_len && !Complete())
+  {
+    switch (_state)
+    {
+      case init:
+        _name_length = buf [ret_bytes];
+        _index = 0;
+        _state = name;
+        ret_bytes++;
+        break;
+
+      case name:
+        ret_bytes += WriteFilenameBytes (buf + ret_bytes, buf_len - ret_bytes, write_to_file);
+        break;
+
+      case data_len:
+        ret_bytes += WriteDataLenBytes (buf + ret_bytes, buf_len - ret_bytes, write_to_file);
+        break;
+
+      case data:
+        ret_bytes += WriteDataBytes (buf + ret_bytes, buf_len - ret_bytes, write_to_file);
+        break;
+
+      case crc:
+        ret_bytes += WriteCRCBytes (buf + ret_bytes, buf_len - ret_bytes, write_to_file);
+        break;
+
+      default:
+        _state = complete;
+    }
+  } // end while
+
+  return ret_bytes;
+
+  //## end FileBlock::WriteBytes%1032126386.body
+}
+
+//## Operation: WriteFilenameBytes%1032126389
+//	Writes the bytes associated with the filename
+//	Returns the number of bytes written
+//## Preconditions:
+//	_sate == name
+//## Postconditions:
+//	_state may have changed.
+//	_index incremnents if _state does not change
+//	returns number of bytes written
+unsigned FileBlock::WriteFilenameBytes (const char* buf, unsigned buf_len, bool testing)
+{
+  //## begin FileBlock::WriteFilenameBytes%1032126389.body preserve=yes
+  unsigned ret_bytes = 0;
+
+  // let us see if there enough bytes in the buffer to accomodate the name
+  if (!_index)
+  {
+    if (_name_length > buf_len)
+    {
+      const unsigned buffsize = (_name_length >= sizeof (_CRC)) ? _name_length : sizeof (_CRC);
+			if (!_temp_buf)
+				{
+					_temp_buf = new char[buffsize]; // in case name is smaller than CRC
+				}
+
+      while (_index < buf_len)
+      {
+        _temp_buf[_index] = buf[_index];
+        _index++;
+        ret_bytes++;
+      }
+    }
+    else // our name is bigger. Let us just assign to _filename
+    {
+      if (buf [_name_length -1]) // the NULL at the end is not there. Fail
+      {
+        _failed = true;
+
+      	const char* message = "FileBlock name missing NULL\r\n";
+
+	      DisplayDiags (message);
+
+				printf ("FileBlock name missing NULL\r\n");
+      }
+      else
+      {
+        _filename = buf;
+        _index = _name_length;
+        ret_bytes = _name_length;
+      }
+    } // index 0
+  }
+  else // we have part of the name in _temp_buf
+  {
+		unsigned i;
+    for (i = 0; i < _name_length - _index && i < buf_len; i++)
+    {
+      _temp_buf [_index + i] = buf[i];
+			ret_bytes++;
+    }
+
+		_index += i;
+
+		if (_name_length == _index)
+			{
+				if (_temp_buf [_name_length -1]) // the NULL at the end is not there. Fail
+					{
+						_failed = true;
+						const char* message = "FileBlock name missing NULL\r\n";
+						
+						DisplayDiags (message);
+						
+						printf ("FileBlock name Missing NULL\r\n");
+					}
+				else
+					{
+						_filename = _temp_buf;
+					}
+
+
+      NextState ();
+  #ifdef SHOW_DIAG
+      printf ("Loaded %s\r\n", _filename.c_str());
+
+      const char* message = "Loaded ";
+
+      DisplayDiags (message);
+
+      message = _filename.c_str();
+
+      DisplayDiags (message);
+
+  #endif
+      _index = 0;
+    }
+  }
+
+  return ret_bytes;
+  //## end FileBlock::WriteFilenameBytes%1032126389.body
+}
+
+//## Operation: WriteDataBytes%1032126390
+//	Writes the bytes associated with the data
+//	Returns the number of bytes written
+//## Preconditions:
+//	_sate == data
+//## Postconditions:
+//	_state may have changed.
+//	_index incremnents if _state does not change
+//	returns number of bytes written
+unsigned FileBlock::WriteDataBytes (const char* buf, unsigned buf_len, bool testing)
+{
+  //## begin FileBlock::WriteDataBytes%1032126390.body preserve=yes
+  unsigned ret_bytes = 0;
+
+  if (!_index)
+  {
+    _CRC = 0xFFFFFFFF; // initialise CRC
+  }
+
+  if (!testing)
+  {
+    if (!_fp)
+    {
+      _fp = fopen (_filename.c_str(), "w+b");
+      _failed = (!_fp);
+			if (_failed)
+      {
+				printf ("Unable to open file %s\r\n", _filename.c_str());
+        const char* message = "Unable to open ";
+
+        DisplayDiags (message);
+
+        message = _filename.c_str();
+
+        DisplayDiags (message);
+
+      }
+    }
+  }
+
+  while (!_failed && _index < _file_length && ret_bytes <  buf_len)
+  {
+    _CRC = CRC32 (buf[ret_bytes], _CRC);
+
+    if (!testing)
+    {
+      fwrite (buf + ret_bytes, 1, 1, _fp);
+    }
+
+    ret_bytes++;
+    _index++;
+  }
+
+  if (_index == _file_length)
+  {
+    _index = 0;
+
+    NextState ();
+    
+    _CRC = _CRC^0xFFFFFFFF;
+    if (!testing)
+    {
+      fclose (_fp);
+
+      _fp = 0;
+    }
+    else
+    {
+      //let us compare CRC with the one on disk
+      _failed = _failed || _CRC != crc_file (_filename.c_str());
+
+			if (_failed)
+        {
+				printf ("Fail CRC %s\r\n", _filename.c_str());
+        const char* message = "Faile CRC ";
+
+        DisplayDiags (message);
+
+        message = _filename.c_str();
+
+        DisplayDiags (message);
+        }
+    }
+  }
+
+	if (_failed)
+    {
+		printf ("Fail WriteDataBytes %s\r\n", _filename.c_str());
+    const char* message = "Fail WriteData Bytes ";
+
+    DisplayDiags (message);
+
+    message = _filename.c_str();
+
+    DisplayDiags (message);
+    }
+  return ret_bytes;
+  //## end FileBlock::WriteDataBytes%1032126390.body
+}
+
+//## Operation: WriteCRCBytes%1032126391
+//	Writes the bytes associated with the CRC
+//	Returns the number of bytes written
+//## Preconditions:
+//	_sate == crc
+//## Postconditions:
+//	_state may have changed.
+//	_index incremnents if _state does not change
+//	returns number of bytes written
+unsigned FileBlock::WriteCRCBytes (const char* buf, unsigned buf_len, bool testing)
+{
+  //## begin FileBlock::WriteCRCBytes%1032126391.body preserve=yes
+  unsigned ret_bytes = 0;
+  char* len_buf = (char*)&_CRC;
+
+  while (!_failed && _index < sizeof (_CRC) && ret_bytes < buf_len)
+  {
+    len_buf[_index++] = buf[ret_bytes++];
+  }
+
+  if (_index == sizeof (_CRC))
+  {
+    _index = 0;
+
+    NextState ();    
+    _failed = _failed || _CRC != crc_file (_filename.c_str());
+  }
+
+	if (_failed)
+		{
+    const char* message = "Bad CRC in WriteCRC ";
+
+    DisplayDiags (message);
+    printf ("Bad CRC in Write CRC\r\n");
+		}
+	
+  return ret_bytes;
+  //## end FileBlock::WriteCRCBytes%1032126391.body
+}
+
+//## Operation: ReadFilenameBytes%1032126392
+//	Reads the bytes associated with the filename
+//	Returns the number of bytes read
+//## Preconditions:
+//	_sate == name
+//## Postconditions:
+//	_state may have changed.
+//	_index incremnents if _state does not change
+//	returns number of bytes written
+unsigned FileBlock::ReadFilenameBytes (char* ret_buf, unsigned buf_len)
+{
+  //## begin FileBlock::ReadFilenameBytes%1032126392.body preserve=yes
+  const char* file_name = _filename.c_str();
+
+  const unsigned max_filename_bytes = _filename.length() + 1; // we also write the null at the end
+
+  unsigned ret_index = 0;
+
+  while (ret_index < buf_len && _index < max_filename_bytes)
+  {
+    ret_buf [ret_index++] = file_name[_index++];
+  }
+
+  // see if we need to change state
+  if (!(_index < max_filename_bytes))
+  {
+    _index = 0;
+    NextState ();
+  }
+
+  return ret_index;
+  //## end FileBlock::ReadFilenameBytes%1032126392.body
+}
+
+//## Operation: ReadDataBytes%1032126393
+//	Reads the bytes associated with the filedata
+//	Returns the number of bytes read
+//## Preconditions:
+//	_sate == data
+//## Postconditions:
+//	_state may have changed.
+//	_index incremnents if _state does not change
+//	returns number of bytes written
+unsigned FileBlock::ReadDataBytes (char* ret_buf, unsigned buf_len)
+{
+  //## begin FileBlock::ReadDataBytes%1032126393.body preserve=yes
+  unsigned ret_index = 0;
+
+  if (!_fp)
+  {
+    _fp = fopen (_filename.c_str(), "r+b");
+  }
+
+  while (_fp && ret_index < buf_len && _index < _file_length)
+  {
+    fread (ret_buf + ret_index, 1, 1, _fp);
+    _index++;
+    ret_index++;
+  }
+
+  // see if we need to change state
+  if (!(_index < _file_length))
+  {
+    _index = 0;
+
+    NextState ();    
+
+    if (_fp)
+    {
+      fclose (_fp);
+
+      _fp = 0;
+    }
+  }
+
+  return ret_index;
+  //## end FileBlock::ReadDataBytes%1032126393.body
+}
+
+//## Operation: ReadCRCBytes%1032126394
+//	Reads the bytes associated with the crc
+//	Returns the number of bytes read
+//## Preconditions:
+//	_sate == crc
+//## Postconditions:
+//	_state may have changed.
+//	_index incremnents if _state does not change
+//	returns number of bytes written
+unsigned FileBlock::ReadCRCBytes (char* ret_buf, unsigned buf_len)
+{
+  //## begin FileBlock::ReadCRCBytes%1032126394.body preserve=yes
+  const char* crc_buf = (const char*) &_CRC;
+
+  unsigned ret_index = 0;
+
+  while (ret_index < buf_len && _index < sizeof (_CRC))
+  {
+    ret_buf [ret_index++] = crc_buf[_index++];
+  }
+
+  // see if we need to change state
+  if (!(_index < sizeof (_CRC)))
+  {
+    _index = 0;
+
+    NextState ();    
+  }
+
+  return ret_index;
+  //## end FileBlock::ReadCRCBytes%1032126394.body
+}
+
+//## Operation: Complete%1032126388
+//	Flag returning whether the read or write is complete
+bool FileBlock::Complete ()
+{
+  //## begin FileBlock::Complete%1032126388.body preserve=yes
+  return _state == complete || _failed;
+  //## end FileBlock::Complete%1032126388.body
+}
+
+//## Operation: WriteDataLenBytes%1032126398
+//	Writes the bytes associated with the data length
+//	Returns the number of bytes written
+//## Preconditions:
+//	_sate == data_len
+//## Postconditions:
+//	_state may have changed.
+//	_index incremnents if _state does not change
+//	returns number of bytes written
+unsigned FileBlock::WriteDataLenBytes (const char* buf, unsigned buf_len, bool testing)
+{
+  //## begin FileBlock::WriteDataLenBytes%1032126398.body preserve=yes
+  unsigned ret_bytes = 0;
+  char* len_buf = (char*)&_file_length;
+
+  while (_index < sizeof (_file_length) && ret_bytes < buf_len)
+  {
+    len_buf[_index++] = buf[ret_bytes++];
+  }
+
+  if (_index == sizeof (_file_length))
+  {
+    _index = 0;
+
+    NextState ();
+  }
+
+  return ret_bytes;
+
+  //## end FileBlock::WriteDataLenBytes%1032126398.body
+}
+
+//## Operation: ReadDataLenBytes%1032126399
+//	Reads the bytes associated with the data length
+//	Returns the number of bytes read
+//## Preconditions:
+//	_sate == data_len
+//## Postconditions:
+//	_state may have changed.
+//	_index incremnents if _state does not change
+//	returns number of bytes written
+unsigned FileBlock::ReadDataLenBytes (char* ret_buf, unsigned buf_len)
+{
+  //## begin FileBlock::ReadDataLenBytes%1032126399.body preserve=yes
+  const char* buf = (const char*) &_file_length;
+
+  unsigned ret_index = 0;
+
+  while (ret_index < buf_len && _index < sizeof (_file_length))
+  {
+    ret_buf [ret_index++] = buf[_index++];
+  }
+
+  // see if we need to change state
+  if (!(_index < sizeof (_file_length)))
+  {
+    _index = 0;
+    NextState ();
+  }
+
+  return ret_index;
+  //## end FileBlock::ReadDataLenBytes%1032126399.body
+}
+
+//## Operation: FreeResources%1032171143
+//	Frees dynamic resources held by class
+void FileBlock::FreeResources ()
+{
+  //## begin FileBlock::FreeResources%1032171143.body preserve=yes
+  if (_temp_buf)
+  {
+    delete []_temp_buf;
+    _temp_buf = NULL;
+  }
+  if (_fp)
+  {
+    fclose (_fp);
+
+    _fp = 0;
+  }
+  //## end FileBlock::FreeResources%1032171143.body
+}
+
+// Additional Declarations
+  //## begin FileBlock%3D80249300BC.declarations preserve=yes
+  //## end FileBlock%3D80249300BC.declarations
+
+//## begin module%3D80249300BC.epilog preserve=yes
+//## end module%3D80249300BC.epilog

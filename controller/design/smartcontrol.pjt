@@ -1,0 +1,117 @@
+#v001>
+#pchd>stdafx.h
+#ssys>engine=
+#ssys>estl=
+#ssys>engineinterface=
++Cengine==
++Cestl==
++Cengineinterface==
+-Ic:\develop\smartcontroller=$DATA\develop\smartcontroller
+-Ic:\develop\smartcontroller\estl=$DATA\develop\smartcontroller\estl
+-Ic:\develop\smartcontroller\controller\source\cvs=$DATA\develop\smartcontroller\controller\source\cvs
+-Ic:\develop\smartcontroller\controller\source\engine=$DATA\develop\smartcontroller\controller\source\engine
+-Ic:\develop\smartcontroller\controller\source\engineinterface=$DATA\develop\smartcontroller\controller\source\engineinterface
+-Ic:\develop\smartcontroller\controller\source\hal_include=$DATA\develop\smartcontroller\controller\source\hal_include
+-Ic:\develop\smartcontroller\controller\source\hal_mac=$DATA\develop\smartcontroller\controller\source\hal_mac
+-Ic:\develop\smartcontroller\controller\source\hal_rtems_pc386=$DATA\develop\smartcontroller\controller\source\hal_rtems_pc386
+-Ic:\develop\smartcontroller\controller\source\hal_windows=$DATA\develop\smartcontroller\controller\source\hal_windows
+-Ic:\develop\smartcontroller\controller\source\link_driver=$DATA\develop\smartcontroller\controller\source\link_driver
+-Ic:\develop\smartcontroller\mididriver\cvs=$DATA\develop\smartcontroller\mididriver\cvs
+-Ic:\develop\smartcontroller\mididriver\design=$DATA\develop\smartcontroller\mididriver\design
+-Ic:\develop\smartcontroller\mididriver\hal_mac=$DATA\develop\smartcontroller\mididriver\hal_mac
+-Ic:\develop\smartcontroller\mididriver\hal_rtems=$DATA\develop\smartcontroller\mididriver\hal_rtems
+-Ic:\develop\smartcontroller\mididriver\hal_windows=$DATA\develop\smartcontroller\mididriver\hal_windows
+-Ic:\develop\smartcontroller\mididriver\test=$DATA\develop\smartcontroller\mididriver\test
+-Ic:\develop\smartcontroller\threads\source\cvs=$DATA\develop\smartcontroller\threads\source\cvs
+-Ic:\develop\smartcontroller\threads\source\hal_include=$DATA\develop\smartcontroller\threads\source\hal_include
+-Ic:\develop\smartcontroller\threads\source\hal_mac=$DATA\develop\smartcontroller\threads\source\hal_mac
+-Ic:\develop\smartcontroller\threads\source\hal_rtems=$DATA\develop\smartcontroller\threads\source\hal_rtems
+-Ic:\develop\smartcontroller\threads\source\hal_windows=$DATA\develop\smartcontroller\threads\source\hal_windows
+-Ic:\develop\smartcontroller\threads\source\test=$DATA\develop\smartcontroller\threads\source\test
++X!h=.cnh
+-D_ROSE_ANALYSE
+-Dbool=unsigned
+-DBYTE=unsigned char
+-DDWORD=unsigned long
+-Derror_message_type=class error_message_type
+-DFILE=class FILE
+#dlft>Simple
+#dpfx>$DATA\
+#dsfx>
+#xnam>RoundTrip
+#xopt> `+Kf1` `+Kt0..1` `+MgReverse Engineered` `+PcC++` `+V4 ` `+V7implicit` `+V8type 3` `+cdReverse Engineered` `+tt%c` `+vv4.0` -ArMLd -ClMd -CtNdM -Cu? -JhMd -JsMd -MS9: -Mcy -MdN -MtM -Nn@ -ScS -Ses -SsNdM -Su? -TdMd -TiMd -TpMd -cAe -cBbefghjz -cCegjklmrtvw -cDe -dNM -dUM -dnM -duM -hSMLdq -hsMLdq -mtM -uSMd -usMd
+#xddd>$DESIGN/%f.red
+#dt2p>t2_
+#[flf>Pathname
+#|sky>~O~Q~R~]
+#|hky>~Q~X
+#|dky>~O\~Q~R~I~Z~I~S~U~ICt=~[~ISs=~\~Y~V    ~X
+#]flf>
+#[flf>Directory
+#|sky>~O~Q~R~]
+#|hky>~O~Q~X
+#|dky>~O (#)~Y ~I~Q~R~I~Z~I~S~U~ICt=~[~ISs=~\~Y~V~I    ~X   
+#]flf>
+#[flf>Simple Name
+#|sky>~Q~R~O~]
+#|hky>~Q~X
+#|dky>~Q~R~I~Z~I~S~U~ICt=~[~ISs=~\~I~O~Y~V    ~X
+#]flf>
+#[flf>Status
+#|sky>~S~Q~R~O~]
+#|hky>~S~Q~X
+#|dky>~S (#)~Y~U~I~Q~R~I~Z~ICt=~[~ISs=~\~I~O~Y ~I~V    ~X
+#]flf>
+#[flf>Errors
+#|sky>~U~S~Q~R~O~]
+#|hky>~S~Q~X
+#|dky>~U~S (#)~Y ~I~U~I~Q~R~I~Z~ICt=~[~ISs=~\~I~O~Y ~I ~I~V    ~X
+#]flf>
+#[flf>Type
+#|sky>~Z~O~Q~R~U~S~]
+#|hky>~Z~O~Q~X
+#|dky>~Z (#)~Y ~I~O (#)~Y ~I ~I~Q~R~I~S~U~ICt=~[~ISs=~\~Y ~I ~I~V    ~X
+#]flf>
+#[flf>Category
+#|sky>~[~Q~R~O~]
+#|hky>~[~Q~X
+#|dky>~[ (#)~Y ~I~U~I~Q~R~I~Z~I~S~ISs=~\~I~O~Y ~I ~I~V    ~X
+#]flf>
+#[flf>Extension
+#|sky>~R~O~Q~]
+#|hky>~R~O~Q~X
+#|dky>~R (#)~Y ~I~O (#)~Y ~I ~I~Q~R~I~S~U~I~Z~ICt=~[~Y ~I ~I~V    ~X
+#]flf>
+#[flf>Subsystem
+#|sky>~\~Q~R~O~]
+#|hky>~\~Q~X
+#|dky>~\ (#)~Y ~I~U~I~Q~R~I~Z~I~S~ICt=~[~I~O~Y ~I ~I~V    ~X
+#]flf>
+#[lyt>Export
+#|ste>1 472 439
+#|brs> 24 83 267 367 270 337 0 0 0 0 0hThvLvCShvRDF
+#|flf>Directory
+#]lyt>
+#[lyt>Files Only
+#|ste>1 445 419
+#|brs> 20 0 0 0 0 0 0 0 0 0 0hTF
+#|flf>Pathname
+#]lyt>
+#[lyt>Full
+#|ste>1 472 483
+#|brs> 24 145 84 268 369 357 205 287 169 328 0hThhvBvCSvLEhvvDUIhRF
+#|flf>Pathname
+#]lyt>
+#[lyt>Simple
+#|ste>1 499 453
+#|brs> 24 83 377 106 0 0 0 0 0 0 0hThvLEhBF
+#|flf>Directory
+#]lyt>
++Cengine
+#ssys>engine
+c:\develop\smartcontroller\controller\source\engine\analogin.h
+c:\develop\smartcontroller\controller\source\engine\analogout.h
+c:\develop\smartcontroller\controller\source\engine\baseshel.h=R
+c:\develop\smartcontroller\controller\source\engine\control.h
+c:\develop\smartcontroller\controller\source\engine\digitalin.h
+c:\develop\smartcontroller\controller\source\engine\digitalout.h

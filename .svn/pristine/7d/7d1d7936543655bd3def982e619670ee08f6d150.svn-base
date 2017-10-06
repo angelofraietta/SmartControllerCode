@@ -1,0 +1,575 @@
+
+(object Petal
+    version    	42
+    _written   	"Rose 4.5.8163.3"
+    charSet    	0)
+
+(object Class_Utility "IdentityQuestion"
+    attributes 	(list Attribute_Set
+	(object Attribute
+	    tool       	"cg"
+	    name       	"cg_style"
+	    value      	"no_operations"))
+    quid       	"3A9AC69203C7"
+    documentation 	"Assembles Identity questions and sends them to the PresentationQuestion for an answer."
+    stereotype 	"Interface"
+    used_nodes 	(list uses_relationship_list
+	(object Uses_Relationship
+	    quid       	"3AC2CFA200DC"
+	    label      	"calls"
+	    supplier   	"Logical View::EngineInterface::Question::PresentationQuestion"
+	    quidu      	"3AA806020126")
+	(object Uses_Relationship
+	    quid       	"3ADF445F03DD"
+	    supplier   	"Logical View::EngineInterface::Answer::IdentityAnswer"
+	    quidu      	"3A99D27700DE"))
+    operations 	(list Operations
+	(object Operation "GetDefaultAttribute"
+	    quid       	"3AA709AF023B"
+	    documentation 	"Gets the Attribute defininded by the P_IDENTITY and index  parameters.  The Attribute value is returned as a parameter. Function returns true if the Attribute is valid"
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"PresentationQuestion*")
+		(object Parameter "objKey"
+		    documentation 	"The key associated with the Identity"
+		    type       	"P_IDENTITY")
+		(object Parameter "ret_value"
+		    documentation 	"This has the attribute value returned as a null terminated string"
+		    type       	"char*")
+		(object Parameter "buf_len"
+		    documentation 	"The length of the ret_value buffer"
+		    type       	"unsigned"))
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    post_condition 	(object Semantic_Info
+		PDL        	
+|question buf has the parameters as follows
+|P_IDENTITY
+|attribute_key
+		)
+	    opExportControl 	"Public"
+	    uid        	985746352)
+	(object Operation "GetName"
+	    quid       	"3ACCF02B01BC"
+	    documentation 	"Gets the name of identity defininded by the P_IDENTITY  parameter.  The identity name is returned as parameters."
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"PresentationQuestion*")
+		(object Parameter "objKey"
+		    documentation 	"The key associated with the Identity"
+		    type       	"P_IDENTITY")
+		(object Parameter "ret_value"
+		    documentation 	"This has the attribute value returned as a null terminated string"
+		    type       	"char*")
+		(object Parameter "buf_len"
+		    documentation 	"The length of the ret_value buffer"
+		    type       	"unsigned"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    post_condition 	(object Semantic_Info
+		PDL        	
+|question buf has the parameters as follows
+|P_IDENTITY
+|
+		)
+	    opExportControl 	"Public"
+	    uid        	986510805)
+	(object Operation "GetComment"
+	    quid       	"3ACCF0B2017A"
+	    documentation 	"Gets the comment of the identity defininded by the P_IDENTITY  parameter.  The identity name is returned as parameters."
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"PresentationQuestion*")
+		(object Parameter "objKey"
+		    documentation 	"The key associated with the Identity"
+		    type       	"P_IDENTITY")
+		(object Parameter "ret_value"
+		    documentation 	"This has the attribute value returned as a null terminated string"
+		    type       	"char*")
+		(object Parameter "buf_len"
+		    documentation 	"The length of the ret_value buffer"
+		    type       	"unsigned"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    post_condition 	(object Semantic_Info
+		PDL        	
+|question buf has the parameters as follows
+|P_IDENTITY
+|
+		)
+	    opExportControl 	"Public"
+	    uid        	986510806)
+	(object Operation "GetType"
+	    quid       	"3ACCF0BB023B"
+	    documentation 	"Gets the type of the identity defininded by the P_IDENTITY  parameter.  The identity name is returned as parameters."
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"PresentationQuestion*")
+		(object Parameter "objKey"
+		    documentation 	"The key associated with the Identity"
+		    type       	"P_IDENTITY")
+		(object Parameter "ret_value"
+		    documentation 	"This has the attribute value returned as a null terminated string"
+		    type       	"char*")
+		(object Parameter "buf_len"
+		    documentation 	"The length of the ret_value buffer"
+		    type       	"unsigned"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    post_condition 	(object Semantic_Info
+		PDL        	
+|question buf has the parameters as follows
+|P_IDENTITY
+|
+		)
+	    opExportControl 	"Public"
+	    uid        	986510807)
+	(object Operation "SetName"
+	    quid       	"3ACCF116020A"
+	    documentation 	"Sets the name defininded by the P_IDENTITY parameter.  Function returns true if the name has been set."
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"PresentationQuestion*")
+		(object Parameter "objKey"
+		    documentation 	"The key associated with the Identity"
+		    type       	"P_IDENTITY")
+		(object Parameter "new_value"
+		    documentation 	"This has the attribute value returned as a null terminated string"
+		    type       	"const char*"))
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    post_condition 	(object Semantic_Info
+		PDL        	
+|question buf has the parameters as follows
+|P_IDENTITY
+|new_value
+		)
+	    opExportControl 	"Public"
+	    uid        	986510808)
+	(object Operation "SetComment"
+	    quid       	"3ACCF1510241"
+	    documentation 	"Sets the comment defininded by the P_IDENTITY parameter.  Function returns true if the name has been set."
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"PresentationQuestion*")
+		(object Parameter "objKey"
+		    documentation 	"The key associated with the Identity"
+		    type       	"P_IDENTITY")
+		(object Parameter "new_value"
+		    documentation 	"This has the attribute value returned as a null terminated string"
+		    type       	"const char*"))
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    post_condition 	(object Semantic_Info
+		PDL        	
+|question buf has the parameters as follows
+|P_IDENTITY
+|new_value
+		)
+	    opExportControl 	"Public"
+	    uid        	986510809)
+	(object Operation "GetModified"
+	    quid       	"3ACCF17F0107"
+	    documentation 	"Returns true if the identity has been modified"
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"PresentationQuestion*")
+		(object Parameter "objKey"
+		    documentation 	"The key associated with the Identity"
+		    type       	"P_IDENTITY"))
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    post_condition 	(object Semantic_Info
+		PDL        	
+|question buf has the parameters as follows
+|P_IDENTITY
+		)
+	    opExportControl 	"Public"
+	    uid        	986510810)
+	(object Operation "SetDefaultAttribute"
+	    quid       	"3AD3A05F000D"
+	    documentation 	"Sets the default attribute defininded by the P_IDENTITY parameter.  Function returns true if the name has been set."
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"PresentationQuestion*")
+		(object Parameter "objKey"
+		    documentation 	"The key associated with the Identity"
+		    type       	"P_IDENTITY")
+		(object Parameter "new_value"
+		    documentation 	"This has the attribute value returned as a null terminated string"
+		    type       	"const char*"))
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    post_condition 	(object Semantic_Info
+		PDL        	
+|question buf has the parameters as follows
+|P_IDENTITY
+|new_value
+		)
+	    opExportControl 	"Public"
+	    uid        	986947729)
+	(object Operation "CanSave"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationIsConst"
+		    value      	FALSE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 200))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	FALSE))
+	    quid       	"3AD3DF1A0159"
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"PresentationQuestion*")
+		(object Parameter "dwpId"
+		    type       	"P_IDENTITY"))
+	    result     	"bool"
+	    protocol   	"C++"
+	    concurrency 	"Sequential"
+	    post_condition 	(object Semantic_Info
+		PDL        	
+|question buf has the parameters as follows
+|P_IDENTITY
+		)
+	    opExportControl 	"Public"
+	    uid        	986947731)
+	(object Operation "GetParent"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationIsConst"
+		    value      	FALSE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 200))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	FALSE))
+	    quid       	"3AD3E6590157"
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"PresentationQuestion*")
+		(object Parameter "dwpId"
+		    type       	"P_IDENTITY"))
+	    result     	"P_PATCH"
+	    protocol   	"C++"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	986947734)
+	(object Operation "SetParent"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationIsConst"
+		    value      	FALSE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 200))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	FALSE))
+	    quid       	"3AD3E6C7003C"
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"PresentationQuestion*")
+		(object Parameter "dwpId"
+		    type       	"P_IDENTITY")
+		(object Parameter "dwpParent"
+		    type       	"P_PATCH"))
+	    result     	"void"
+	    protocol   	"C++"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	986947735))
+    module     	"Component View::engineinterface::IdentityQuestion (module body)"
+    quidu      	"3AC14A26020E"
+    module     	"Component View::engineinterface::IdentityQuestion (module spec)"
+    quidu      	"3ADF3C4A01ED"
+    language   	"C++")
+
+(object Class_Utility "Identity"
+    quid       	"3E669C0700BD"
+    documentation 	"Provides Java to Native Interface for Identity"
+    used_nodes 	(list uses_relationship_list
+	(object Uses_Relationship
+	    quid       	"3E669CD70120"
+	    label      	"calls"
+	    supplier   	"Logical View::EngineInterface::Question::IdentityQuestion"
+	    quidu      	"3A9AC69203C7"))
+    operations 	(list Operations
+	(object Operation "GetDefaultAttribute"
+	    quid       	"3E669DF80266"
+	    documentation 	"Gets the Attribute defininded by the int and index  parameters.  The Attribute value is returned as a parameter. Function returns true if the Attribute is valid"
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"int")
+		(object Parameter "objKey"
+		    documentation 	"The key associated with the Identity"
+		    type       	"int"))
+	    result     	"String"
+	    concurrency 	"Sequential"
+	    post_condition 	(object Semantic_Info
+		PDL        	
+|question buf has the parameters as follows
+|int
+|attribute_key
+		)
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "GetName"
+	    quid       	"3E669DF80270"
+	    documentation 	"Gets the name of identity defininded by the int  parameter.  The identity name is returned as parameters."
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"int")
+		(object Parameter "objKey"
+		    documentation 	"The key associated with the Identity"
+		    type       	"int"))
+	    result     	"String"
+	    concurrency 	"Sequential"
+	    post_condition 	(object Semantic_Info
+		PDL        	
+|question buf has the parameters as follows
+|int
+|
+		)
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "GetComment"
+	    quid       	"3E669DF8027A"
+	    documentation 	"Gets the comment of the identity defininded by the int  parameter.  The identity name is returned as parameters."
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"int")
+		(object Parameter "objKey"
+		    documentation 	"The key associated with the Identity"
+		    type       	"int"))
+	    result     	"String"
+	    concurrency 	"Sequential"
+	    post_condition 	(object Semantic_Info
+		PDL        	
+|question buf has the parameters as follows
+|int
+|
+		)
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "GetType"
+	    quid       	"3E669DF80284"
+	    documentation 	"Gets the type of the identity defininded by the int  parameter.  The identity name is returned as parameters."
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"int")
+		(object Parameter "objKey"
+		    documentation 	"The key associated with the Identity"
+		    type       	"int"))
+	    result     	"String"
+	    concurrency 	"Sequential"
+	    post_condition 	(object Semantic_Info
+		PDL        	
+|question buf has the parameters as follows
+|int
+|
+		)
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "SetName"
+	    quid       	"3E669DF8028E"
+	    documentation 	"Sets the name defininded by the int parameter.  Function returns true if the name has been set."
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"int")
+		(object Parameter "objKey"
+		    documentation 	"The key associated with the Identity"
+		    type       	"int")
+		(object Parameter "new_value"
+		    documentation 	"This has the attribute value returned as a null terminated string"
+		    type       	"String"))
+	    result     	"boolean"
+	    concurrency 	"Sequential"
+	    post_condition 	(object Semantic_Info
+		PDL        	
+|question buf has the parameters as follows
+|int
+|new_value
+		)
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "SetComment"
+	    quid       	"3E669DF802A2"
+	    documentation 	"Sets the comment defininded by the int parameter.  Function returns true if the name has been set."
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"int")
+		(object Parameter "objKey"
+		    documentation 	"The key associated with the Identity"
+		    type       	"int")
+		(object Parameter "new_value"
+		    documentation 	"This has the attribute value returned as a null terminated string"
+		    type       	"String"))
+	    result     	"boolean"
+	    concurrency 	"Sequential"
+	    post_condition 	(object Semantic_Info
+		PDL        	
+|question buf has the parameters as follows
+|int
+|new_value
+		)
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "GetModified"
+	    quid       	"3E669DF802AC"
+	    documentation 	"Returns true if the identity has been modified"
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"int")
+		(object Parameter "objKey"
+		    documentation 	"The key associated with the Identity"
+		    type       	"int"))
+	    result     	"boolean"
+	    concurrency 	"Sequential"
+	    post_condition 	(object Semantic_Info
+		PDL        	
+|question buf has the parameters as follows
+|int
+		)
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "SetDefaultAttribute"
+	    quid       	"3E669DF802B6"
+	    documentation 	"Sets the default attribute defininded by the int parameter.  Function returns true if the name has been set."
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"int")
+		(object Parameter "objKey"
+		    documentation 	"The key associated with the Identity"
+		    type       	"int")
+		(object Parameter "new_value"
+		    documentation 	"This has the attribute value returned as a null terminated string"
+		    type       	"String"))
+	    result     	"boolean"
+	    concurrency 	"Sequential"
+	    post_condition 	(object Semantic_Info
+		PDL        	
+|question buf has the parameters as follows
+|int
+|new_value
+		)
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "CanSave"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationIsConst"
+		    value      	FALSE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 200))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	FALSE))
+	    quid       	"3E669DF802CA"
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"int")
+		(object Parameter "dwpId"
+		    type       	"int"))
+	    result     	"boolean"
+	    protocol   	"C++"
+	    concurrency 	"Sequential"
+	    post_condition 	(object Semantic_Info
+		PDL        	
+|question buf has the parameters as follows
+|int
+		)
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "GetParent"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationIsConst"
+		    value      	FALSE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 200))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	FALSE))
+	    quid       	"3E669DF802D4"
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"int")
+		(object Parameter "dwpId"
+		    type       	"int"))
+	    result     	"int"
+	    protocol   	"C++"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "SetParent"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationIsConst"
+		    value      	FALSE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 200))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	FALSE))
+	    quid       	"3E669DF802DE"
+	    parameters 	(list Parameters
+		(object Parameter "pQuestion"
+		    documentation 	"Pointer to the Presentation Question used to get the answer"
+		    type       	"int")
+		(object Parameter "dwpId"
+		    type       	"int")
+		(object Parameter "dwpParent"
+		    type       	"int"))
+	    result     	"void"
+	    protocol   	"C++"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0))
+    module     	"Component View::Jni::Identity"
+    quidu      	"3E669D5E0066"
+    language   	"Java")

@@ -1,0 +1,373 @@
+#! /bin/sh 
+#
+#  Simple shell script to configure and build rtems
+#
+#  build-${CPU}-rtems is created as the build tree
+#
+#  Recommended prefix for various OS's:
+#     Linux:    /usr/local/rtems
+#     Solaris:  /opt/gnu/rtems
+#
+#  $Id: bit_rtems,v 1.2 2003/03/05 04:36:25 angelo Exp $
+#
+
+usage()
+{
+  echo "usage: $0 CPU [BSP]"
+  print_rtems_cpus
+}
+
+my_exit()
+{
+  exit $0
+}
+
+#if [ $# -ne 1 ]; then
+#  usage
+#  exit 1
+#fi
+
+CPU=$1
+shift
+if [ $# -eq 1 ] ; then
+  BSP_TO_TEST=$1
+  shift
+fi
+
+args=$*
+
+# The argument to the "--target" argument of configure.
+BUILD_PIECE=rtems
+
+# Include shared setup
+if [ ! -r ./common.sh ] ; then
+  echo "Cannot find shared shell script support (common.sh)"
+  exit 1
+fi
+. `echo $0 | sed -e 's/bit_rtems/common.sh/'`
+
+# Include user configurable information
+test -r ./user.cfg || \
+  check_fatal 1 "Cannot find user configuration (user.cfg)"
+. ./user.cfg
+
+# Now set some internal variables based on the user configuration
+verbose=yes
+testing=no
+if [ "X${INSTALL_RTEMS}" = "Xno" ] ; then
+  do_install=no
+else
+  do_install=yes
+fi
+
+export PATH=$PATH:${INSTALL_POINT}/bin
+echo $PATH
+
+#
+# Remove the build directory
+#
+  echo "Removing build directory ${BUILDDIR} ..."
+  if [ ${testing} = no ] ; then
+    rm -rf ${BUILDDIR}
+    mkdir ${BUILDDIR}
+    cd ${BUILDDIR}
+  fi
+
+#
+# Configure_rtems
+#
+
+conf_rtems()
+{
+echo "../${RTEMS}/configure $* ${BARE_CPU}${BARE_MODEL_ARG} \
+    ${BARE_CFLAGS}${BARE_CFLAGS_ARG}"
+if [ ${testing} = no ] ; then
+  if [ "X${BARE_MODEL_ARG}" != "X" ] ; then
+    ../${RTEMS}/configure $* ${BARE_CPU}"${BARE_MODEL_ARG}" \
+      ${BARE_CFLAGS}"${BARE_CFLAGS_ARG}"
+  else
+    ../${RTEMS}/configure $* 
+  fi
+else
+  echo "In test mode: Not actually configuring"
+echo
+fi
+
+if [ $? -eq 0 ] ; then
+  echo "${BUILDDIR} has been successfully prepared"
+else
+  echo "Could not successfully configure into ${BUILDDIR}!"
+  exit 1
+fi
+
+}
+
+# enable-gcc28
+# --enable-libcdir=${INSTALL_POINT}
+#    --disable-rtems-inlines
+
+doing_bare_bsp=no
+if [ x${BSP_TO_TEST} != x ] ; then
+ 
+  if [ `echo ${BSP_TO_TEST} | cut -d'-' -f1` != bare ]; then
+    if [ ${BSP_TO_TEST} != "all" ] ; then
+      ENABLE_BSP=--enable-rtemsbsp="${BSP_TO_TEST}"
+    fi
+  else
+    doing_bare_bsp=yes
+    ENABLE_BSP=--enable-rtemsbsp="bare"
+    BARE_CPU="--enable-bare-cpu-model="
+    BARE_CFLAGS="--enable-bare-cpu-cflags="
+    case ${BSP_TO_TEST} in
+       # Hitachi SH family
+         bare-sh7032)
+           BARE_MODEL_ARG=sh7032
+           BARE_CFLAGS_ARG="-Wall -m1 -DMHZ=20 -DCPU_CONSOLE_DEVNAME="\\\"/dev/null\\\"""
+           ;;
+
+       # Intel i386 family
+         bare-i386_fp)
+           BARE_MODEL_ARG=i386_fp
+           BARE_CFLAGS_ARG="-m386"
+           ;;
+         bare-i386_nofp)
+           BARE_MODEL_ARG=i386_nofp
+           BARE_CFLAGS_ARG="-m386 -msoft-float"
+           ;;
+         bare-i486dx)
+           BARE_MODEL_ARG=i486dx
+           BARE_CFLAGS_ARG="-m486"
+           ;;
+         bare-i486sx)
+           BARE_MODEL_ARG=i486sx
+           BARE_CFLAGS_ARG="-m486 -msoft-float"
+           ;;
+         bare-pentium)
+           BARE_MODEL_ARG=pentium
+           BARE_CFLAGS_ARG="-mpentium"
+           ;;
+       
+       # Motorola m68xxx and Coldfire family
+         bare-m68000)
+           BARE_MODEL_ARG=m68000
+           BARE_CFLAGS_ARG="-m68000 -msoft-float"
+           ;;
+         bare-m68020)
+           BARE_MODEL_ARG=m68020
+           BARE_CFLAGS_ARG="-m68020"
+           ;;
+         bare-m68020nofp)
+           BARE_MODEL_ARG=m68020
+           BARE_CFLAGS_ARG="-m68020 -msoft-float"
+           ;;
+         bare-m68040)
+           BARE_MODEL_ARG=m68040
+           BARE_CFLAGS_ARG="-m68040"
+           ;;
+         bare-m68040nofp)
+           BARE_MODEL_ARG=m68040
+           BARE_CFLAGS_ARG="-m68040 -msoft-float"
+           ;;
+         bare-m68060)
+           BARE_MODEL_ARG=m68060
+           BARE_CFLAGS_ARG="-m68060"
+           ;;
+         bare-m68060nofp)
+           BARE_MODEL_ARG=m68060
+           BARE_CFLAGS_ARG="-m68060 -msoft-float"
+           ;;
+         bare-m68302)
+           BARE_MODEL_ARG=m68302
+           BARE_CFLAGS_ARG="-m68302 -msoft-float"
+           ;;
+         bare-cpu32)
+           BARE_MODEL_ARG=cpu32
+           BARE_CFLAGS_ARG="-mcpu32"
+           ;;
+         bare-cpu32+)
+           BARE_MODEL_ARG=cpu32+
+           BARE_CFLAGS_ARG="-mcpu32 -DRTEMS__mcpu32p__"
+           ;;
+         bare-m5200)
+           BARE_MODEL_ARG=m5200
+           BARE_CFLAGS_ARG="-m5200"
+           ;;
+
+       # Motorola PowerPC Family
+         bare-ppc403)
+           BARE_MODEL_ARG=ppc403
+           BARE_CFLAGS_ARG="-mcpu=403"
+           ;;
+         bare-ppc603e)
+           BARE_MODEL_ARG=ppc603e
+           BARE_CFLAGS_ARG="-m60e"
+           ;;
+
+       # Unknown CPU family
+         *)
+           echo This script does not know how to build ${BSP_TO_TEST} yet.
+           echo
+           usage
+           exit 1
+           ;;
+    esac
+  fi
+fi
+
+#
+#  Convert user.cfg variables into RTEMS configuration options
+#
+
+if [ ${ENABLE_RTEMS_TESTS} = yes ] ; then
+  RTEMS_TESTS_FLAG="--enable-tests"
+else
+  RTEMS_TESTS_FLAG="--disable-tests"
+fi
+  
+if [ ${ENABLE_RTEMS_TCPIP} = yes ] ; then
+  TCPIP_FLAG="--enable-networking"
+else
+  TCPIP_FLAG="--disable-networking"
+fi
+
+if [ ${ENABLE_RTEMS_POSIX} = yes ] ; then
+  POSIX_FLAG="--enable-posix"
+else
+  POSIX_FLAG="--disable-posix"
+fi
+
+if [ ${ENABLE_RTEMS_ITRON} = yes ] ; then
+  ITRON_FLAG="--enable-itron"
+else
+  ITRON_FLAG="--disable-itron"
+fi
+
+if [ ${ENABLE_RTEMS_MP} = yes ] ; then
+  ENABLE_MP_FLAG="--enable-multiprocessing"
+else
+  ENABLE_MP_FLAG="--disable-multiprocessing"
+fi
+
+if [ ${ENABLE_RTEMS_CXX} = yes ] ; then
+  ENABLE_RTEMS_CXX="--enable-cxx"
+else
+  ENABLE_RTEMS_CXX="--disable-cxx"
+fi
+
+if [ ${ENABLE_RTEMS_RDBG} = yes ] ; then
+  ENABLE_RTEMS_RDBG="--enable-rdbg"
+else
+  ENABLE_RTEMS_RDBG="--disable-rdbg"
+fi
+
+if [ ${ENABLE_RTEMS_MAINTAINER_MODE} = yes ] ; then
+  ENABLE_RTEMS_MAINTAINER_MODE="--enable-maintainer-mode"
+else
+  ENABLE_RTEMS_MAINTAINER_MODE=""
+fi
+
+ENABLE_ARGS="\
+    --prefix=${INSTALL_POINT} \
+    --disable-hwapi \
+    ${ENABLE_MP_FLAG} \
+    ${ENABLE_RTEMS_CXX} \
+    ${ENABLE_RTEMS_RDBG} \
+    ${ENABLE_RTEMS_MAINTAINER_MODE} \
+    ${RTEMS_TESTS_FLAG} \
+    ${TCPIP_FLAG} \
+    ${POSIX_FLAG} \
+    ${ITRON_FLAG}"
+
+if [ $CPU != unix ] ; then
+  TARGET_ARG=--target=${target}
+fi
+
+conf_rtems ${TARGET_ARG} ${ENABLE_ARGS} ${ENABLE_BSP} $args
+
+if [ $? -ne 0 ] ; then
+  echo "Unable to configure successfully"
+  exit 1
+fi
+
+
+build_status=0
+if [ ${testing} = yes ]; then
+  echo "In test mode: Not actually making"
+  echo "Would execute the following commands:"
+  if [ ${BUILD_RTEMS_NONDEBUG} = "yes" ] ; then
+    echo "    ${MAKE} all"
+  fi
+  if [ ${BUILD_RTEMS_DEBUG} = "yes" ] ; then
+    echo "    ${MAKE} VARIANT=debug"
+  fi
+  if [ ${do_install} = "yes" ] ; then
+    echo "    ${MAKE} install"
+  fi
+else
+  export  PATH=$PATH:${INSTALL_POINT}/bin
+  if [ ${verbose} = yes ]; then
+    echo "Initiating ${MAKE} .."
+  fi
+
+  if [ ${BUILD_RTEMS_NONDEBUG} = "yes" ] ; then
+     echo "Executing ${MAKE} all ..."
+     ${MAKE} all
+     check_fatal $? "failed ${MAKE} all."
+  fi
+  if [ ${BUILD_RTEMS_DEBUG} = "yes" ] ; then
+    echo "Executing ${MAKE} VARIANT=DEBUG ..."
+    ${MAKE} VARIANT=DEBUG
+    check_fatal $? "failed ${MAKE} VARIANT=DEBUG."
+  fi
+  case $CPU in
+    unix) ;;
+    *)
+       if [ ${do_install} = "yes" ] ; then
+         echo "Executing ${MAKE} install ..."
+         ${MAKE} install
+         check_fatal $? "failed ${MAKE} install."
+       fi
+       ;;
+  esac
+  build_status=$?
+
+  # If we were installing a bare BSP, then we must fix the install point
+  if [ ${do_install} = yes -a ${doing_bare_bsp} = yes ] ; then
+    echo "Moving the RTEMS bare bsp directory to ${BSP_TO_TEST} ... "
+    test -d ${INSTALL_POINT}/bare
+    check_fatal $? "${INSTALL_POINT}/bare does not exist"
+    mv ${INSTALL_POINT}/bare ${INSTALL_POINT}/${BSP_TO_TEST}
+    check_fatal $? "failed to move the bare bsp directory to ${BSP_TO_TEST}."
+  fi
+fi
+
+if [ ${build_status} -eq 0 -a "x${BSP_TO_TEST}" != "x" ] ; then
+  ran_them=no
+echo $PATH
+  case ${BSP_TO_TEST} in
+    posix)
+      cd posix/tests
+      ./runtest *.exe
+      ran_them=yes
+      ;;
+    psim)
+      cd psim/tests
+      ./runtest *.exe
+      ran_them=yes
+      ;;
+    erc32)
+      cd erc32/tests
+      ./runtest *.exe
+      ran_them=yes
+      ;;
+    *)
+      ;;
+  esac
+
+  if [ "${ran_them}" = "yes" ] ; then
+    echo "running ./difftest >${target}-${BSP_TO_TEST}.diff"
+    pwd
+    ./difftest >${target}-${BSP_TO_TEST}.diff
+  fi
+fi
+exit 0

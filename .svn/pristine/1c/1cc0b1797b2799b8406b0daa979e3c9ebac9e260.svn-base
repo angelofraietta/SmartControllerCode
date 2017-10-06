@@ -1,0 +1,112 @@
+#
+#  $Id: user.cfg,v 1.1 2003/02/25 23:47:05 angelo Exp $
+#
+#  User Configurable Items when Building RTEMS Cross Compilation Toolset
+#
+#  Localize these variables to match the tool versions, install point,
+#  and various build options for RTEMS and the GNU tools.
+#
+#  In general terms, this file in conjunction with the various bit*
+#  scripts do nothing that can not be done via directly using each
+#  packages configuration and build instructions.  What the scripts
+#  attempt to protect you from is knowing the sequencing and dependency
+#  information between the various components.
+#
+
+#
+#  INSTALL_POINT: Directory tools and RTEMS are installed into.
+#      Recommended installation point for various OS's:
+#         Linux:    /usr/local/rtems
+#         Solaris:  /opt/gnu/rtems
+INSTALL_POINT=/opt/rtems
+
+#
+#  GNU Tool Configuration Options
+#
+
+# Binutils version and source directory
+#BINUTILS=binutils-2.10
+
+# GCC version and source directory
+#GCC=gcc-2.95.2
+
+# Set to "yes" if you want to build languages other than C and C++.
+# The set of alternative languages includes Java, Fortran, and Objective-C.
+# These alternative languages do not always build cross.
+BUILD_OTHER_LANGUAGES=no
+
+# Newlib version and source directory
+#NEWLIB=newlib-1.9.0
+
+# GDB version and source directory
+#GDB=gdb-5.0
+
+# Set this to "yes" if you want to attempt to build documentation
+# for the tools.  This requires support tools like makeinfo.
+BUILD_DOCS=no
+
+#
+# RTEMS Configuration Information
+#
+
+# RTEMS version and source directory
+RTEMS=RTEMS4.5.0ss
+
+# Set this to yes if you want to enable a more robust set of
+# POSIX functionality including POSIX threads support.
+ENABLE_RTEMS_POSIX=yes
+# Set this to yes if you want to enable the RTEMS uITRON 3.0 API
+# implementation.  This API is not completely implemented and 
+# volunteers are encouraged to assist in finishing it.
+ENABLE_RTEMS_ITRON=no
+
+# Set this to yes if you want to enable multiprocessing support.
+# Multiprocessing is automatically disabled for BSPs without MP support.
+ENABLE_RTEMS_MP=no
+
+# Set this to yes if you want to enable C++ support including
+# the RTEMS Classic API class libraries
+ENABLE_RTEMS_CXX=yes
+
+# Set this to yes if you want to build the full set of RTEMS
+# tests appropriate for your configuration.
+ENABLE_RTEMS_TESTS=no
+
+# Set this to yes if you want to build the TCP/IP stack and 
+# associated clients and servers.  This is automatically disabled
+# for BSPs that have no networking support.
+ENABLE_RTEMS_TCPIP=no
+
+# Set this to yes if you want to enable a remote debugging
+# via Ethernet.  Currently this is not supported on all ports
+# of RTEMS.
+ENABLE_RTEMS_RDBG=no
+
+# Set this to yes if you want to enable maintainer mode functionality
+# in the Makefile system.
+ENABLE_RTEMS_MAINTAINER_MODE=no
+
+# Set this to yes if you want to build the optimized version of RTEMS.
+BUILD_RTEMS_NONDEBUG=yes
+
+# Set this to yes if you want to build the debug version of RTEMS.
+BUILD_RTEMS_DEBUG=no
+
+# Set this to yes if you want to install RTEMS after it is successfully built.
+INSTALL_RTEMS=yes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

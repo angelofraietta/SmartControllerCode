@@ -1,0 +1,36 @@
+008     PSP_DATA
+015-016 CCP_1
+015     CCP_1_LOW
+016     CCP_1_HIGH
+01B-01C CCP_2
+01B     CCP_2_LOW
+01C     CCP_2_HIGH
+020     rs232_errors
+021     main.value
+022     main.@SCRATCH
+023     delay_ms.P1
+023     WriteOutData.out_byte
+077     @SCRATCH
+078     @SCRATCH
+078     _RETURN_
+079     @SCRATCH
+07A     @SCRATCH
+07B     @SCRATCH
+07F     @INTERRUPT_AREA
+0FF     @INTERRUPT_AREA
+17F     @INTERRUPT_AREA
+1FF     @INTERRUPT_AREA
+27F     @INTERRUPT_AREA
+2FF     @INTERRUPT_AREA
+37F     @INTERRUPT_AREA
+3FF     @INTERRUPT_AREA
+        delay_us.P1
+        ReadAnaloguePulse.sub_bank
+
+0009  delay_ms
+0004  WriteOutData
+001E  main
+
+Project Files:
+C:\DEVELOP\MIDICO~3\MIDICO~1\CODE\TESTAN.C
+C:\PROGRA~1\PICC\devices\16f877.h

@@ -1,0 +1,281 @@
+
+(object Petal
+    version    	42
+    _written   	"Rose 4.5.8163.3"
+    charSet    	0)
+
+(object Class_Utility "PatchEditor"
+    attributes 	(list Attribute_Set
+	(object Attribute
+	    tool       	"Java"
+	    name       	"GenerateStaticInitializer"
+	    value      	TRUE))
+    quid       	"3E56A1C60260"
+    operations 	(list Operations
+	(object Operation "GetCurrentInterface"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"Java"
+		    name       	"Native"
+		    value      	TRUE))
+	    quid       	"3E56A4270310"
+	    documentation 	"Returns the Current PresentationQuestion of Shared Library"
+	    result     	"int"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "Initialise"
+	    quid       	"3E66C25201C7"
+	    result     	"boolean"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "Deinitialise"
+	    quid       	"3E66C25F02B6"
+	    result     	"boolean"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "OpenMidiInputPort"
+	    quid       	"3E66C293009E"
+	    documentation 	"Opens A Midi Port and assigns a Number"
+	    parameters 	(list Parameters
+		(object Parameter "device_number"
+		    documentation 	"The physical Hardware device number"
+		    type       	"int")
+		(object Parameter "index"
+		    documentation 	"The index within simulator"
+		    type       	"int"))
+	    result     	"boolean"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "OpenMidiOutputPort"
+	    quid       	"3E66C3380204"
+	    documentation 	"Opens A Midi Port and assigns a Number"
+	    parameters 	(list Parameters
+		(object Parameter "device_number"
+		    documentation 	"The physical Hardware device number"
+		    type       	"int")
+		(object Parameter "index"
+		    documentation 	"The index within simulator"
+		    type       	"int"))
+	    result     	"boolean"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "CloseMidiOutputPorts"
+	    quid       	"3E66C3580051"
+	    result     	"boolean"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "CloseMidiInputPorts"
+	    quid       	"3E66C36801A9"
+	    result     	"boolean"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "SetDefaultDirectory"
+	    quid       	"3E66C3B20322"
+	    documentation 	"Sets the default directory within simulator"
+	    parameters 	(list Parameters
+		(object Parameter "path"
+		    documentation 	"The path including any directory or folder parameters"
+		    type       	"String"))
+	    result     	"boolean"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "GetDefaultDirectory"
+	    quid       	"3E7DA896036A"
+	    result     	"String"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "OpenSysexFile"
+	    quid       	"3E93784D000C"
+	    documentation 	"Opens a File for a Sysex dump. Returns Presentation Question"
+	    parameters 	(list Parameters
+		(object Parameter "filename"
+		    type       	"String"))
+	    result     	"int"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "CloseSysexFile"
+	    quid       	"3E9378A7017E"
+	    documentation 	"Closes Sysex File"
+	    parameters 	(list Parameters
+		(object Parameter "presentation"
+		    documentation 	"The presentation question to close"
+		    type       	"int"))
+	    result     	"boolean"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "PrepareTxSysexFile"
+	    quid       	"3E9378DD003B"
+	    documentation 	"Opens a Sysex file to prpare for Transmit"
+	    parameters 	(list Parameters
+		(object Parameter "filename"
+		    type       	"String"))
+	    result     	"int"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "TxSysexData"
+	    quid       	"3EAE010203C4"
+	    documentation 	"Tansmits Sysex Data to a Midi Port"
+	    parameters 	(list Parameters
+		(object Parameter "key"
+		    documentation 	"The value returned form PrepareTxSysexFile"
+		    type       	"int")
+		(object Parameter "port"
+		    documentation 	"The Midi Port To Transmit to"
+		    type       	"int")
+		(object Parameter "num_bytes"
+		    documentation 	"The Number of Bytes to transmit"
+		    type       	"int"))
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "CloseTxSysexFile"
+	    quid       	"3EAE0161035D"
+	    parameters 	(list Parameters
+		(object Parameter "key"
+		    documentation 	"the value returned from PrepareTxSysexFile"
+		    type       	"int"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "NumMidiOut"
+	    quid       	"3E93C033016B"
+	    documentation 	"Returns the Number"
+	    result     	"int"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "NumMidiIn"
+	    quid       	"3E93C05A023A"
+	    documentation 	"Returns the Number"
+	    result     	"int"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "MidOutName"
+	    quid       	"3E93C0620281"
+	    documentation 	"Returns the name of the device given a device index"
+	    parameters 	(list Parameters
+		(object Parameter "index"
+		    type       	"int"))
+	    result     	"String"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "MidInName"
+	    quid       	"3E93C0900024"
+	    documentation 	"Returns the name of the device given a device index"
+	    parameters 	(list Parameters
+		(object Parameter "index"
+		    type       	"int"))
+	    result     	"String"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "OpenInterface"
+	    quid       	"4088318D03D8"
+	    documentation 	"Opens a new Presentation Inteface"
+	    parameters 	(list Parameters
+		(object Parameter "name"
+		    type       	"String")
+		(object Parameter "port"
+		    type       	"int"))
+	    result     	"int"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "SetInterfaceAddress"
+	    quid       	"4088322C0167"
+	    documentation 	"Sets the IP Address for the PresentationInterface"
+	    parameters 	(list Parameters
+		(object Parameter "presentation"
+		    type       	"int")
+		(object Parameter "address"
+		    type       	"String"))
+	    result     	"boolean"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "SetCurrentInterface"
+	    quid       	"40883DA901F4"
+	    documentation 	"Sets the Current Interface"
+	    parameters 	(list Parameters
+		(object Parameter "new_interface"
+		    type       	"int"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "AddAnalogueValue"
+	    quid       	"415723BA0205"
+	    documentation 	"Pushes a new Value from the Simulator onto the Input Queue. The Value is Added In a Floating Value with 1 being the Max amount"
+	    parameters 	(list Parameters
+		(object Parameter "channel"
+		    type       	"int")
+		(object Parameter "value"
+		    type       	"float"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "AddDigitalValue"
+	    quid       	"415723F80225"
+	    documentation 	"Pushes a new Value from the Simulator onto the Input Queue"
+	    parameters 	(list Parameters
+		(object Parameter "channel"
+		    type       	"int")
+		(object Parameter "value"
+		    type       	"boolean"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "GetDigitalValue"
+	    quid       	"4157241802E0"
+	    documentation 	"Returns The Value of the Digital output"
+	    parameters 	(list Parameters
+		(object Parameter "channel"
+		    type       	"int"))
+	    result     	"boolean"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "GetAnalogueValue"
+	    quid       	"415724580244"
+	    documentation 	"Returns The Value of the Analogue output as a float, 1 being the maximum"
+	    parameters 	(list Parameters
+		(object Parameter "channel"
+		    type       	"int"))
+	    result     	"float"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0)
+	(object Operation "IsConnected"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"Java"
+		    name       	"Native"
+		    value      	FALSE))
+	    quid       	"415725020169"
+	    parameters 	(list Parameters
+		(object Parameter "pinterface"
+		    type       	"int"))
+	    result     	"boolean"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	0))
+    module     	"Component View::Jni::PatchEditor"
+    quidu      	"3E56A2350129"
+    language   	"Java")

@@ -1,0 +1,1060 @@
+CCS PCM C Compiler, Version 3.060, 12652
+
+               Filename: C:\DEVELOP\MIDICO~3\MIDICO~1\CODE\TESTWRIT.LST
+
+               ROM used: 597 (7%)
+                         Largest free fragment is 2048
+               RAM used: 18 (10%) at main() level
+                         28 (16%) worst case
+               Stack:    3 locations
+
+*
+0000:  MOVLW  00
+0001:  MOVWF  0A
+0002:  GOTO   21C
+0003:  NOP
+....................  #include "16f877.h" 
+....................  //////// Standard Header file for the PIC16F877 device //////////////// 
+.................... #device PIC16F877 
+.................... #list 
+.................... 
+....................  
+....................  
+.................... #fuses HS, WDT, BROWNOUT, NOPUT, NOLVP 
+....................  
+.................... #use delay(clock=20000000) 
+0004:  MOVLW  36
+0005:  MOVWF  04
+0006:  MOVF   00,W
+0007:  BTFSC  03.2
+0008:  GOTO   016
+0009:  MOVLW  06
+000A:  MOVWF  78
+000B:  CLRF   77
+000C:  DECFSZ 77,F
+000D:  GOTO   00C
+000E:  DECFSZ 78,F
+000F:  GOTO   00B
+0010:  MOVLW  7B
+0011:  MOVWF  77
+0012:  DECFSZ 77,F
+0013:  GOTO   012
+0014:  DECFSZ 00,F
+0015:  GOTO   009
+0016:  RETLW  00
+.................... #USE I2C(master, sda=PIN_B7, scl=PIN_B6) 
+*
+0061:  MOVLW  08
+0062:  MOVWF  30
+0063:  MOVF   77,W
+0064:  MOVWF  31
+0065:  BSF    03.5
+0066:  BSF    06.7
+0067:  MOVLW  06
+0068:  MOVWF  77
+0069:  BCF    03.5
+006A:  DECFSZ 77,F
+006B:  GOTO   06A
+006C:  BSF    03.5
+006D:  BSF    06.6
+006E:  BCF    03.5
+006F:  BTFSS  06.6
+0070:  GOTO   06F
+0071:  BTFSC  06.7
+0072:  BSF    03.0
+0073:  BTFSS  06.7
+0074:  BCF    03.0
+0075:  RLF    78,F
+0076:  MOVLW  04
+0077:  MOVWF  77
+0078:  DECFSZ 77,F
+0079:  GOTO   078
+007A:  BSF    03.5
+007B:  BCF    06.6
+007C:  BCF    03.5
+007D:  BCF    06.6
+007E:  DECFSZ 30,F
+007F:  GOTO   065
+0080:  BSF    03.5
+0081:  BSF    06.7
+0082:  MOVLW  06
+0083:  MOVWF  77
+0084:  BCF    03.5
+0085:  DECFSZ 77,F
+0086:  GOTO   085
+0087:  BCF    06.7
+0088:  MOVF   31,W
+0089:  BTFSC  03.2
+008A:  GOTO   08E
+008B:  BSF    03.5
+008C:  BCF    06.7
+008D:  BCF    03.5
+008E:  NOP
+008F:  BSF    03.5
+0090:  BSF    06.6
+0091:  BCF    03.5
+0092:  BTFSS  06.6
+0093:  GOTO   092
+0094:  MOVLW  04
+0095:  MOVWF  77
+0096:  DECFSZ 77,F
+0097:  GOTO   096
+0098:  BCF    06.6
+0099:  BSF    03.5
+009A:  BCF    06.6
+009B:  MOVLW  06
+009C:  MOVWF  77
+009D:  BCF    03.5
+009E:  DECFSZ 77,F
+009F:  GOTO   09E
+00A0:  BCF    06.7
+00A1:  BSF    03.5
+00A2:  BCF    06.7
+00A3:  BCF    03.5
+00A4:  BCF    0A.3
+00A5:  BCF    0A.4
+00A6:  GOTO   0AA (RETURN)
+*
+00C0:  MOVLW  08
+00C1:  MOVWF  78
+00C2:  NOP
+00C3:  MOVLW  04
+00C4:  MOVWF  77
+00C5:  DECFSZ 77,F
+00C6:  GOTO   0C5
+00C7:  BCF    06.6
+00C8:  BSF    03.5
+00C9:  BCF    06.6
+00CA:  MOVLW  06
+00CB:  MOVWF  77
+00CC:  BCF    03.5
+00CD:  DECFSZ 77,F
+00CE:  GOTO   0CD
+00CF:  RLF    36,F
+00D0:  BCF    06.7
+00D1:  BTFSS  03.0
+00D2:  GOTO   0D6
+00D3:  BSF    03.5
+00D4:  BSF    06.7
+00D5:  BCF    03.5
+00D6:  BTFSC  03.0
+00D7:  GOTO   0DB
+00D8:  BSF    03.5
+00D9:  BCF    06.7
+00DA:  BCF    03.5
+00DB:  BSF    03.5
+00DC:  BSF    06.6
+00DD:  BCF    03.5
+00DE:  BTFSS  06.6
+00DF:  GOTO   0DE
+00E0:  DECFSZ 78,F
+00E1:  GOTO   0C2
+00E2:  MOVLW  04
+00E3:  MOVWF  77
+00E4:  DECFSZ 77,F
+00E5:  GOTO   0E4
+00E6:  BCF    06.6
+00E7:  BSF    03.5
+00E8:  BCF    06.6
+00E9:  NOP
+00EA:  BSF    06.7
+00EB:  MOVLW  06
+00EC:  MOVWF  77
+00ED:  BCF    03.5
+00EE:  DECFSZ 77,F
+00EF:  GOTO   0EE
+00F0:  MOVLW  06
+00F1:  MOVWF  77
+00F2:  DECFSZ 77,F
+00F3:  GOTO   0F2
+00F4:  BSF    03.5
+00F5:  BSF    06.6
+00F6:  BCF    03.5
+00F7:  BTFSS  06.6
+00F8:  GOTO   0F7
+00F9:  CLRF   78
+00FA:  MOVLW  06
+00FB:  MOVWF  77
+00FC:  DECFSZ 77,F
+00FD:  GOTO   0FC
+00FE:  BTFSC  06.7
+00FF:  BSF    78.0
+0100:  BCF    06.6
+0101:  BSF    03.5
+0102:  BCF    06.6
+0103:  BCF    03.5
+0104:  BCF    06.7
+0105:  BSF    03.5
+0106:  BCF    06.7
+0107:  BCF    03.5
+0108:  RETLW  00
+....................  
+.................... //#define _SIMULATE 
+....................  
+.................... #define WATCHDOG_OVERFLOW_COUNT   255 
+.................... #define WATCHDOG_NORMAL_COUNT     5000L 
+....................  
+.................... #include "watchdog.h" 
+....................   
+.................... #define NUM_WD_FLASHES	8 
+....................  
+.................... //#ifndef WATCHDOG_PIN 
+.................... #define WATCHDOG_PIN	PIN_C0 
+.................... //#endif 
+....................  
+.................... void FlashWatchdog(int16 ms_time) 
+.................... { 
+.................... 		output_high (WATCHDOG_PIN); 
+*
+001F:  BCF    20.0
+0020:  MOVF   20,W
+0021:  BSF    03.5
+0022:  MOVWF  07
+0023:  BCF    03.5
+0024:  BSF    07.0
+.................... 		restart_wdt(); 
+0025:  CLRWDT
+.................... #ifndef _SIMULATE 
+.................... 		delay_ms (ms_time); 
+0026:  MOVF   2E,W
+0027:  MOVWF  36
+0028:  CALL   004
+.................... #endif 
+.................... 		restart_wdt(); 
+0029:  CLRWDT
+.................... 		output_low (WATCHDOG_PIN); 
+002A:  BCF    20.0
+002B:  MOVF   20,W
+002C:  BSF    03.5
+002D:  MOVWF  07
+002E:  BCF    03.5
+002F:  BCF    07.0
+.................... #ifndef _SIMULATE 
+.................... 		delay_ms (ms_time); 
+0030:  MOVF   2E,W
+0031:  MOVWF  36
+0032:  CALL   004
+.................... #endif 
+.................... 		restart_wdt(); 
+0033:  CLRWDT
+.................... } 
+....................  
+.................... void SetWatchdogLed (short value) 
+.................... { 
+.................... 	output_bit (WATCHDOG_PIN, value); 
+*
+0045:  MOVF   2E,F
+0046:  BTFSS  03.2
+0047:  GOTO   04A
+0048:  BCF    07.0
+0049:  GOTO   04B
+004A:  BSF    07.0
+004B:  BCF    20.0
+004C:  MOVF   20,W
+004D:  BSF    03.5
+004E:  MOVWF  07
+004F:  BCF    03.5
+.................... } 
+....................  
+.................... void InitialiseWatchdog() 
+.................... { 
+.................... 	int i; 
+.................... 	for (i = 0; i < NUM_WD_FLASHES; i++) 
+*
+0017:  CLRF   2D
+0018:  MOVF   2D,W
+0019:  SUBLW  07
+001A:  BTFSS  03.0
+001B:  GOTO   037
+.................... 		{ 
+.................... 			FlashWatchdog(100); 
+001C:  CLRF   2F
+001D:  MOVLW  64
+001E:  MOVWF  2E
+.................... 			restart_wdt(); 
+*
+0034:  CLRWDT
+.................... 		} 
+0035:  INCF   2D,F
+0036:  GOTO   018
+0037:  BCF    0A.3
+0038:  BCF    0A.4
+0039:  GOTO   230 (RETURN)
+.................... } 
+....................  
+.................... 
+.................... #include "24lc256.h" 
+....................  /********************************************************** 
+....................  * I2C driver for 24LC256 32k EEPROM 
+....................  *********************************************************/ 
+....................  
+.................... #define LC256_SLAVE_MASK 0xA0 // must be ORed with slave device number 
+....................   
+.................... #define LC256_MEM_SIZE 0x00008000 
+.................... #define LC256_PAGE_SIZE 64 
+.................... #define LC256_NUM_REPOLLS 1 
+.................... #define LC256_POLL_TIME 1 
+....................  
+.................... typedef struct 
+.................... { 
+.................... 	int lower_address; 
+.................... 	int upper_address :7; 
+.................... 	int restart:1; 
+.................... 	int device; 
+.................... } str_LC256; 
+....................  
+.................... str_LC256 LC_256_device_info; // this is current device info 
+....................  
+.................... void ExtEEpromIncAddress() 
+.................... { 
+....................       LC_256_device_info.lower_address++; 
+*
+01DF:  INCFSZ 21,F
+....................        
+....................       // check for cycle 
+....................       if (!LC_256_device_info.lower_address) 
+01E0:  GOTO   1ED
+....................         { 
+....................           LC_256_device_info.upper_address++; 
+01E1:  MOVF   22,W
+01E2:  ADDLW  01
+01E3:  ANDLW  7F
+01E4:  MOVWF  77
+01E5:  MOVLW  80
+01E6:  ANDWF  22,W
+01E7:  IORWF  77,W
+01E8:  MOVWF  22
+....................            
+....................           if (!LC_256_device_info.upper_address) 
+01E9:  ANDLW  7F
+01EA:  XORLW  00
+01EB:  BTFSC  03.2
+....................             { 
+....................               LC_256_device_info.device++; 
+01EC:  INCF   23,F
+....................             } 
+....................         } 
+.................... } 
+....................  
+.................... void ExtEEpromScheduleRestart() 
+.................... { 
+.................... 	LC_256_device_info.restart = true; 
+.................... } 
+....................  
+.................... void ResyncEEprom() 
+.................... { 
+.................... 	LC_256_device_info.restart = true; 
+*
+00A7:  BSF    22.7
+.................... 	 
+.................... #ifndef _SIMULATE 
+.................... 	 
+.................... 	i2c_read (0); // clock anything out in case we stopped during a read without sending a stop 
+00A8:  CLRF   77
+00A9:  GOTO   061
+.................... 	i2c_stop(); 
+00AA:  BSF    03.5
+00AB:  BCF    06.7
+00AC:  NOP
+00AD:  BSF    06.6
+00AE:  BCF    03.5
+00AF:  BTFSS  06.6
+00B0:  GOTO   0AF
+00B1:  MOVLW  04
+00B2:  MOVWF  77
+00B3:  DECFSZ 77,F
+00B4:  GOTO   0B3
+00B5:  NOP
+00B6:  NOP
+00B7:  NOP
+00B8:  BSF    03.5
+00B9:  BSF    06.7
+00BA:  MOVLW  04
+00BB:  MOVWF  77
+00BC:  BCF    03.5
+00BD:  DECFSZ 77,F
+00BE:  GOTO   0BD
+00BF:  RETLW  00
+.................... #endif 
+.................... 	 
+.................... } 
+....................  
+.................... void ResetEEPROM() 
+.................... { 
+.................... 	LC_256_device_info.lower_address = 0; 
+*
+0212:  CLRF   21
+.................... 	LC_256_device_info.upper_address = 0; 
+0213:  MOVLW  80
+0214:  ANDWF  22,W
+0215:  MOVWF  22
+.................... 	LC_256_device_info.restart = 1; 
+0216:  BSF    22.7
+.................... 	LC_256_device_info.device = 0; 
+0217:  CLRF   23
+.................... 	 
+.................... 	ResyncEEprom(); 
+0218:  CALL   0A7
+0219:  BCF    0A.3
+021A:  BCF    0A.4
+021B:  GOTO   253 (RETURN)
+.................... 	 
+.................... } // ResetEEPROM 
+....................  
+.................... #inline 
+.................... int GenerateSlaveNum (int device_num) 
+.................... { 
+.................... 	// packs the Control Byte 
+.................... 	device_num <<= 1; 
+*
+0124:  BCF    03.0
+0125:  RLF    33,F
+.................... 	return LC256_SLAVE_MASK | device_num; 
+0126:  MOVF   33,W
+0127:  IORLW  A0
+0128:  MOVWF  78
+.................... } 
+....................  
+.................... short PollSlave(int device_address, short stop) 
+.................... { 
+*
+012D:  BCF    35.0
+.................... 	short ret = false; 
+.................... 	 
+.................... 	i2c_start(); 
+012E:  BSF    03.5
+012F:  BSF    06.7
+0130:  MOVLW  04
+0131:  MOVWF  77
+0132:  BCF    03.5
+0133:  DECFSZ 77,F
+0134:  GOTO   133
+0135:  BSF    03.5
+0136:  BSF    06.6
+0137:  MOVLW  06
+0138:  MOVWF  77
+0139:  BCF    03.5
+013A:  DECFSZ 77,F
+013B:  GOTO   13A
+013C:  BCF    06.7
+013D:  BSF    03.5
+013E:  BCF    06.7
+013F:  MOVLW  04
+0140:  MOVWF  77
+0141:  BCF    03.5
+0142:  DECFSZ 77,F
+0143:  GOTO   142
+0144:  BCF    06.6
+0145:  BSF    03.5
+0146:  BCF    06.6
+.................... 	ret = !i2c_write(device_address);  
+0147:  BCF    03.5
+0148:  MOVF   33,W
+0149:  MOVWF  36
+014A:  CALL   0C0
+014B:  MOVF   78,W
+014C:  XORLW  00
+014D:  BTFSC  03.2
+014E:  GOTO   151
+014F:  BCF    35.0
+0150:  GOTO   152
+0151:  BSF    35.0
+.................... 	restart_wdt(); 
+0152:  CLRWDT
+.................... 	if (!ret) 
+0153:  BTFSC  35.0
+0154:  GOTO   16D
+.................... 		{ 
+.................... 			i2c_stop(); 
+0155:  BSF    03.5
+0156:  BCF    06.7
+0157:  NOP
+0158:  BSF    06.6
+0159:  BCF    03.5
+015A:  BTFSS  06.6
+015B:  GOTO   15A
+015C:  MOVLW  04
+015D:  MOVWF  77
+015E:  DECFSZ 77,F
+015F:  GOTO   15E
+0160:  NOP
+0161:  NOP
+0162:  NOP
+0163:  BSF    03.5
+0164:  BSF    06.7
+0165:  MOVLW  04
+0166:  MOVWF  77
+0167:  BCF    03.5
+0168:  DECFSZ 77,F
+0169:  GOTO   168
+.................... 			delay_ms (LC256_POLL_TIME); 
+016A:  MOVLW  01
+016B:  MOVWF  36
+016C:  CALL   004
+.................... 		} 
+.................... 	 
+.................... 	 
+.................... 	if (ret && stop) 
+016D:  BTFSS  35.0
+016E:  GOTO   187
+016F:  MOVF   34,F
+0170:  BTFSC  03.2
+0171:  GOTO   187
+.................... 		{ 
+.................... 			i2c_stop(); 
+0172:  BSF    03.5
+0173:  BCF    06.7
+0174:  NOP
+0175:  BSF    06.6
+0176:  BCF    03.5
+0177:  BTFSS  06.6
+0178:  GOTO   177
+0179:  MOVLW  04
+017A:  MOVWF  77
+017B:  DECFSZ 77,F
+017C:  GOTO   17B
+017D:  NOP
+017E:  NOP
+017F:  NOP
+0180:  BSF    03.5
+0181:  BSF    06.7
+0182:  MOVLW  04
+0183:  MOVWF  77
+0184:  BCF    03.5
+0185:  DECFSZ 77,F
+0186:  GOTO   185
+.................... 		} 
+.................... 	 
+.................... 	return ret; 
+0187:  MOVLW  00
+0188:  BTFSC  35.0
+0189:  MOVLW  01
+018A:  MOVWF  78
+.................... } // end PollSlave(int device_address, short stop) 
+....................  
+....................  
+.................... short WriteEEpromAddress () 
+.................... { 
+.................... 	short ret = false; 
+.................... 	 
+*
+019F:  BCF    31.0
+.................... #ifndef _SIMULATE 
+.................... 	ret = ! i2c_write (LC_256_device_info.upper_address); 
+01A0:  MOVF   22,W
+01A1:  ANDLW  7F
+01A2:  MOVWF  32
+01A3:  MOVWF  36
+01A4:  CALL   0C0
+01A5:  MOVF   78,W
+01A6:  XORLW  00
+01A7:  BTFSC  03.2
+01A8:  GOTO   1AB
+01A9:  BCF    31.0
+01AA:  GOTO   1AC
+01AB:  BSF    31.0
+.................... 	 
+.................... #else 
+.................... 	ret = true; 
+.................... #endif 
+.................... 	 
+.................... 	if (ret) 
+01AC:  BTFSS  31.0
+01AD:  GOTO   1B8
+.................... 		{ 
+.................... #ifndef _SIMULATE 
+.................... 			ret = !i2c_write (LC_256_device_info.lower_address); 
+01AE:  MOVF   21,W
+01AF:  MOVWF  36
+01B0:  CALL   0C0
+01B1:  MOVF   78,W
+01B2:  XORLW  00
+01B3:  BTFSC  03.2
+01B4:  GOTO   1B7
+01B5:  BCF    31.0
+01B6:  GOTO   1B8
+01B7:  BSF    31.0
+.................... #endif 
+.................... 		} 
+.................... 	 
+.................... 	return ret; 
+01B8:  MOVLW  00
+01B9:  BTFSC  31.0
+01BA:  MOVLW  01
+01BB:  MOVWF  78
+.................... 	 
+.................... } //WriteEEpromAddress 
+....................  
+.................... short InitialiseReadExtEEProm (int port_num) 
+.................... { 
+.................... 	// we will convert Port Num to the Slave Address 
+.................... 	short ret; 
+.................... 	int device_address; 
+.................... 	 
+.................... 	i2c_start(); 
+.................... 	 
+.................... 	device_address = GenerateSlaveNum (port_num) | 0x01; // the lsb is the read control bit  
+.................... 	 
+.................... #ifndef _SIMULATE 
+.................... 	ret = !i2c_write (device_address); 
+.................... #else 
+....................   ret = true; 
+.................... #endif 
+.................... 	 
+.................... 	return ret; 
+.................... } // InitialiseReadExtEEProm 
+....................  
+....................  
+.................... short InitialiseWriteExtEEPROM (int port_num) 
+.................... { 
+.................... 	// we will convert Port Num to the Slave Address 
+.................... 	short ret; 
+.................... 	int device_address; 
+.................... 	 
+.................... 	device_address = GenerateSlaveNum (port_num);  
+*
+0122:  MOVF   30,W
+0123:  MOVWF  33
+*
+0129:  MOVF   78,W
+012A:  MOVWF  32
+.................... 	 
+.................... #ifndef _SIMULATE 
+.................... 	ret = PollSlave (device_address, false); 
+012B:  MOVWF  33
+012C:  CLRF   34
+*
+018B:  MOVF   78,F
+018C:  BTFSS  03.2
+018D:  GOTO   190
+018E:  BCF    31.0
+018F:  GOTO   191
+0190:  BSF    31.0
+.................... #else 
+....................   ret = true; 
+.................... #endif 
+.................... 	 
+.................... 	return ret; 
+0191:  MOVLW  00
+0192:  BTFSC  31.0
+0193:  MOVLW  01
+0194:  MOVWF  78
+.................... } // InitialiseWriteExtEEPROM 
+....................  
+....................  
+.................... short SetEEpromMemoryAddress () 
+.................... { 
+....................   short ret; 
+.................... 	 
+.................... 	ret = InitialiseWriteExtEEPROM (LC_256_device_info.device); 
+*
+0120:  MOVF   23,W
+0121:  MOVWF  30
+*
+0195:  MOVF   78,F
+0196:  BTFSS  03.2
+0197:  GOTO   19A
+0198:  BCF    2F.0
+0199:  GOTO   19B
+019A:  BSF    2F.0
+.................... 	 
+.................... 	ret |= WriteEEpromAddress (); 
+019B:  MOVLW  00
+019C:  BTFSC  2F.0
+019D:  MOVLW  01
+019E:  MOVWF  30
+*
+01BC:  MOVF   30,W
+01BD:  IORWF  78,W
+01BE:  XORLW  00
+01BF:  BTFSS  03.2
+01C0:  GOTO   1C3
+01C1:  BCF    2F.0
+01C2:  GOTO   1C4
+01C3:  BSF    2F.0
+.................... 	 
+.................... 	return ret; 
+01C4:  MOVLW  00
+01C5:  BTFSC  2F.0
+01C6:  MOVLW  01
+01C7:  MOVWF  78
+.................... } // SetEEpromMemoryAddress 
+....................  
+.................... #inline  
+.................... void FinishEEpromWrite() 
+.................... { 
+.................... 	i2c_stop(); 
+.................... 	LC_256_device_info.restart = true; 
+.................... } 
+....................  
+.................... #inline 
+.................... short CheckCurrentEEpromDevice() 
+.................... { 
+.................... 	return true; // for some reason this is not working 
+.................... 	//return PollSlave (LC_256_device_info.device, true); 
+.................... } 
+....................  
+.................... // write a byte of data to eeprom 
+.................... short WriteEEProm (int tx_byte) 
+.................... { 
+*
+0109:  BSF    2E.0
+.................... 	short ret = true; 
+.................... 		 
+.................... 	// we will restart if LC256_eeprom_address is zero or a multiple of LC256_PAGE_SIZE 
+.................... 	// this is becase of physical page boundaries 
+.................... 	LC_256_device_info.restart |= !(LC_256_device_info.lower_address % LC256_PAGE_SIZE); 
+010A:  MOVLW  00
+010B:  BTFSC  22.7
+010C:  MOVLW  01
+010D:  MOVWF  2F
+010E:  MOVF   21,W
+010F:  ANDLW  3F
+0110:  XORLW  00
+0111:  BTFSC  03.2
+0112:  GOTO   115
+0113:  MOVLW  00
+0114:  GOTO   116
+0115:  MOVLW  01
+0116:  IORWF  2F,W
+0117:  XORLW  00
+0118:  BTFSS  03.2
+0119:  GOTO   11C
+011A:  BCF    22.7
+011B:  GOTO   11D
+011C:  BSF    22.7
+.................... 	 
+.................... 	if (LC_256_device_info.restart) 
+011D:  BTFSS  22.7
+011E:  GOTO   1CE
+.................... 		{ 
+.................... 			ResyncEEprom(); 
+011F:  CALL   0A7
+.................... 			ret = SetEEpromMemoryAddress(); 
+*
+01C8:  MOVF   78,F
+01C9:  BTFSS  03.2
+01CA:  GOTO   1CD
+01CB:  BCF    2E.0
+01CC:  GOTO   1CE
+01CD:  BSF    2E.0
+.................... 		} 
+....................  
+.................... 	return true; 
+01CE:  MOVLW  01
+01CF:  MOVWF  78
+01D0:  GOTO   20F
+.................... 		 
+.................... 	if (ret) 
+01D1:  BTFSS  2E.0
+01D2:  GOTO   208
+.................... 		{ 
+.................... #ifndef _SIMULATE 
+.................... 			ret = !i2c_write (tx_byte); 
+01D3:  MOVF   2D,W
+01D4:  MOVWF  36
+01D5:  CALL   0C0
+01D6:  MOVF   78,W
+01D7:  XORLW  00
+01D8:  BTFSC  03.2
+01D9:  GOTO   1DC
+01DA:  BCF    2E.0
+01DB:  GOTO   1DD
+01DC:  BSF    2E.0
+.................... #endif 
+.................... 			if (ret) 
+01DD:  BTFSS  2E.0
+01DE:  GOTO   208
+.................... 				{ 
+.................... 					ExtEEpromIncAddress(); 
+....................  
+.................... 					// test if we are going over boundary 
+.................... 					if (!(LC_256_device_info.lower_address % LC256_PAGE_SIZE)) 
+*
+01ED:  MOVF   21,W
+01EE:  ANDLW  3F
+01EF:  XORLW  00
+01F0:  BTFSS  03.2
+01F1:  GOTO   208
+.................... 						{ 
+.................... #ifndef _SIMULATE 
+.................... 							i2c_stop(); 
+01F2:  BSF    03.5
+01F3:  BCF    06.7
+01F4:  NOP
+01F5:  BSF    06.6
+01F6:  BCF    03.5
+01F7:  BTFSS  06.6
+01F8:  GOTO   1F7
+01F9:  MOVLW  04
+01FA:  MOVWF  77
+01FB:  DECFSZ 77,F
+01FC:  GOTO   1FB
+01FD:  NOP
+01FE:  NOP
+01FF:  NOP
+0200:  BSF    03.5
+0201:  BSF    06.7
+0202:  MOVLW  04
+0203:  MOVWF  77
+0204:  BCF    03.5
+0205:  DECFSZ 77,F
+0206:  GOTO   205
+.................... 							LC_256_device_info.restart = true; 
+0207:  BSF    22.7
+.................... #else 
+.................... 							tx_byte++; // set a break point in debugger 
+.................... #endif 
+.................... 						} 
+.................... 				} 
+.................... 		} 
+.................... 	 
+.................... 	LC_256_device_info.restart = !ret; 
+0208:  BCF    22.7
+0209:  BTFSS  2E.0
+020A:  BSF    22.7
+.................... 	 
+.................... 	return ret; 
+020B:  MOVLW  00
+020C:  BTFSC  2E.0
+020D:  MOVLW  01
+020E:  MOVWF  78
+020F:  BCF    0A.3
+0210:  BCF    0A.4
+0211:  GOTO   241 (RETURN)
+.................... } // WriteEEProm  
+....................  
+....................  
+.................... short ReadEEprom (int *ret_byte) 
+.................... { 
+.................... 	short ret; 
+....................  
+.................... 	// we will restart if LC_256_device_info.upper_address is zero  
+.................... 	// this is becase of physical size of memory, not boundary 
+.................... 	LC_256_device_info.restart |= (!LC_256_device_info.upper_address && !LC_256_device_info.lower_address); 
+.................... 	 
+.................... 	if (LC_256_device_info.restart) 
+.................... 		{ 
+.................... 			ResyncEEprom(); 
+.................... 			 
+....................       ret = SetEEpromMemoryAddress(); 
+.................... 			 
+.................... 			ret &= InitialiseReadExtEEProm (LC_256_device_info.device); 
+.................... 		} 
+.................... 	else 
+.................... 		{ 
+.................... 			ret = true; 
+.................... 		} 
+.................... 	 
+.................... 	if (ret) 
+.................... 		{ 
+.................... 			ExtEEpromIncAddress(); 
+....................  
+.................... #ifndef _SIMULATE 
+.................... 			// if we are going over a boundary, we will have to send a stop 
+.................... 			if (LC_256_device_info.upper_address || LC_256_device_info.lower_address) 
+.................... 				{ 
+.................... 					*ret_byte = i2c_read (1); // send ack 
+.................... 				} 
+.................... 			else 
+.................... 				{ 
+.................... 					*ret_byte = i2c_read (0); // do not send ack 
+.................... 					LC_256_device_info.restart = true; 
+.................... 					i2c_stop(); 
+.................... 				} 
+.................... #endif 
+.................... 			 
+.................... 		} 
+....................  
+.................... 	LC_256_device_info.restart = !ret; 
+....................  
+.................... 	return ret; 
+.................... } 
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+.................... 
+.................... #include "cfgram.h" 
+....................  /********************************************************* 
+.................... Module for storing configuration in Pic EEProm 
+.................... ********************************************************/ 
+....................  
+....................  
+.................... //#inline 
+.................... void WriteConfigByte (int index, byte config_byte) 
+.................... { 
+....................  
+.................... #ifndef _SIMULATE 
+....................   restart_wdt(); 
+.................... 	write_eeprom (index, config_byte); 
+....................   restart_wdt(); 
+.................... #else // let us decode from here 
+....................   int x; 
+....................   x = index; 
+.................... #endif 
+.................... } // end WriteConfigByte 
+....................  
+....................  
+.................... #inline 
+.................... byte ReadConfigByte (int index) 
+.................... { 
+.................... 	return read_eeprom (index); 
+.................... } // end ReadConfigByte 
+.................... 
+....................  
+.................... short success = false; 
+.................... int16 watchdog_flash_count = 0; // when becomes zero, changes state of LED 
+.................... short watchdog_led = 0; 
+....................  
+....................  
+.................... void BlinkWatchdog() 
+.................... { 
+....................  
+....................   if (!watchdog_flash_count) 
+*
+003A:  MOVF   25,W
+003B:  IORWF  26,W
+003C:  BTFSS  03.2
+003D:  GOTO   05A
+....................     { 
+....................     watchdog_led = ~watchdog_led; 
+003E:  MOVLW  02
+003F:  XORWF  24,F
+....................     SetWatchdogLed (watchdog_led); 
+0040:  MOVLW  00
+0041:  BTFSC  24.1
+0042:  MOVLW  01
+0043:  MOVWF  2D
+0044:  MOVWF  2E
+....................  
+....................  
+....................     if (success) 
+*
+0050:  BTFSS  24.0
+0051:  GOTO   056
+....................       { 
+....................       watchdog_flash_count = WATCHDOG_OVERFLOW_COUNT; 
+0052:  CLRF   26
+0053:  MOVLW  FF
+0054:  MOVWF  25
+....................       } 
+....................     else 
+0055:  GOTO   05A
+....................       { 
+....................       watchdog_flash_count = WATCHDOG_NORMAL_COUNT; 
+0056:  MOVLW  13
+0057:  MOVWF  26
+0058:  MOVLW  88
+0059:  MOVWF  25
+....................       } 
+....................     } 
+....................  
+....................   watchdog_flash_count--; 
+005A:  MOVF   25,W
+005B:  BTFSC  03.2
+005C:  DECF   26,F
+005D:  DECF   25,F
+005E:  BCF    0A.3
+005F:  BCF    0A.4
+0060:  GOTO   232 (RETURN)
+....................  
+.................... } 
+....................  
+....................  
+.................... main() 
+.................... { 
+....................   int i = 0; 
+....................   int32 num_eeprom_bytes = 0; 
+*
+0229:  CLRF   27
+022A:  CLRF   28
+022B:  CLRF   29
+022C:  CLRF   2A
+022D:  CLRF   2B
+022E:  BCF    2C.0
+.................... 	short fail = false; 
+*
+021C:  CLRF   04
+021D:  MOVLW  1F
+021E:  ANDWF  03,F
+021F:  MOVLW  9F
+0220:  MOVWF  04
+0221:  MOVLW  07
+0222:  MOVWF  00
+0223:  MOVLW  FF
+0224:  MOVWF  20
+0225:  BCF    24.0
+0226:  CLRF   25
+0227:  CLRF   26
+0228:  BCF    24.1
+....................  
+....................   initialiseWatchdog(); 
+*
+022F:  GOTO   017
+....................   while (1) 
+....................     { 
+....................     restart_wdt(); 
+0230:  CLRWDT
+....................     BlinkWatchdog (); 
+0231:  GOTO   03A
+....................  
+....................     if (! fail && num_eeprom_bytes < 0x08000) 
+0232:  BTFSC  2C.0
+0233:  GOTO   24F
+0234:  MOVF   2B,F
+0235:  BTFSS  03.2
+0236:  GOTO   24F
+0237:  MOVF   2A,F
+0238:  BTFSS  03.2
+0239:  GOTO   24F
+023A:  MOVF   29,W
+023B:  SUBLW  7F
+023C:  BTFSS  03.0
+023D:  GOTO   24F
+....................       { 
+....................       if (WriteEEProm (i)) 
+023E:  MOVF   27,W
+023F:  MOVWF  2D
+0240:  GOTO   109
+0241:  MOVF   78,F
+0242:  BTFSC  03.2
+0243:  GOTO   24D
+....................         { 
+....................         num_eeprom_bytes++; 
+0244:  INCF   28,F
+0245:  BTFSC  03.2
+0246:  INCF   29,F
+0247:  BTFSC  03.2
+0248:  INCF   2A,F
+0249:  BTFSC  03.2
+024A:  INCF   2B,F
+....................         i++;  
+024B:  INCF   27,F
+....................         } 
+.................... 			else 
+024C:  GOTO   24E
+.................... 				{ 
+.................... 					fail = true; 
+024D:  BSF    2C.0
+.................... 				} 
+....................       } 
+....................      else 
+024E:  GOTO   253
+....................       { 
+.................... 				success = !fail; // cause watchdog LED to blink quickly  
+024F:  BCF    24.0
+0250:  BTFSS  2C.0
+0251:  BSF    24.0
+.................... 				ResetEEprom(); 
+0252:  GOTO   212
+....................       } 
+....................      
+....................     } // end while 
+0253:  GOTO   230
+.................... } 
+.................... 
+0254:  SLEEP

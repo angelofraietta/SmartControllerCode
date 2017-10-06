@@ -1,0 +1,519 @@
+//## begin module%3C5F00F80349.cm preserve=no
+//	  %X% %Q% %Z% %W%
+//## end module%3C5F00F80349.cm
+
+//## begin module%3C5F00F80349.cp preserve=no
+//## end module%3C5F00F80349.cp
+
+//## Module: WindowsMidiInputDriver%3C5F00F80349; Package body
+//## Subsystem: MidiDriver::hal_windows%3C5F00760139
+//## Source file: D:\develop\SmartController\mididriver\hal_windows\windowsmidiinputdriver.cpp
+
+//## begin module%3C5F00F80349.additionalIncludes preserve=no
+#include <windows.h>
+#include <mmsystem.h>
+//## end module%3C5F00F80349.additionalIncludes
+
+//## begin module%3C5F00F80349.includes preserve=yes
+#include <stdafx.h>
+#include <winbase.h>
+#include <iostream.h>
+#include "midiinputsync.h"
+#include "midiflags.h"
+#include <stdio.h>
+//## end module%3C5F00F80349.includes
+
+#include "midiinputdriver.h"
+#include "analogueinputvalue.h"
+#include "mididriver.h"
+#include "midiutilities.h"
+
+
+//## begin module%3C5F00F80349.declarations preserve=no
+//## end module%3C5F00F80349.declarations
+
+//## begin module%3C5F00F80349.additionalDeclarations preserve=yes
+void CALLBACK WindowsMidiInProc(
+
+    HMIDIIN hmo,
+    UINT wMsg,
+    DWORD dwInstance,
+    DWORD dwParam1,
+    DWORD dwParam2
+   );
+
+static MidiInputDriver* def_midi_in = 0; // this pointer is for File IO only
+
+//## end module%3C5F00F80349.additionalDeclarations
+
+
+//## begin WindowsMidiInputDriver%3C5F20E900DA.preface preserve=yes
+//## end WindowsMidiInputDriver%3C5F20E900DA.preface
+
+//## Class: WindowsMidiInputDriver%3C5F20E900DA
+//## Category: MidiDriver::hal_windows%3C5F1EB6009E
+//## Subsystem: MidiDriver::hal_windows%3C5F00760139
+//## Persistence: Transient
+//## Cardinality/Multiplicity: n
+
+//## Uses: <unnamed>%3C5F5E86010D;MidiUtilities { -> }
+
+class WindowsMidiInputDriver : public MidiInputDriver  //## Inherits: <unnamed>%3F525DFC0213
+{
+  //## begin WindowsMidiInputDriver%3C5F20E900DA.initialDeclarations preserve=yes
+  //## end WindowsMidiInputDriver%3C5F20E900DA.initialDeclarations
+
+  public:
+    //## Constructors (specified)
+      //## Operation: WindowsMidiInputDriver%1012864643
+      //	Constructor which defines queue size
+      WindowsMidiInputDriver (int queue_size, MidiInputSync* driver);
+
+    //## Destructor (generated)
+      ~WindowsMidiInputDriver();
+
+
+    //## Other Operations (specified)
+      //## Operation: open%1012864653
+      //	opens device
+      bool open (int device_num, 	// The device number required by hardware. This value is
+      	// the the device number in the hardware
+      int device_id = -1	// Index that the device will be identified as the driver.
+      	// -1 signifies that the device_num is used
+      );
+
+      //## Operation: close%1012864654
+      //	closes device
+      bool close ();
+
+      //## Operation: DataReady%1012864656
+      //	Function called by ISR when data is ready at input
+      bool DataReady (IOData data);
+
+      //## Operation: ReadData%1012937115
+      //	Removes and retrieves item from Queue. Rteuns true if
+      //	successful. Is abstract so each subclass can protect its
+      //	critical sections
+      bool ReadData (IOData* item);
+
+      //## Operation: PostProcesData%1013549219
+      //	Function for processing data within context of thread.
+      //	Overloaded for specific hal implimenttaion
+      virtual void PostProcesData ();
+
+    // Additional Public Declarations
+      //## begin WindowsMidiInputDriver%3C5F20E900DA.public preserve=yes
+      //## end WindowsMidiInputDriver%3C5F20E900DA.public
+
+  protected:
+    // Additional Protected Declarations
+      //## begin WindowsMidiInputDriver%3C5F20E900DA.protected preserve=yes
+      //## end WindowsMidiInputDriver%3C5F20E900DA.protected
+
+  private:
+    // Data Members for Class Attributes
+
+      //## Attribute: _hmin%3C5F5EEE02E3
+      //## begin WindowsMidiInputDriver::_hmin%3C5F5EEE02E3.attr preserve=no  private: HMIDIIN {UA} 0
+      HMIDIIN _hmin;
+      //## end WindowsMidiInputDriver::_hmin%3C5F5EEE02E3.attr
+
+      //## Attribute: _critical_section%3C5F668003C6
+      //## begin WindowsMidiInputDriver::_critical_section%3C5F668003C6.attr preserve=no  private: CRITICAL_SECTION {UA} 
+      CRITICAL_SECTION _critical_section;
+      //## end WindowsMidiInputDriver::_critical_section%3C5F668003C6.attr
+
+      //## Attribute: _sysex_buffer%3C68507A03C6
+      //## begin WindowsMidiInputDriver::_sysex_buffer%3C68507A03C6.attr preserve=no  private: unsigned char* {UA} 
+      unsigned char* _sysex_buffer;
+      //## end WindowsMidiInputDriver::_sysex_buffer%3C68507A03C6.attr
+
+      //## Attribute: _sysex_headers%3C6850950040
+      //## begin WindowsMidiInputDriver::_sysex_headers%3C6850950040.attr preserve=no  private: LPMIDIHDR {UA} 
+      LPMIDIHDR _sysex_headers;
+      //## end WindowsMidiInputDriver::_sysex_headers%3C6850950040.attr
+
+      //## Attribute: _num_buffers%3C6850E8031A
+      //	The number of Buffers
+      //## begin WindowsMidiInputDriver::_num_buffers%3C6850E8031A.attr preserve=no  private: static unsigned {UA} 16
+      static unsigned _num_buffers;
+      //## end WindowsMidiInputDriver::_num_buffers%3C6850E8031A.attr
+
+      //## Attribute: _sysex_queue_size%3C6859480147
+      //## begin WindowsMidiInputDriver::_sysex_queue_size%3C6859480147.attr preserve=no  private: int {UA} queue_size
+      int _sysex_queue_size;
+      //## end WindowsMidiInputDriver::_sysex_queue_size%3C6859480147.attr
+
+      //## Attribute: _buffer_num%3C698AA5016B
+      //## begin WindowsMidiInputDriver::_buffer_num%3C698AA5016B.attr preserve=no  private: unsigned {UAT} 0
+      volatile unsigned  _buffer_num;
+      //## end WindowsMidiInputDriver::_buffer_num%3C698AA5016B.attr
+
+    // Additional Private Declarations
+      //## begin WindowsMidiInputDriver%3C5F20E900DA.private preserve=yes
+      //## end WindowsMidiInputDriver%3C5F20E900DA.private
+
+  private: //## implementation
+    // Additional Implementation Declarations
+      //## begin WindowsMidiInputDriver%3C5F20E900DA.implementation preserve=yes
+      //## end WindowsMidiInputDriver%3C5F20E900DA.implementation
+
+};
+
+//## begin WindowsMidiInputDriver%3C5F20E900DA.postscript preserve=yes
+//## end WindowsMidiInputDriver%3C5F20E900DA.postscript
+
+// Class WindowsMidiInputDriver 
+
+// Class MidiInputDriver 
+
+
+
+
+MidiInputDriver::MidiInputDriver (int queue_size, MidiInputSync* driver)
+  //## begin MidiInputDriver::MidiInputDriver%1012859309.hasinit preserve=no
+      : pThread(driver)
+  //## end MidiInputDriver::MidiInputDriver%1012859309.hasinit
+  //## begin MidiInputDriver::MidiInputDriver%1012859309.initialization preserve=yes
+  ,MidiDriver(queue_size)
+  //## end MidiInputDriver::MidiInputDriver%1012859309.initialization
+{
+  //## begin MidiInputDriver::MidiInputDriver%1012859309.body preserve=yes
+  for (int i = 0; i < 16; i++)
+  {
+    _ana_values[i].in_queue = false;
+  }
+  //## end MidiInputDriver::MidiInputDriver%1012859309.body
+}
+
+
+MidiInputDriver::~MidiInputDriver()
+{
+  //## begin MidiInputDriver::~MidiInputDriver%.body preserve=yes
+  //## end MidiInputDriver::~MidiInputDriver%.body
+}
+
+
+
+//## Other Operations (implementation)
+void MidiInputDriver::ProcessInputData ()
+{
+  if (pThread)
+   pThread->resume();
+
+  //## begin MidiInputDriver::ProcessInputData%1012451967.body preserve=yes
+  //## end MidiInputDriver::ProcessInputData%1012451967.body
+}
+
+MidiInputDriver* MidiInputDriver::create (int queue_size, MidiInputSync* driver)
+{
+  //## begin MidiInputDriver::create%1012864642.body preserve=yes
+
+  MidiInputDriver* pDriver = new WindowsMidiInputDriver(queue_size, driver);
+  if (!def_midi_in)
+  {
+    def_midi_in = pDriver;
+    printf ("Create Input Driver %u\r\n", def_midi_in);
+  }
+
+  return pDriver;
+  //## end MidiInputDriver::create%1012864642.body
+}
+
+void MidiInputDriver::ExtDataInput (IOData data)
+{
+  //## begin MidiInputDriver::ExtDataInput%1031953702.body preserve=yes
+  if (def_midi_in)
+  {
+    IOData iodata_type = (IOData) ((data & DATA_TYPE_MASK));
+
+    if (iodata_type == ANALOG_DATA_16)
+    {
+
+      unsigned channel = (data & DATA_PARAMS_MASK) >> 8;
+
+      //unsigned value = (data & DATA_VALUE_MASK); // we will let the getAnaVal stript the iodata type
+      def_midi_in->_ana_values[channel].upper_bits =  data;
+
+      if (!def_midi_in->_ana_values[channel].in_queue)
+      {
+        def_midi_in->_ana_values[channel].in_queue = true;
+
+        printf ("Data Ready - %u \r\n", def_midi_in);
+        def_midi_in->DataReady(data);
+      }
+
+    }
+    else if (iodata_type == ANALOG_LOWER_DATA_16)
+    {
+      unsigned channel = (data & DATA_PARAMS_MASK) >> 8;
+      //unsigned value = (data & DATA_VALUE_MASK);// we will let the getAnaVal stript the iodata type
+      def_midi_in->_ana_values[channel].lower_bits = data;
+    }
+    else
+    {
+      def_midi_in->DataReady(data);
+      def_midi_in->ProcessInputData();
+    }
+  }
+  //## end MidiInputDriver::ExtDataInput%1031953702.body
+}
+
+unsigned MidiInputDriver::NumDevices ()
+{
+  //## begin MidiInputDriver::NumDevices%1049869257.body preserve=yes
+  return midiInGetNumDevs();
+  //## end MidiInputDriver::NumDevices%1049869257.body
+}
+
+bool MidiInputDriver::GetDeviceName (unsigned index, char* ret_buf, unsigned buf_len)
+{
+  //## begin MidiInputDriver::GetDeviceName%1049869258.body preserve=yes
+  bool ret = false;
+	MIDIINCAPS Caps;
+
+	if(midiInGetDevCaps(index, (LPMIDIINCAPS) &Caps, sizeof(Caps)) !=
+			MMSYSERR_BADDEVICEID)
+  {
+		strncpy(ret_buf, (LPSTR)Caps.szPname, buf_len);
+    // make sure last char is null
+    ret_buf [buf_len -1] = 0;
+	  ret = true;
+  }
+  return ret;
+
+  //## end MidiInputDriver::GetDeviceName%1049869258.body
+}
+
+AnalogueInputValue& MidiInputDriver::GetAnalogValue (unsigned channel)
+{
+   return _ana_values[channel];
+
+  //## begin MidiInputDriver::GetAnalogValue%1096433556.body preserve=yes
+  //## end MidiInputDriver::GetAnalogValue%1096433556.body
+}
+
+// Additional Declarations
+  //## begin MidiInputDriver%3C588B9601D9.declarations preserve=yes
+  //## end MidiInputDriver%3C588B9601D9.declarations
+
+// Class WindowsMidiInputDriver 
+
+
+
+
+
+//## begin WindowsMidiInputDriver::_num_buffers%3C6850E8031A.attr preserve=no  private: static unsigned {UA} 16
+unsigned WindowsMidiInputDriver::_num_buffers = 16;
+//## end WindowsMidiInputDriver::_num_buffers%3C6850E8031A.attr
+
+
+
+WindowsMidiInputDriver::WindowsMidiInputDriver (int queue_size, MidiInputSync* driver)
+  //## begin WindowsMidiInputDriver::WindowsMidiInputDriver%1012864643.hasinit preserve=no
+      : _hmin(0), _sysex_queue_size(queue_size), _buffer_num(0)
+  //## end WindowsMidiInputDriver::WindowsMidiInputDriver%1012864643.hasinit
+  //## begin WindowsMidiInputDriver::WindowsMidiInputDriver%1012864643.initialization preserve=yes
+  ,MidiInputDriver(queue_size, driver)
+  //## end WindowsMidiInputDriver::WindowsMidiInputDriver%1012864643.initialization
+{
+  //## begin WindowsMidiInputDriver::WindowsMidiInputDriver%1012864643.body preserve=yes
+  InitializeCriticalSection(&_critical_section);
+  _sysex_buffer = (unsigned char*) (unsigned char*) GlobalLock(GlobalAlloc(GHND, queue_size * _num_buffers));
+  _sysex_headers = (LPMIDIHDR)GlobalLock(GlobalAlloc(GHND, sizeof (MIDIHDR) * _num_buffers));
+  //## end WindowsMidiInputDriver::WindowsMidiInputDriver%1012864643.body
+}
+
+
+WindowsMidiInputDriver::~WindowsMidiInputDriver()
+{
+  //## begin WindowsMidiInputDriver::~WindowsMidiInputDriver%.body preserve=yes
+  close();
+  GlobalFree(_sysex_buffer);
+  GlobalFree(_sysex_headers);
+  DeleteCriticalSection(&_critical_section);
+  //## end WindowsMidiInputDriver::~WindowsMidiInputDriver%.body
+}
+
+
+
+//## Other Operations (implementation)
+bool WindowsMidiInputDriver::open (int device_num, int device_id)
+{
+  //## begin WindowsMidiInputDriver::open%1012864653.body preserve=yes
+  bool ret;
+
+  _device_num = device_num;
+  
+  close();
+  ret = ((midiInOpen(&_hmin, device_num, (DWORD)WindowsMidiInProc, (DWORD)this, CALLBACK_FUNCTION) ==
+  	MMSYSERR_NOERROR));
+
+
+  if (ret)
+  {
+  	for (unsigned i = 0; i < _num_buffers; i++)
+    {
+  		LPMIDIHDR hdr = &_sysex_headers[i];
+      hdr->dwFlags = 0;
+      hdr->dwBytesRecorded = 0;
+      hdr->lpData = (char*) (&_sysex_buffer[i * _sysex_queue_size]);
+      hdr->dwBufferLength = _sysex_queue_size;
+      hdr->dwUser = (DWORD)hdr;
+      ret = ret && (midiInPrepareHeader(_hmin, hdr, sizeof(MIDIHDR)) == MMSYSERR_NOERROR);
+      ret = ret && (midiInAddBuffer(_hmin, hdr, sizeof(MIDIHDR)) == MMSYSERR_NOERROR);
+    }
+  }
+
+  ret = ret && (midiInStart(_hmin) == MMSYSERR_NOERROR);
+  return ret;
+
+  //## end WindowsMidiInputDriver::open%1012864653.body
+}
+
+bool WindowsMidiInputDriver::close ()
+{
+  //## begin WindowsMidiInputDriver::close%1012864654.body preserve=yes
+  if (_hmin)
+  {
+    midiInReset (_hmin);
+  	for (unsigned i = 0; i < _num_buffers; i++)
+    	{
+	  	midiInUnprepareHeader(_hmin, &_sysex_headers[i], sizeof (MIDIHDR));
+      }
+  	midiInClose(_hmin);
+    _hmin = 0;
+  }
+
+  return true;
+  //## end WindowsMidiInputDriver::close%1012864654.body
+}
+
+bool WindowsMidiInputDriver::DataReady (IOData data)
+{
+  //## begin WindowsMidiInputDriver::DataReady%1012864656.body preserve=yes
+          printf ("Enter Data Ready \r\n");
+  //EnterCriticalSection (&_critical_section);
+	EnqueData (data);
+//  LeaveCriticalSection (&_critical_section);
+            printf ("Exit Data Ready \r\n");
+  return true;
+  //## end WindowsMidiInputDriver::DataReady%1012864656.body
+}
+
+bool WindowsMidiInputDriver::ReadData (IOData* item)
+{
+  //## begin WindowsMidiInputDriver::ReadData%1012937115.body preserve=yes
+  bool valid;
+  //EnterCriticalSection (&_critical_section);
+
+  valid = DequeData(item);
+
+  //LeaveCriticalSection (&_critical_section);
+
+  return valid;
+  //## end WindowsMidiInputDriver::ReadData%1012937115.body
+}
+
+void WindowsMidiInputDriver::PostProcesData ()
+{
+  //## begin WindowsMidiInputDriver::PostProcesData%1013549219.body preserve=yes
+  LPMIDIHDR hdr = &_sysex_headers[_buffer_num];
+
+  while (hdr->dwFlags & MHDR_DONE)
+  {
+    if (midiInUnprepareHeader(_hmin, hdr, sizeof(MIDIHDR)) != MMSYSERR_NOERROR)
+    {
+    	cerr<<"Unable to Unprepare header"<<endl;
+    }
+
+    hdr->dwFlags = 0;
+    hdr->dwBytesRecorded = 0;
+    hdr->dwBufferLength = _sysex_queue_size;
+    if (midiInPrepareHeader(_hmin, hdr, sizeof(MIDIHDR)) != MMSYSERR_NOERROR)
+    {
+    	cerr<<"Unable to Prepare header"<<endl;
+    }
+
+    if (!(midiInAddBuffer(_hmin, hdr, sizeof(MIDIHDR)) == MMSYSERR_NOERROR))
+    {
+    	cerr<<"Unable to Add header"<<endl;
+    }
+
+  	_buffer_num = (_buffer_num + 1) % _num_buffers;
+  	hdr = &_sysex_headers[_buffer_num];
+  } // end while
+
+  //## end WindowsMidiInputDriver::PostProcesData%1013549219.body
+}
+
+// Additional Declarations
+  //## begin WindowsMidiInputDriver%3C5F20E900DA.declarations preserve=yes
+void CALLBACK WindowsMidiInProc(
+
+    HMIDIIN hmo,
+    UINT wMsg,
+    DWORD dwInstance,
+    DWORD dwParam1,
+    DWORD dwParam2
+   )
+{
+	IOData iodata;
+  WindowsMidiInputDriver* pDriver = (WindowsMidiInputDriver*)dwInstance;
+  bool process_required = pDriver->isEmpty();
+
+  if (wMsg == MIM_CLOSE)
+    return;
+    
+	if (wMsg == MIM_LONGDATA)
+  {
+   	LPMIDIHDR hdr = (LPMIDIHDR) dwParam1;
+    for (DWORD i = 0; i < hdr->dwBytesRecorded; i++)
+    {
+     	iodata = (IOData) (hdr->lpData[i] & 0xFF);
+   		pDriver->DataReady(iodata);
+    }
+
+    if (hdr->dwBytesRecorded && process_required)
+    {
+      pDriver->ProcessInputData();
+    }
+  }
+
+	if (wMsg == MIM_DATA)
+	{
+    if (dwInstance)
+    {
+      iodata = (short) (dwParam1 & 0xff);
+
+      int num_bytes = MidiUtilities::num_bytes((char) (iodata & 0xff));
+
+      pDriver->DataReady(iodata);
+
+      for (int i = 1; i < num_bytes; i++)
+      {
+        DWORD byte_mask = dwParam1;
+
+        // now shift data to left one byte for every position
+        for (int j = 0; j < i; j++)
+        {
+          byte_mask >>=8;
+        } // for (unsigned j = 0; j < i; j++)
+
+        iodata = (short) (byte_mask & 0xff);
+
+        pDriver->DataReady(iodata);
+      } // for (unsigned i = 1; i <= tx_bytes; i++)
+
+    }
+
+		if (process_required)
+	    {
+      pDriver->ProcessInputData();
+      }
+	}
+}
+
+  //## end WindowsMidiInputDriver%3C5F20E900DA.declarations
+//## begin module%3C5F00F80349.epilog preserve=yes
+//## end module%3C5F00F80349.epilog

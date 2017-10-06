@@ -1,0 +1,28 @@
+LIBRARY     SMARTCONTROL.DLL
+
+EXPORTS
+    _AddAnalogueValue
+    _AddDigitalValue
+    _CloseMidiInputDevices
+    _CloseMidiOutputDevices
+    _CloseSysexData
+    _DeleteAllPatches
+    _GetAnalogueValue
+    _GetDigitalValue
+    _GetDefaultDirectory
+    _GetMidiInputName
+    _GetMidiOutputName
+    _GetNumMidiInDevices
+    _GetNumMidiOutDevices
+    _GetSchedulerTime
+    _OpenCommPorts
+    _OpenMidiInputDevice
+    _OpenMidiOutputDevice
+    _OpenSysexSendFile
+    _RestoreNVRAM
+    _SetDefaultDirectory
+    _SimulatorDeinitialise
+    _SimulatorGetAnswer
+    _SimulatorInitialise
+    _TransmitSysexData
+

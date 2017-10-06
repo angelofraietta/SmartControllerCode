@@ -1,0 +1,261 @@
+//## begin module%3C588FAC01DD.cm preserve=no
+//	  %X% %Q% %Z% %W%
+//## end module%3C588FAC01DD.cm
+
+//## begin module%3C588FAC01DD.cp preserve=no
+//	Angelo Fraietta
+//## end module%3C588FAC01DD.cp
+
+//## Module: MidiInputSync%3C588FAC01DD; Pseudo Package specification
+//## Subsystem: MidiDriver%3CB215CA01F1
+//## Source file: D:\develop\SmartController\mididriver\midiinputsync.h
+
+#ifndef midiinputsync_h
+#define midiinputsync_h 1
+
+//## begin module%3C588FAC01DD.additionalIncludes preserve=no
+//## end module%3C588FAC01DD.additionalIncludes
+
+//## begin module%3C588FAC01DD.includes preserve=yes
+//## end module%3C588FAC01DD.includes
+
+#include "midiinputdriver.h"
+#include "analogueinputvalue.h"
+#include "event.h"
+#include "activeobject.h"
+//## begin module%3C588FAC01DD.additionalDeclarations preserve=yes
+//## end module%3C588FAC01DD.additionalDeclarations
+
+
+//## begin MidiInputSync%3C588FAC01DD.preface preserve=yes
+//## end MidiInputSync%3C588FAC01DD.preface
+
+//## Class: MidiInputSync%3C588FAC01DD; Abstract
+//	Allows Input of Data to be synchronizes within a thread
+//## Category: MidiDriver%3C588B4A020C
+//## Subsystem: MidiDriver%3CB215CA01F1
+//## Persistence: Transient
+//## Cardinality/Multiplicity: n
+
+//## Uses: <unnamed>%41C5D351031C;AnalogueInputValue { -> }
+
+class MidiInputSync : public ActiveObject  //## Inherits: <unnamed>%3C588BEF00A1
+{
+  //## begin MidiInputSync%3C588FAC01DD.initialDeclarations preserve=yes
+  //## end MidiInputSync%3C588FAC01DD.initialDeclarations
+
+  public:
+    //## Constructors (specified)
+      //## Operation: MidiInputSync%1012442862
+      MidiInputSync (int queue_size);
+
+    //## Destructor (generated)
+      virtual ~MidiInputSync();
+
+
+    //## Other Operations (specified)
+      //## Operation: resume%1012859310
+      //	Sets event in class, which then causes the thread to
+      //	unblock.
+      void resume ();
+
+      //## Operation: open%1012937117
+      //	opens Midi Driver
+      bool open (int device_num, 	// The device number required by hardware. This value is
+      	// the the device number in the hardware
+      int device_id = -1	// Index that the device will be identified as the driver.
+      	// -1 signifies that the device_num is used
+      );
+
+      //## Operation: run%1012937118
+      //	The actual function of the task
+      void run ();
+
+      //## Operation: processMidiInput%1012937119
+      virtual void processMidiInput () = 0;
+
+      //## Operation: Purge%1012937120
+      void Purge ();
+
+      //## Operation: ReadData%1012937121
+      //	Removes and retrieves item from Queue. Rteuns true if
+      //	successful. Is abstract so each subclass can protect its
+      //	critical sections
+      bool ReadData (IOData* item);
+
+      //## Operation: close%1013552377
+      void close ();
+
+      //## Operation: GetDeviceNum%1018564233
+      //	Returns the Device Number of The Midi Driver
+      int GetDeviceNum () const;
+
+      //## Operation: ExtDataInput%1096227733
+      //	Allows external Process to Add Data to Its's queue
+      void ExtDataInput (IOData data);
+
+      //## Operation: GetAnalogValue%1096433557
+      //	Reads Cached Analogue Data
+      AnalogueInputValue& GetAnalogValue (unsigned channel);
+
+    //## Get and Set Operations for Associations (generated)
+
+      //## Association: MidiDriver::<unnamed>%3C588FF6017F
+      //## Role: MidiInputSync::pMidiDriver%3C588FF70114
+      MidiInputDriver * GetInputDriver ();
+
+    // Additional Public Declarations
+      //## begin MidiInputSync%3C588FAC01DD.public preserve=yes
+      //## end MidiInputSync%3C588FAC01DD.public
+
+  protected:
+    // Additional Protected Declarations
+      //## begin MidiInputSync%3C588FAC01DD.protected preserve=yes
+      //## end MidiInputSync%3C588FAC01DD.protected
+
+  private:
+    // Data Members for Class Attributes
+
+      //## Attribute: _purging%3C6052710210
+      //## begin MidiInputSync::_purging%3C6052710210.attr preserve=no  private: bool {UAT} false
+      volatile bool  _purging;
+      //## end MidiInputSync::_purging%3C6052710210.attr
+
+    // Additional Private Declarations
+      //## begin MidiInputSync%3C588FAC01DD.private preserve=yes
+      //## end MidiInputSync%3C588FAC01DD.private
+
+  private: //## implementation
+    // Data Members for Associations
+
+      //## Association: MidiDriver::<unnamed>%3C588FF6017F
+      //## begin MidiInputSync::pMidiDriver%3C588FF70114.role preserve=no  public: MidiInputDriver {1 -> 1RHN}
+      MidiInputDriver *pMidiDriver;
+      //## end MidiInputSync::pMidiDriver%3C588FF70114.role
+
+      //## Association: MidiDriver::<unnamed>%3C5E012F0372
+      //## Role: MidiInputSync::pEvent%3C5E013000F4
+      //## begin MidiInputSync::pEvent%3C5E013000F4.role preserve=no  public: Event { -> 1RHN}
+      Event *pEvent;
+      //## end MidiInputSync::pEvent%3C5E013000F4.role
+
+    // Additional Implementation Declarations
+      //## begin MidiInputSync%3C588FAC01DD.implementation preserve=yes
+      //## end MidiInputSync%3C588FAC01DD.implementation
+
+};
+
+//## begin MidiInputSync%3C588FAC01DD.postscript preserve=yes
+//## end MidiInputSync%3C588FAC01DD.postscript
+
+// Class MidiInputSync 
+
+inline MidiInputSync::MidiInputSync (int queue_size)
+  //## begin MidiInputSync::MidiInputSync%1012442862.hasinit preserve=no
+      : _purging(false), pMidiDriver(MidiInputDriver::create(queue_size, this)), pEvent(Event::create())
+  //## end MidiInputSync::MidiInputSync%1012442862.hasinit
+  //## begin MidiInputSync::MidiInputSync%1012442862.initialization preserve=yes
+  //## end MidiInputSync::MidiInputSync%1012442862.initialization
+{
+  //## begin MidiInputSync::MidiInputSync%1012442862.body preserve=yes
+  //## end MidiInputSync::MidiInputSync%1012442862.body
+}
+
+
+inline MidiInputSync::~MidiInputSync()
+{
+  //## begin MidiInputSync::~MidiInputSync%.body preserve=yes
+  Purge();
+  delete pEvent;
+  delete pMidiDriver;
+  //## end MidiInputSync::~MidiInputSync%.body
+}
+
+
+
+//## Other Operations (inline)
+inline void MidiInputSync::resume ()
+{
+  //## begin MidiInputSync::resume%1012859310.body preserve=yes
+  pEvent->Release();
+  //## end MidiInputSync::resume%1012859310.body
+}
+
+inline bool MidiInputSync::open (int device_num, int device_id)
+{
+  //## begin MidiInputSync::open%1012937117.body preserve=yes
+  return pMidiDriver->open(device_num, device_id);
+  //## end MidiInputSync::open%1012937117.body
+}
+
+inline void MidiInputSync::run ()
+{
+  //## begin MidiInputSync::run%1012937118.body preserve=yes
+  while (!Terminated() && !_purging)
+  {
+		pEvent->Wait();
+
+  	if (!_purging)
+    {
+	    pMidiDriver->PreProcesData();
+	    processMidiInput();
+      pMidiDriver->PostProcesData();
+    }
+  }
+
+  //## end MidiInputSync::run%1012937118.body
+}
+
+inline void MidiInputSync::Purge ()
+{
+  _purging = true;
+
+  //## begin MidiInputSync::Purge%1012937120.body preserve=yes
+  pEvent->Release();
+  //## end MidiInputSync::Purge%1012937120.body
+}
+
+inline bool MidiInputSync::ReadData (IOData* item)
+{
+  //## begin MidiInputSync::ReadData%1012937121.body preserve=yes
+  return pMidiDriver->ReadData (item);
+  //## end MidiInputSync::ReadData%1012937121.body
+}
+
+inline void MidiInputSync::close ()
+{
+  //## begin MidiInputSync::close%1013552377.body preserve=yes
+  pMidiDriver->close();
+  //## end MidiInputSync::close%1013552377.body
+}
+
+inline int MidiInputSync::GetDeviceNum () const
+{
+  return pMidiDriver->GetDeviceNum();
+
+  //## begin MidiInputSync::GetDeviceNum%1018564233.body preserve=yes
+  //## end MidiInputSync::GetDeviceNum%1018564233.body
+}
+
+inline AnalogueInputValue& MidiInputSync::GetAnalogValue (unsigned channel)
+{
+  //## begin MidiInputSync::GetAnalogValue%1096433557.body preserve=yes
+  //## end MidiInputSync::GetAnalogValue%1096433557.body
+
+  return pMidiDriver->GetAnalogValue (channel);
+}
+
+//## Get and Set Operations for Associations (inline)
+
+inline MidiInputDriver * MidiInputSync::GetInputDriver ()
+{
+  //## begin MidiInputSync::GetInputDriver%3C588FF70114.get preserve=no
+  return pMidiDriver;
+  //## end MidiInputSync::GetInputDriver%3C588FF70114.get
+}
+
+//## begin module%3C588FAC01DD.epilog preserve=yes
+//## end module%3C588FAC01DD.epilog
+
+
+#endif

@@ -1,0 +1,216 @@
+005     PORTA
+006     PORTB
+007     PORTC
+008     PSP_DATA
+00C     PIR1
+015-016 CCP_1
+015     CCP_1_LOW
+016     CCP_1_HIGH
+019     TXREG
+01B-01C CCP_2
+01B     CCP_2_LOW
+01C     CCP_2_HIGH
+020     @INTERRUPT_AREA
+021     @INTERRUPT_AREA
+022     @INTERRUPT_AREA
+023     @INTERRUPT_AREA
+024     @INTERRUPT_AREA
+025     @INTERRUPT_AREA
+026     @INTERRUPT_AREA
+027     @INTERRUPT_AREA
+028     rs232_errors
+029.0   resync_required
+029.1   tx_ready
+029.2   message_received
+029.3   awaiting_response
+029.4   message_lost
+029.5   midi_tx
+029.6   input_unlocked
+029.7   re_transmit_required
+02A     num_overflow_blinks
+02B-02C quiet_cycles
+02D     @TRIS_C
+02E-02F pla_out_data
+030-031 pla_in_data
+032-033 prev_pla_out
+034-03C pla_out_queue
+03D-05E in_queue
+05F-060 current_value
+061-070 current_analogue_val
+071-072 prev_digital_val
+073-074 current_digital_val
+075-076 last_tx_data
+077     @SCRATCH
+078     @SCRATCH
+078     _RETURN_
+079     @SCRATCH
+07A     @SCRATCH
+07B     @SCRATCH
+07C     num_tx_data_bytes
+07D     num_rx_data_bytes
+07E.0   watchdog_led
+07E.1   overflow_val
+07F     @INTERRUPT_AREA
+0A0-0A1 watchdog_flash_count
+0A2     main.wait_cycles
+0A3     main.delay_time
+0A4     delay_us.P1
+0A4-0A5 BlinkWatchdog.pla_data
+0A4     ResetController.i
+0A4     main.@SCRATCH
+0A5     ReadAnalogueIn.produce_output
+0A5     ProcessDigitalInputs.produce_output
+0A6.0   ReadAnalogueIn.ret
+0A6.0   ProcessDigitalInputs.ret
+0A6     BlinkWatchdog.@SCRATCH
+0A7     SetWatchdogLed.value
+0A7     ReadAnalogueIn.sub_bank
+0A7     ProcessDigitalInputs.bit_num
+0A8     ReadAnalogueIn.init_b
+0A8     ProcessDigitalInputs.byte_num
+0A9     ReadAnalogueIn.bank_num
+0A9     ProcessDigitalInputs.cur_val
+0AA     ReadAnalogueIn.adc_val
+0AA     ProcessDigitalInputs.prev_val
+0AB     Spi_read_data.ret_data
+0AB     ReadAnalogueIn.adc_val_second_read
+0AB     ProcessDigitalInputs.@SCRATCH
+0AC     Spi_read_data.data_size
+0AC     ReadAnalogueIn.channel_num
+0AC     ProcessDigitalInputs.@SCRATCH
+0AD     OutputAnalog.channel
+0AD     Spi_read_data.data_pin
+0AD     ReadAnalogueIn.@SCRATCH
+0AD     ProcessDigitalInputs.@SCRATCH
+0AE     OutputAnalog.value
+0AE     Spi_read_data.byte_num
+0AE     ProcessDigitalInputs.@SCRATCH
+0AF     OutputAnalog.flags
+0AF     Spi_read_data.bit_num
+0AF     ProcessDigitalInputs.@SCRATCH
+0B0     Spi_read_data.in_val
+0B0     ProcessDigitalInputs.@SCRATCH
+0B1.0   Spi_read_data.data_val
+0B1     @MUL88.P1
+0B1     ProcessDigitalInputs.@SCRATCH
+0B2     OutputDigital.channel
+0B2     @MUL88.P1
+0B2     Spi_read_data.@SCRATCH
+0B3     OutputDigital.value
+0B4     OutputDigital.flags
+0B5     OutputPla.flags
+0B6     OutputPla.value
+0B7.0   OutputPla.ret
+0B8     AddPlaQueue.flags
+0B8.0   ProcessPlaInputStream.ret
+0B8     PlaOutQueueFull.@SCRATCH
+0B9     AddPlaQueue.data
+0B9     ProcessPlaInputMessage.rx_data
+0BA     delay_ms.P1
+0BA     Pla_write_fast_data.byte_num
+0BA     Pla_fast_read_data.byte_num
+0BA.0   GetNextPlaMessage.ret
+0BA     ProcessOutputData.flags
+0BA     AddPlaQueue.@SCRATCH
+0BA     ProcessPlaInputMessage.@SCRATCH
+0BB     Pla_write_fast_data.bit_num
+0BB     Pla_fast_read_data.bit_num
+0BB     GetInChar.ret
+0BB     ProcessOutputData.data
+0BB     AddPlaQueue.@SCRATCH
+0BB     GetPlaQueue.@SCRATCH
+0BB     ProcessPlaInputMessage.@SCRATCH
+0BC     Pla_write_fast_data.out_val
+0BC.0   Pla_fast_read_data.data_val
+0BC.1   Pla_fast_read_data.ret
+0BC     GetQueue.ret
+0BC     ProcessOutputData.channel
+0BC     AddPlaQueue.@SCRATCH
+0BC     GetPlaQueue.@SCRATCH
+0BD.0   Pla_write_fast_data.data_val
+0BD     ProcessOutputData.data_type
+0BD     GetQueue.@SCRATCH
+0BE     GenerateAnalogueOutput.out_num
+0BE     WriteOutData.out_byte
+0BE     WriteOutData2.out_byte
+0BE     GenerateDigitalOutput.out_num
+0BF     GenerateAnalogueOutput.val
+0BF     GenerateDigitalOutput.val
+0C0     WriteAnalogueOutput.port_num
+0C0-0C1 GenerateDigitalOutput.new_state
+0C1     WriteAnalogueOutput.outval
+0C2.0   WriteAnalogueOutput.ret
+0C2     GenerateDigitalOutput.offset
+0C3     WriteAnalogueOutput.slave_num
+0C3     Spi_write_data.out_data
+0C3     GenerateDigitalOutput.@SCRATCH
+0C4     WriteAnalogueOutput.op_num
+0C4     Spi_write_data.data_size
+0C5     WriteAnalogueOutput.device_address
+0C5     Spi_write_data.latch_pin
+0C6     Spi_write_data.byte_num
+0C7     Spi_write_data.bit_num
+0C8     Spi_write_data.out_val
+0C9.0   Spi_write_data.data_val
+0E0     DataReceived.midi_char
+0E1     InQueueFull.@SCRATCH
+0E1     DataReceived.@SCRATCH
+0E2     DataReceived.@SCRATCH
+0FF     @INTERRUPT_AREA
+17F     @INTERRUPT_AREA
+1FF     @INTERRUPT_AREA
+27F     @INTERRUPT_AREA
+2FF     @INTERRUPT_AREA
+37F     @INTERRUPT_AREA
+3FF     @INTERRUPT_AREA
+        @I2C_READ_1_54_55.P1
+        @I2C_WRITE_1_54_55.P2
+  -001  LCD_INIT_STRING
+        lcd_send_byte.out_byte
+        lcd_send_byte.data_type
+        lcd_send_byte.byte_num
+        lcd_init.i
+        lcd_init.j
+        lcd_gotoxy.x
+        lcd_gotoxy.y
+        lcd_gotoxy.address
+        lcd_putc.c
+  -000  FlashWatchdog.ms_time
+        InitialiseWatchdog.i
+        AddQueue.new_byte
+        AddInQueue.new_byte
+        @PUTCHAR_31250_61_63.P1
+        InitialiseAnalogueIn.i
+  -007  LCD_INIT_TEXT
+
+0349  delay_ms
+06AA  delay_us
+004C  @GETCH_BIU_N
+003D  ProcessInterrupt
+01AB  Pla_Send_data
+009B  InitialisePlaIn
+005A  DataReceived
+035E  ProcessAnalogueIn
+049A  ProcessDigitalInputs
+0471  @MUL88
+0800  ProcessPlaInputStream
+0667  BlinkWatchdog
+031D  ResetController
+06B7  main
+
+Project Files:
+C:\DEVELOP\MIDICO~2\MIDICO~1\CODE\PLA.C
+C:\PROGRA~1\PICC\devices\16f877.h
+C:\DEVELOP\MIDICO~2\mididriver\midiflags.h
+C:\DEVELOP\MIDICO~2\MIDICO~1\CODE\lcd.h
+C:\DEVELOP\MIDICO~2\MIDICO~1\CODE\watchdog.h
+C:\DEVELOP\MIDICO~2\MIDICO~1\CODE\pla_io.h
+C:\DEVELOP\MIDICO~2\MIDICO~1\CODE\Pla_out.h
+C:\DEVELOP\MIDICO~2\MIDICO~1\CODE\max520.h
+C:\DEVELOP\MIDICO~2\MIDICO~1\CODE\anaout.h
+C:\DEVELOP\MIDICO~2\MIDICO~1\CODE\midiin.h
+C:\DEVELOP\MIDICO~2\MIDICO~1\CODE\spi_read.h
+C:\DEVELOP\MIDICO~2\MIDICO~1\CODE\digout.h
+C:\DEVELOP\MIDICO~2\MIDICO~1\CODE\anain.h
+C:\DEVELOP\MIDICO~2\MIDICO~1\CODE\digin.h
+C:\DEVELOP\MIDICO~2\MIDICO~1\CODE\proc_pla.h

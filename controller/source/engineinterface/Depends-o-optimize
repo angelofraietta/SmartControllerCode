@@ -1,0 +1,723 @@
+$(ARCH)/smutility.o: smutility.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/float.h \
+  /opt/rtems/i386-rtems/include/stdio.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stdarg.h \
+  /opt/rtems/i386-rtems/include/sys/types.h \
+  /opt/rtems/i386-rtems/include/machine/types.h \
+  /opt/rtems/i386-rtems/include/sys/features.h \
+  /opt/rtems/i386-rtems/include/sys/sched.h \
+  /opt/rtems/i386-rtems/include/sys/unistd.h \
+  /opt/rtems/i386-rtems/include/sys/time.h \
+  /opt/rtems/i386-rtems/include/sys/stdio.h smutility.h
+$(ARCH)/eventmessagequeue.o: eventmessagequeue.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h ../engine/control.h \
+  ../engine/identity.h /opt/rtems/i386-rtems/include/stdio.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stdarg.h \
+  /opt/rtems/i386-rtems/include/sys/types.h \
+  /opt/rtems/i386-rtems/include/machine/types.h \
+  /opt/rtems/i386-rtems/include/sys/features.h \
+  /opt/rtems/i386-rtems/include/sys/sched.h \
+  /opt/rtems/i386-rtems/include/sys/unistd.h \
+  /opt/rtems/i386-rtems/include/sys/time.h \
+  /opt/rtems/i386-rtems/include/sys/stdio.h ../engine/connectormessage.h \
+  ../engine/socket.h ../engine/outlet.h ../engine/baseshel.h \
+  ../engine/connect.h ../engine/funcdec.h smutility.h eventmessagequeue.h
+$(ARCH)/baseshellquestion.o: baseshellquestion.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h ../engine/control.h \
+  ../engine/identity.h /opt/rtems/i386-rtems/include/stdio.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stdarg.h \
+  /opt/rtems/i386-rtems/include/sys/types.h \
+  /opt/rtems/i386-rtems/include/machine/types.h \
+  /opt/rtems/i386-rtems/include/sys/features.h \
+  /opt/rtems/i386-rtems/include/sys/sched.h \
+  /opt/rtems/i386-rtems/include/sys/unistd.h \
+  /opt/rtems/i386-rtems/include/sys/time.h \
+  /opt/rtems/i386-rtems/include/sys/stdio.h ../engine/connectormessage.h \
+  ../engine/socket.h ../engine/outlet.h ../engine/baseshel.h \
+  ../engine/connect.h ../engine/funcdec.h smutility.h interfacetypes.h \
+  baseshellanswer.h presentationquestion.h baseshellquestion.h \
+  presentationanswer.h eventanswer.h
+$(ARCH)/connectorquestion.o: connectorquestion.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h smutility.h interfacetypes.h \
+  /opt/rtems/i386-rtems/include/stdio.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stdarg.h \
+  /opt/rtems/i386-rtems/include/sys/types.h \
+  /opt/rtems/i386-rtems/include/machine/types.h \
+  /opt/rtems/i386-rtems/include/sys/features.h \
+  /opt/rtems/i386-rtems/include/sys/sched.h \
+  /opt/rtems/i386-rtems/include/sys/unistd.h \
+  /opt/rtems/i386-rtems/include/sys/time.h \
+  /opt/rtems/i386-rtems/include/sys/stdio.h connectorquestion.h \
+  presentationquestion.h connectoranswer.h presentationanswer.h \
+  eventanswer.h
+$(ARCH)/patchquestion.o: patchquestion.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h interfacetypes.h \
+  /opt/rtems/i386-rtems/include/stdio.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stdarg.h \
+  /opt/rtems/i386-rtems/include/sys/types.h \
+  /opt/rtems/i386-rtems/include/machine/types.h \
+  /opt/rtems/i386-rtems/include/sys/features.h \
+  /opt/rtems/i386-rtems/include/sys/sched.h \
+  /opt/rtems/i386-rtems/include/sys/unistd.h \
+  /opt/rtems/i386-rtems/include/sys/time.h \
+  /opt/rtems/i386-rtems/include/sys/stdio.h smutility.h dllinterface.h \
+  patchquestion.h presentationquestion.h presentationanswer.h \
+  eventanswer.h patchanswer.h baseshellanswer.h
+$(ARCH)/identityquestion.o: identityquestion.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h ../engine/control.h \
+  ../engine/identity.h /opt/rtems/i386-rtems/include/stdio.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stdarg.h \
+  /opt/rtems/i386-rtems/include/sys/types.h \
+  /opt/rtems/i386-rtems/include/machine/types.h \
+  /opt/rtems/i386-rtems/include/sys/features.h \
+  /opt/rtems/i386-rtems/include/sys/sched.h \
+  /opt/rtems/i386-rtems/include/sys/unistd.h \
+  /opt/rtems/i386-rtems/include/sys/time.h \
+  /opt/rtems/i386-rtems/include/sys/stdio.h ../engine/connectormessage.h \
+  ../engine/socket.h ../engine/outlet.h ../engine/baseshel.h \
+  ../engine/connect.h ../engine/funcdec.h smutility.h \
+  presentationquestion.h identityquestion.h interfacetypes.h \
+  presentationanswer.h eventanswer.h identityanswer.h
+$(ARCH)/sessionquestion.o: sessionquestion.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h sysexfilequestion.h \
+  /opt/rtems/i386-rtems/include/stdio.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stdarg.h \
+  /opt/rtems/i386-rtems/include/sys/types.h \
+  /opt/rtems/i386-rtems/include/machine/types.h \
+  /opt/rtems/i386-rtems/include/sys/features.h \
+  /opt/rtems/i386-rtems/include/sys/sched.h \
+  /opt/rtems/i386-rtems/include/sys/unistd.h \
+  /opt/rtems/i386-rtems/include/sys/time.h \
+  /opt/rtems/i386-rtems/include/sys/stdio.h ../link_driver/linkprotocol.h \
+  ../link_driver/staticvector.h ../link_driver/controlfilter.h \
+  sessioninterface.h questiontask.h \
+  ../../../threads/source/activeobject.h ../link_driver/networklayer.h \
+  ../hal_include/simulatorinterface.h
+$(ARCH)/presentationquestion.o: presentationquestion.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h smutility.h \
+  ../link_driver/crc32.h eventanswer.h sessioninterface.h \
+  presentationanswer.h eventquestion.h presentationquestion.h
+$(ARCH)/eventquestion.o: eventquestion.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h presentationquestion.h \
+  eventanswer.h eventquestion.h
+$(ARCH)/baseshellanswer.o: baseshellanswer.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h ../engine/control.h \
+  ../engine/identity.h /opt/rtems/i386-rtems/include/stdio.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stdarg.h \
+  /opt/rtems/i386-rtems/include/sys/types.h \
+  /opt/rtems/i386-rtems/include/machine/types.h \
+  /opt/rtems/i386-rtems/include/sys/features.h \
+  /opt/rtems/i386-rtems/include/sys/sched.h \
+  /opt/rtems/i386-rtems/include/sys/unistd.h \
+  /opt/rtems/i386-rtems/include/sys/time.h \
+  /opt/rtems/i386-rtems/include/sys/stdio.h ../engine/connectormessage.h \
+  ../engine/socket.h ../engine/outlet.h ../engine/baseshel.h \
+  ../engine/connect.h ../engine/funcdec.h smutility.h \
+  ../engine/typelist.h identityanswer.h interfacetypes.h \
+  ../hal_include/scheduler.h ../engine/timer.h ../engine/memorycache.h \
+  ../../../estl/elist.h ../../../estl/equeue.h patchanswer.h \
+  baseshellanswer.h connectoranswer.h
+$(ARCH)/connectoranswer.o: connectoranswer.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h identityanswer.h interfacetypes.h \
+  /opt/rtems/i386-rtems/include/stdio.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stdarg.h \
+  /opt/rtems/i386-rtems/include/sys/types.h \
+  /opt/rtems/i386-rtems/include/machine/types.h \
+  /opt/rtems/i386-rtems/include/sys/features.h \
+  /opt/rtems/i386-rtems/include/sys/sched.h \
+  /opt/rtems/i386-rtems/include/sys/unistd.h \
+  /opt/rtems/i386-rtems/include/sys/time.h \
+  /opt/rtems/i386-rtems/include/sys/stdio.h connectoranswer.h \
+  baseshellanswer.h ../engine/control.h ../engine/identity.h \
+  ../engine/connectormessage.h ../engine/socket.h ../engine/outlet.h \
+  ../engine/baseshel.h ../engine/connect.h ../engine/funcdec.h \
+  smutility.h
+$(ARCH)/patchanswer.o: patchanswer.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h ../engine/control.h \
+  ../engine/identity.h /opt/rtems/i386-rtems/include/stdio.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stdarg.h \
+  /opt/rtems/i386-rtems/include/sys/types.h \
+  /opt/rtems/i386-rtems/include/machine/types.h \
+  /opt/rtems/i386-rtems/include/sys/features.h \
+  /opt/rtems/i386-rtems/include/sys/sched.h \
+  /opt/rtems/i386-rtems/include/sys/unistd.h \
+  /opt/rtems/i386-rtems/include/sys/time.h \
+  /opt/rtems/i386-rtems/include/sys/stdio.h ../engine/connectormessage.h \
+  ../engine/socket.h ../engine/outlet.h ../engine/baseshel.h \
+  ../engine/connect.h ../engine/funcdec.h smutility.h ../engine/patch.h \
+  ../engine/patchports.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/deque \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/functexcept.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/exception_defines.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_algobase.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/c++config.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/os_defines.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cstring \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cstddef \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/climits \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/limits.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/syslimits.h \
+  /opt/rtems/i386-rtems/include/limits.h \
+  /opt/rtems/i386-rtems/include/sys/syslimits.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cstdlib \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/new \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/exception \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/iosfwd \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stringfwd.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/fpos.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/c++io.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cstdio \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/gthr.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/gthr-default.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cwchar \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/ctime \
+  /opt/rtems/i386-rtems/include/time.h \
+  /opt/rtems/i386-rtems/include/machine/time.h \
+  /opt/rtems/i386-rtems/include/signal.h \
+  /opt/rtems/i386-rtems/include/sys/signal.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_pair.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/type_traits.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_iterator_base_types.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_iterator_base_funcs.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/concept_check.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_iterator.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_alloc.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cassert \
+  /opt/rtems/i386-rtems/include/assert.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_threads.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/atomicity.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_construct.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_uninitialized.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_deque.h \
+  identityanswer.h interfacetypes.h ../hal_include/scheduler.h \
+  ../engine/timer.h ../engine/memorycache.h ../../../estl/elist.h \
+  ../../../estl/equeue.h fileanswer.h connectoranswer.h patchanswer.h \
+  baseshellanswer.h
+$(ARCH)/identityanswer.o: identityanswer.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h smutility.h ../engine/control.h \
+  ../engine/identity.h /opt/rtems/i386-rtems/include/stdio.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stdarg.h \
+  /opt/rtems/i386-rtems/include/sys/types.h \
+  /opt/rtems/i386-rtems/include/machine/types.h \
+  /opt/rtems/i386-rtems/include/sys/features.h \
+  /opt/rtems/i386-rtems/include/sys/sched.h \
+  /opt/rtems/i386-rtems/include/sys/unistd.h \
+  /opt/rtems/i386-rtems/include/sys/time.h \
+  /opt/rtems/i386-rtems/include/sys/stdio.h ../engine/connectormessage.h \
+  ../engine/socket.h ../engine/outlet.h ../engine/baseshel.h \
+  ../engine/connect.h ../engine/funcdec.h ../../../estl/emap.h \
+  ../engine/memorycache.h identityanswer.h interfacetypes.h patchanswer.h \
+  baseshellanswer.h
+$(ARCH)/sessionanswer.o: sessionanswer.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h smutility.h \
+  ../link_driver/networklayer.h sessioninterface.h presentationanswer.h \
+  eventanswer.h
+$(ARCH)/presentationanswer.o: presentationanswer.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h smutility.h \
+  ../link_driver/crc32.h ../engine/control.h ../engine/identity.h \
+  /opt/rtems/i386-rtems/include/stdio.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stdarg.h \
+  /opt/rtems/i386-rtems/include/sys/types.h \
+  /opt/rtems/i386-rtems/include/machine/types.h \
+  /opt/rtems/i386-rtems/include/sys/features.h \
+  /opt/rtems/i386-rtems/include/sys/sched.h \
+  /opt/rtems/i386-rtems/include/sys/unistd.h \
+  /opt/rtems/i386-rtems/include/sys/time.h \
+  /opt/rtems/i386-rtems/include/sys/stdio.h ../engine/connectormessage.h \
+  ../engine/socket.h ../engine/outlet.h ../engine/baseshel.h \
+  ../engine/connect.h ../engine/funcdec.h sessioninterface.h answertask.h \
+  ../../../threads/source/activeobject.h presentationanswer.h \
+  eventanswer.h identityanswer.h interfacetypes.h patchanswer.h \
+  baseshellanswer.h viewanswer.h connectoranswer.h fileanswer.h
+$(ARCH)/eventanswer.o: eventanswer.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h eventanswer.h
+$(ARCH)/fileanswer.o: fileanswer.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h \
+  /opt/rtems/i386-rtems/include/stdio.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stdarg.h \
+  /opt/rtems/i386-rtems/include/sys/types.h \
+  /opt/rtems/i386-rtems/include/machine/types.h \
+  /opt/rtems/i386-rtems/include/sys/features.h \
+  /opt/rtems/i386-rtems/include/sys/sched.h \
+  /opt/rtems/i386-rtems/include/sys/unistd.h \
+  /opt/rtems/i386-rtems/include/sys/time.h \
+  /opt/rtems/i386-rtems/include/sys/stdio.h \
+  /opt/rtems/i386-rtems/include/fcntl.h \
+  /opt/rtems/i386-rtems/include/sys/fcntl.h \
+  /opt/rtems/i386-rtems/include/sys/stat.h \
+  /opt/rtems/i386-rtems/include/time.h \
+  /opt/rtems/i386-rtems/include/machine/time.h \
+  /opt/rtems/i386-rtems/include/signal.h \
+  /opt/rtems/i386-rtems/include/sys/signal.h ../../../estl/emap.h \
+  ../engine/memorycache.h ../engine/control.h ../engine/identity.h \
+  ../engine/connectormessage.h ../engine/socket.h ../engine/outlet.h \
+  ../engine/baseshel.h ../engine/connect.h ../engine/funcdec.h \
+  smutility.h nvramstore.h ../../../mididriver/iodata.h fileblock.h \
+  ../../../threads/source/event.h ../../../threads/source/activeobject.h \
+  ../../../mididriver/midiflags.h ../../../mididriver/midioutputdriver.h \
+  ../../../mididriver/midiinputdriver.h ../../../mididriver/stdafx.h \
+  ../../../mididriver/mididriver.h ../../../estl/equeue.h \
+  ../../../mididriver/filedriver.h ../../../mididriver/midiutilities.h \
+  ../engine/patch.h ../engine/patchports.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/deque \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/functexcept.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/exception_defines.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_algobase.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/c++config.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/os_defines.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cstring \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cstddef \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/climits \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/limits.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/syslimits.h \
+  /opt/rtems/i386-rtems/include/limits.h \
+  /opt/rtems/i386-rtems/include/sys/syslimits.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cstdlib \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/new \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/exception \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/iosfwd \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stringfwd.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/fpos.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/c++io.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cstdio \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/gthr.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/gthr-default.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cwchar \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/ctime \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_pair.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/type_traits.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_iterator_base_types.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_iterator_base_funcs.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/concept_check.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_iterator.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_alloc.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cassert \
+  /opt/rtems/i386-rtems/include/assert.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_threads.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/atomicity.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_construct.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_uninitialized.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_deque.h \
+  interfacetypes.h fileanswer.h
+$(ARCH)/answertask.o: answertask.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h \
+  /opt/rtems/i386-rtems/include/stdio.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stdarg.h \
+  /opt/rtems/i386-rtems/include/sys/types.h \
+  /opt/rtems/i386-rtems/include/machine/types.h \
+  /opt/rtems/i386-rtems/include/sys/features.h \
+  /opt/rtems/i386-rtems/include/sys/sched.h \
+  /opt/rtems/i386-rtems/include/sys/unistd.h \
+  /opt/rtems/i386-rtems/include/sys/time.h \
+  /opt/rtems/i386-rtems/include/sys/stdio.h \
+  ../../../threads/source/event.h ../../../estl/equeue.h \
+  sessioninterface.h presentationanswer.h eventanswer.h answertask.h \
+  ../../../threads/source/activeobject.h
+$(ARCH)/sysexfilequestion.o: sysexfilequestion.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h ../../../mididriver/mididrv.h \
+  ../link_driver/linkprotocol.h ../link_driver/staticvector.h \
+  ../link_driver/controlfilter.h sysexfilequestion.h \
+  /opt/rtems/i386-rtems/include/stdio.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stdarg.h \
+  /opt/rtems/i386-rtems/include/sys/types.h \
+  /opt/rtems/i386-rtems/include/machine/types.h \
+  /opt/rtems/i386-rtems/include/sys/features.h \
+  /opt/rtems/i386-rtems/include/sys/sched.h \
+  /opt/rtems/i386-rtems/include/sys/unistd.h \
+  /opt/rtems/i386-rtems/include/sys/time.h \
+  /opt/rtems/i386-rtems/include/sys/stdio.h sessioninterface.h
+$(ARCH)/viewanswer.o: viewanswer.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h ../engine/control.h \
+  ../engine/identity.h /opt/rtems/i386-rtems/include/stdio.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stdarg.h \
+  /opt/rtems/i386-rtems/include/sys/types.h \
+  /opt/rtems/i386-rtems/include/machine/types.h \
+  /opt/rtems/i386-rtems/include/sys/features.h \
+  /opt/rtems/i386-rtems/include/sys/sched.h \
+  /opt/rtems/i386-rtems/include/sys/unistd.h \
+  /opt/rtems/i386-rtems/include/sys/time.h \
+  /opt/rtems/i386-rtems/include/sys/stdio.h ../engine/connectormessage.h \
+  ../engine/socket.h ../engine/outlet.h ../engine/baseshel.h \
+  ../engine/connect.h ../engine/funcdec.h smutility.h ../engine/patch.h \
+  ../engine/patchports.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/deque \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/functexcept.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/exception_defines.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_algobase.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/c++config.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/os_defines.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cstring \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cstddef \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/climits \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/limits.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/syslimits.h \
+  /opt/rtems/i386-rtems/include/limits.h \
+  /opt/rtems/i386-rtems/include/sys/syslimits.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cstdlib \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/new \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/exception \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/iosfwd \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stringfwd.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/fpos.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/c++io.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cstdio \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/gthr.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/gthr-default.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cwchar \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/ctime \
+  /opt/rtems/i386-rtems/include/time.h \
+  /opt/rtems/i386-rtems/include/machine/time.h \
+  /opt/rtems/i386-rtems/include/signal.h \
+  /opt/rtems/i386-rtems/include/sys/signal.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_pair.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/type_traits.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_iterator_base_types.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_iterator_base_funcs.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/concept_check.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_iterator.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_alloc.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cassert \
+  /opt/rtems/i386-rtems/include/assert.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_threads.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/atomicity.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_construct.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_uninitialized.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_deque.h \
+  ../engine/patchview.h connectoranswer.h interfacetypes.h patchanswer.h \
+  baseshellanswer.h viewanswer.h
+$(ARCH)/fileblock.o: fileblock.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h ../link_driver/crc32.h \
+  /opt/rtems/i386-rtems/include/stdio.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stdarg.h \
+  /opt/rtems/i386-rtems/include/sys/types.h \
+  /opt/rtems/i386-rtems/include/machine/types.h \
+  /opt/rtems/i386-rtems/include/sys/features.h \
+  /opt/rtems/i386-rtems/include/sys/sched.h \
+  /opt/rtems/i386-rtems/include/sys/unistd.h \
+  /opt/rtems/i386-rtems/include/sys/time.h \
+  /opt/rtems/i386-rtems/include/sys/stdio.h \
+  /opt/rtems/i386-rtems/include/fcntl.h \
+  /opt/rtems/i386-rtems/include/sys/fcntl.h \
+  /opt/rtems/i386-rtems/include/sys/stat.h \
+  /opt/rtems/i386-rtems/include/time.h \
+  /opt/rtems/i386-rtems/include/machine/time.h \
+  /opt/rtems/i386-rtems/include/signal.h \
+  /opt/rtems/i386-rtems/include/sys/signal.h sessioninterface.h \
+  presentationanswer.h eventanswer.h answertask.h \
+  ../../../threads/source/activeobject.h fileblock.h
+$(ARCH)/nvramstore.o: nvramstore.cpp ../engine/stdafx.h \
+  /opt/rtems/i386-rtems/include/stdlib.h \
+  /opt/rtems/i386-rtems/include/_ansi.h \
+  /opt/rtems/i386-rtems/include/newlib.h \
+  /opt/rtems/i386-rtems/include/sys/config.h \
+  /opt/rtems/i386-rtems/include/machine/ieeefp.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stddef.h \
+  /opt/rtems/i386-rtems/include/sys/reent.h \
+  /opt/rtems/i386-rtems/include/sys/_types.h \
+  /opt/rtems/i386-rtems/include/machine/stdlib.h \
+  /opt/rtems/i386-rtems/include/alloca.h ../../../estl/evector.h \
+  ../../../estl/estring.h /opt/rtems/i386-rtems/include/string.h \
+  typedefs.h ../engine/error_messages.h \
+  /opt/rtems/i386-rtems/include/stdio.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/stdarg.h \
+  /opt/rtems/i386-rtems/include/sys/types.h \
+  /opt/rtems/i386-rtems/include/machine/types.h \
+  /opt/rtems/i386-rtems/include/sys/features.h \
+  /opt/rtems/i386-rtems/include/sys/sched.h \
+  /opt/rtems/i386-rtems/include/sys/unistd.h \
+  /opt/rtems/i386-rtems/include/sys/time.h \
+  /opt/rtems/i386-rtems/include/sys/stdio.h \
+  /opt/rtems/i386-rtems/include/fcntl.h \
+  /opt/rtems/i386-rtems/include/sys/fcntl.h \
+  /opt/rtems/i386-rtems/include/sys/stat.h \
+  /opt/rtems/i386-rtems/include/time.h \
+  /opt/rtems/i386-rtems/include/machine/time.h \
+  /opt/rtems/i386-rtems/include/signal.h \
+  /opt/rtems/i386-rtems/include/sys/signal.h \
+  /opt/rtems/i386-rtems/include/dirent.h \
+  /opt/rtems/i386-rtems/include/sys/dirent.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/limits.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/syslimits.h \
+  /opt/rtems/i386-rtems/include/limits.h \
+  /opt/rtems/i386-rtems/include/sys/syslimits.h \
+  ../../../mididriver/midiflags.h ../engine/control.h \
+  ../engine/identity.h ../engine/connectormessage.h ../engine/socket.h \
+  ../engine/outlet.h ../engine/baseshel.h ../engine/connect.h \
+  ../engine/funcdec.h smutility.h ../engine/patch.h \
+  ../engine/patchports.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/deque \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/functexcept.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/exception_defines.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_algobase.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/c++config.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/os_defines.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cstring \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cstddef \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/climits \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cstdlib \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/new \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/exception \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/iosfwd \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stringfwd.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/fpos.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/c++io.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cstdio \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/gthr.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/gthr-default.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cwchar \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/ctime \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_pair.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/type_traits.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_iterator_base_types.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_iterator_base_funcs.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/concept_check.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_iterator.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_alloc.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/cassert \
+  /opt/rtems/i386-rtems/include/assert.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_threads.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/i386-rtems/bits/atomicity.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_construct.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_uninitialized.h \
+  /opt/rtems/lib/gcc-lib/i386-rtems/3.2.3/include/c++/bits/stl_deque.h \
+  ../hal_include/scheduler.h ../engine/timer.h ../engine/memorycache.h \
+  ../../../estl/elist.h ../../../estl/equeue.h sessioninterface.h \
+  presentationanswer.h eventanswer.h answertask.h \
+  ../../../threads/source/activeobject.h nvramstore.h \
+  ../../../mididriver/iodata.h fileblock.h \
+  ../../../threads/source/event.h ../../../mididriver/midioutputdriver.h \
+  ../../../mididriver/midiinputdriver.h ../../../mididriver/stdafx.h \
+  ../../../mididriver/mididriver.h ../../../mididriver/filedriver.h \
+  ../../../mididriver/midiutilities.h

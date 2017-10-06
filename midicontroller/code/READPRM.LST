@@ -1,0 +1,7142 @@
+CCS PCM C Compiler, Version 3.060, 12652
+
+               Filename: C:\DEVELOP\MIDICO~3\MIDICO~1\CODE\READPRM.LST
+
+               ROM used: 4232 (52%)
+                         Largest free fragment is 2048
+               RAM used: 105 (60%) at main() level
+                         168 (96%) worst case
+               Stack:    7 worst case (5 in main + 2 for interrupts)
+
+*
+0000:  MOVLW  10
+0001:  MOVWF  0A
+0002:  GOTO   000
+0003:  NOP
+0004:  MOVWF  7F
+0005:  SWAPF  03,W
+0006:  BCF    03.5
+0007:  BCF    03.6
+0008:  MOVWF  21
+0009:  MOVF   0A,W
+000A:  MOVWF  20
+000B:  CLRF   0A
+000C:  MOVF   04,W
+000D:  MOVWF  22
+000E:  MOVF   77,W
+000F:  MOVWF  23
+0010:  MOVF   78,W
+0011:  MOVWF  24
+0012:  MOVF   79,W
+0013:  MOVWF  25
+0014:  MOVF   7A,W
+0015:  MOVWF  26
+0016:  MOVF   7B,W
+0017:  MOVWF  27
+0018:  BCF    03.7
+0019:  BCF    03.5
+001A:  BTFSS  0B.4
+001B:  GOTO   01E
+001C:  BTFSC  0B.1
+001D:  GOTO   037
+001E:  MOVLW  8C
+001F:  MOVWF  04
+0020:  BTFSS  00.5
+0021:  GOTO   024
+0022:  BTFSC  0C.5
+0023:  GOTO   03A
+0024:  MOVF   22,W
+0025:  MOVWF  04
+0026:  MOVF   23,W
+0027:  MOVWF  77
+0028:  MOVF   24,W
+0029:  MOVWF  78
+002A:  MOVF   25,W
+002B:  MOVWF  79
+002C:  MOVF   26,W
+002D:  MOVWF  7A
+002E:  MOVF   27,W
+002F:  MOVWF  7B
+0030:  MOVF   20,W
+0031:  MOVWF  0A
+0032:  SWAPF  21,W
+0033:  MOVWF  03
+0034:  SWAPF  7F,F
+0035:  SWAPF  7F,W
+0036:  RETFIE
+0037:  BCF    0A.3
+0038:  BCF    0A.4
+0039:  GOTO   051
+003A:  BCF    0A.3
+003B:  BCF    0A.4
+003C:  GOTO   078
+....................  /******************************************************************************* 
+.................... *	Author: Angelo Fraietta 
+.................... *	Description: General Purpose Midi controller 
+.................... *	Processor PIC16F877 
+.................... *	Specifications: 
+.................... *		16 Digital input to Midi Output (SPI) 
+.................... *		16 Analogue input to Midi Output (ADC) 
+.................... *		Midi input to Midi output merge (UART) 
+.................... *   Midi input to 16 Analogue ouput (I2C) 
+.................... * 
+.................... *******************************************************************************/ 
+....................  
+.................... #include "16f877.h" 
+....................  //////// Standard Header file for the PIC16F877 device //////////////// 
+.................... #device PIC16F877 
+.................... #list 
+.................... 
+....................  
+.................... #include "../../mididriver/midiflags.h" 
+....................  /************************************************************* 
+.................... Module contains Flags used for using 16 bit word as bitmask 
+....................  
+.................... Tx and RX are respective to the Smart Controller CPU device 
+.................... The Midi IO board, therefore would treat it's tx as RX 
+.................... *************************************************************/ 
+....................  
+.................... #define TX_DATA_MASK    0x8000 
+.................... #define DATA_TYPE_MASK   0x7000 
+.................... #define DATA_PARAMS_MASK 0x0F00 
+.................... #define DATA_VALUE_MASK  0x00FF 
+....................  
+.................... // define the diagnostic messages 
+....................  
+.................... #define DIAG_DIAG_MESSAGE_FLAG 0xFF 
+....................  
+.................... #define DIAG_INVALID_RX_DATA 0xFFFF //this means this message is bad 
+.................... #define DIAG_MESSAGE_MASK 0xFF00 // we are checking the first byte 
+.................... #define DIAG_RE_TRANSMIT_LAST_MESSAGE 0xFF00 // We are requesting the last message be re-sent 
+.................... #define DIAG_ETX 0xFF01 // This is the End of our transmission. Pic Requires a response 
+.................... #define DIAG_ECHO 0xFF02 // Same Data is returned. Initiated by PIC 
+.................... #define DIAG_RESET 0xFF03 // Reset. Sent by 386 upon device driver startup 
+.................... #define DIAG_ASYNC_MESSAGE_READY 0xFF04 // 386 has a message ready, transmitted asynchronously from 386. 
+.................... #define DIAG_SYNC_MESSAGE_READY 0xFF05 // 386 has a message ready, transmitted within context of ISR from 386.   
+.................... #define DIAG_RECEIVE_RESPONSE  0xFF06 // 386 has received PICS message but has no data. Response still required 
+.................... #define DIAG_REQUEST_RX_BYTES  0xFF07 // requesting the number of Data bytes received be returned 
+.................... #define DIAG_REQUEST_TX_BYTES  0xFF08 // requesting the number of Data bytes transmitted be returned 
+.................... #define DIAG_INCOMPLETE_PLA    0xFF09 // this is what the Pla will give out if it has not been loded properly 
+.................... // Synchronisation returns have the number as the last nibble. Value is therefore 0 to F 
+.................... #define DIAG_RETURN_RX_BYTES   0xFFE0 
+.................... #define DIAG_RETURN_TX_BYTES   0xFFD0 
+.................... #define DIAG_TEST_RETURN_BYTES_MASK 0xFFF0 // AND with Diag message to determine whether it is a synch mask 
+.................... #define DIAG_RETURN_BYTES_MASK 0x0001 // AND with Message to read the number of bytes. Only test 1 and zero 
+....................  
+.................... #define SYSEX_START_STATUS 0xF0 
+.................... #define SYSEX_END_STATUS 	 0xF7 
+.................... 	 
+.................... /************************************************* 
+.................... 16 bit Message Consists of following Bits 
+....................  
+.................... T  DDD CCCC DATABYTE 
+....................  
+.................... T = Transmit Data - 1 bit 
+.................... DDD = Data Types - 3 bits (listed below). Up to a maximum of 7 
+.................... CCCC = Channel - 4 bits (16 channels) 
+.................... DATABYTE = Message Data Value - 8 bits 
+....................  
+.................... Note that DDDCCCC that equals 7F is a diag message 
+.................... **************************************************/ 
+.................... #define TX_DATA_FLAG      0x80 
+....................  
+.................... // define four Data Types. Last three bits of first byte. Remaining are Type specific 
+....................  
+.................... #define MIDI_CHAN_1_DATA  0x00 
+.................... #define MIDI_CHAN_2_DATA  0x10 
+.................... #define ANALOG_DATA       0x20 
+.................... #define DIGITAL_DATA      0x30 
+....................  
+.................... #define EEPROM_WRITE_PAGE_SIZE 64 // the maximum we are allowed to write at one time 
+.................... #define EEPROM_READ_PAGE_SIZE  127 // the number of bytes we will receive from the IO card 
+.................... #define EEPROM_INT_PAGE_SIZE   256 
+....................  
+.................... // define EEPROM flags  
+.................... #define EEPROM_DATA          0x40  
+.................... #define EEPROM_INIT_ADDRESS  0x41 // sent by 386 
+.................... #define EEPROM_START_WRITE   0x42 // sent by 386 
+.................... #define EEPROM_END_WRITE     0x43 // completes the page write 
+.................... #define EEPROM_WRITE_READY   0x44 // sent by PIC 
+.................... #define EEPROM_END_READ      0x45 // sent by PIC 
+.................... #define EEPROM_BLOCK_READ    0x46 // sent by 386 
+....................  
+.................... // define masks to Disable and enable IO 
+.................... #define EEPROM_START         0x47 
+.................... #define EEPROM_END           0x48 
+....................  
+.................... // define Masks for the internal rom 
+.................... #define INT_EEPROM_DATA      0x49 
+.................... #define INT_EEPROM_READ      0x4A 
+....................  
+....................  
+.................... 
+....................  
+.................... #define IOCARD_BUILD 
+....................  
+.................... #device adc=8 
+.................... #fuses HS, WDT, BROWNOUT, PUT, NOLVP, PROTECT 
+....................  
+.................... //#define _SIMULATE 
+....................  
+....................  
+.................... // define pins for SPI input reads and output writes 
+.................... #define SPI_IN_LATCH      PIN_C2 
+.................... #define SPI_CLOCK         PIN_C3 
+....................  
+.................... #define SPI_DATA_OUT      PIN_D1 
+.................... #define DIGITAL_OUT_LATCH PIN_D2 
+.................... #define DIGITAL_IN_DATA   PIN_C4 
+.................... #define LCD_CLK           SPI_CLOCK          
+.................... #define LCD_DATA          SPI_DATA_OUT 
+.................... #define LCD_ENABLE        PIN_D0 
+....................    
+.................... // define PLA Pins 
+.................... #define PLA_CLK                 PIN_D5 
+.................... #define SPI_PLA_DATA_OUT        PIN_D4 
+.................... #define SPI_PLA_DATA_IN         PIN_D6 
+....................  
+.................... //#define SPI_PLA_DATA          PIN_D4 
+.................... #define SPI_PLA_DATA_DIR        PIN_D3 
+....................  
+.................... #define CYCLE_COUNT 2 
+....................  
+.................... // set the following define to Do a count test 
+.................... //#define DIAG_COUNT 
+....................  
+....................  
+.................... #ifdef _SIMULATE 
+.................... #define _NO_DELAY 
+.................... #else 
+.................... #define _USE_PRINTF 
+.................... #endif 
+....................  
+.................... #define NUM_ANALOGUE_OUT 8 
+.................... #define NUM_DIGITAL_OUT 16 
+....................  
+....................  
+.................... #use delay(clock=20000000) 
+*
+00AB:  MOVLW  CF
+00AC:  MOVWF  04
+00AD:  MOVF   00,W
+00AE:  BTFSC  03.2
+00AF:  GOTO   0BD
+00B0:  MOVLW  06
+00B1:  MOVWF  78
+00B2:  CLRF   77
+00B3:  DECFSZ 77,F
+00B4:  GOTO   0B3
+00B5:  DECFSZ 78,F
+00B6:  GOTO   0B2
+00B7:  MOVLW  7B
+00B8:  MOVWF  77
+00B9:  DECFSZ 77,F
+00BA:  GOTO   0B9
+00BB:  DECFSZ 00,F
+00BC:  GOTO   0B0
+00BD:  RETLW  00
+*
+07F3:  MOVLW  AA
+07F4:  MOVWF  04
+07F5:  MOVF   00,W
+07F6:  BTFSC  03.2
+07F7:  GOTO   7FD
+07F8:  GOTO   7FB
+07F9:  NOP
+07FA:  NOP
+07FB:  DECFSZ 00,F
+07FC:  GOTO   7F9
+07FD:  BCF    0A.3
+07FE:  BSF    0A.4
+07FF:  GOTO   3AA (RETURN)
+....................  
+.................... #define MIDIOUT_1_PIN PIN_C6 
+.................... #define MIDIOUT_2_PIN PIN_C5 
+.................... #define MIDI_IN_PIN PIN_C7 
+....................  
+.................... #define WATCHDOG_OVERFLOW_COUNT   255 
+.................... #define WATCHDOG_NORMAL_COUNT     5000L 
+.................... #define NUM_MAX_OVERFLOW_BLINK        10 
+.................... #define MAX_RESENDS               2 
+....................  
+.................... #define NUM_ANALOGUE_IN_BANKS 2 
+.................... #define NUM_ANALOGUE_IN_SUB_BANKS 8 
+.................... #define NUM_ANALOGUE_IN_CHANS (NUM_ANALOGUE_IN_BANKS * NUM_ANALOGUE_IN_SUB_BANKS) 
+.................... #define AD_READ_DELAY 20 // num us to delay from setting channel to making read 
+.................... #define AD_SWITCH_DELAY 1 // num us to wait between switching analog switch to reading 
+.................... #define NUM_ANALOG_VALID_READS 2 // must be this many identical reads to be a valid input 
+....................  
+.................... //#define SEVEN_BIT_AD 
+....................  
+.................... #ifdef SEVEN_BIT_AD 
+.................... #define DIG_ON_VAL 0x7f 
+.................... #else 
+.................... #define DIG_ON_VAL 0xff 
+.................... #endif 
+....................  
+.................... #byte PORTA = 5 
+.................... #byte PORTB = 6 
+.................... #byte PORTC = 7 
+....................  
+....................  
+.................... #use rs232(baud=31250, xmit=MIDIOUT_1_PIN, rcv=MIDI_IN_PIN, ERRORS)  
+*
+005A:  BTFSS  0C.5
+005B:  GOTO   05A
+005C:  MOVF   18,W
+005D:  MOVWF  28
+005E:  MOVF   1A,W
+005F:  MOVWF  78
+0060:  BTFSS  28.1
+0061:  GOTO   064
+0062:  BCF    18.4
+0063:  BSF    18.4
+0064:  NOP
+0065:  BCF    0A.3
+0066:  BCF    0A.4
+0067:  GOTO   079 (RETURN)
+....................  
+.................... #USE I2C(master, sda=PIN_B7, scl=PIN_B6) 
+*
+0101:  MOVLW  08
+0102:  BSF    03.5
+0103:  MOVWF  49
+0104:  MOVF   77,W
+0105:  MOVWF  4A
+0106:  BCF    03.5
+0107:  BSF    03.5
+0108:  BSF    06.7
+0109:  MOVLW  06
+010A:  MOVWF  77
+010B:  BCF    03.5
+010C:  DECFSZ 77,F
+010D:  GOTO   10C
+010E:  BSF    03.5
+010F:  BSF    06.6
+0110:  BCF    03.5
+0111:  BTFSS  06.6
+0112:  GOTO   111
+0113:  BTFSC  06.7
+0114:  BSF    03.0
+0115:  BTFSS  06.7
+0116:  BCF    03.0
+0117:  RLF    78,F
+0118:  MOVLW  04
+0119:  MOVWF  77
+011A:  DECFSZ 77,F
+011B:  GOTO   11A
+011C:  BSF    03.5
+011D:  BCF    06.6
+011E:  BCF    03.5
+011F:  BCF    06.6
+0120:  BSF    03.5
+0121:  DECFSZ 49,F
+0122:  GOTO   124
+0123:  GOTO   126
+0124:  BCF    03.5
+0125:  GOTO   107
+0126:  BSF    06.7
+0127:  MOVLW  06
+0128:  MOVWF  77
+0129:  BCF    03.5
+012A:  DECFSZ 77,F
+012B:  GOTO   12A
+012C:  BCF    06.7
+012D:  BSF    03.5
+012E:  MOVF   4A,W
+012F:  BTFSS  03.2
+0130:  BCF    06.7
+0131:  BCF    03.5
+0132:  NOP
+0133:  BSF    03.5
+0134:  BSF    06.6
+0135:  BCF    03.5
+0136:  BTFSS  06.6
+0137:  GOTO   136
+0138:  MOVLW  04
+0139:  MOVWF  77
+013A:  DECFSZ 77,F
+013B:  GOTO   13A
+013C:  BCF    06.6
+013D:  BSF    03.5
+013E:  BCF    06.6
+013F:  MOVLW  06
+0140:  MOVWF  77
+0141:  BCF    03.5
+0142:  DECFSZ 77,F
+0143:  GOTO   142
+0144:  BCF    06.7
+0145:  BSF    03.5
+0146:  BCF    06.7
+0147:  BCF    03.5
+0148:  RETLW  00
+*
+0162:  MOVLW  08
+0163:  MOVWF  78
+0164:  NOP
+0165:  MOVLW  04
+0166:  MOVWF  77
+0167:  DECFSZ 77,F
+0168:  GOTO   167
+0169:  BCF    06.6
+016A:  BSF    03.5
+016B:  BCF    06.6
+016C:  MOVLW  06
+016D:  MOVWF  77
+016E:  BCF    03.5
+016F:  DECFSZ 77,F
+0170:  GOTO   16F
+0171:  BSF    03.5
+0172:  RLF    4F,F
+0173:  BCF    03.5
+0174:  BCF    06.7
+0175:  BTFSS  03.0
+0176:  GOTO   17A
+0177:  BSF    03.5
+0178:  BSF    06.7
+0179:  BCF    03.5
+017A:  BTFSC  03.0
+017B:  GOTO   17F
+017C:  BSF    03.5
+017D:  BCF    06.7
+017E:  BCF    03.5
+017F:  BSF    03.5
+0180:  BSF    06.6
+0181:  BCF    03.5
+0182:  BTFSS  06.6
+0183:  GOTO   182
+0184:  DECFSZ 78,F
+0185:  GOTO   164
+0186:  MOVLW  04
+0187:  MOVWF  77
+0188:  DECFSZ 77,F
+0189:  GOTO   188
+018A:  BCF    06.6
+018B:  BSF    03.5
+018C:  BCF    06.6
+018D:  NOP
+018E:  BSF    06.7
+018F:  MOVLW  06
+0190:  MOVWF  77
+0191:  BCF    03.5
+0192:  DECFSZ 77,F
+0193:  GOTO   192
+0194:  MOVLW  06
+0195:  MOVWF  77
+0196:  DECFSZ 77,F
+0197:  GOTO   196
+0198:  BSF    03.5
+0199:  BSF    06.6
+019A:  BCF    03.5
+019B:  BTFSS  06.6
+019C:  GOTO   19B
+019D:  CLRF   78
+019E:  MOVLW  06
+019F:  MOVWF  77
+01A0:  DECFSZ 77,F
+01A1:  GOTO   1A0
+01A2:  BTFSC  06.7
+01A3:  BSF    78.0
+01A4:  BCF    06.6
+01A5:  BSF    03.5
+01A6:  BCF    06.6
+01A7:  BCF    03.5
+01A8:  BCF    06.7
+01A9:  BSF    03.5
+01AA:  BCF    06.7
+01AB:  BCF    03.5
+01AC:  RETLW  00
+.................... #use fast_io(e)   
+....................  
+.................... #define IO_INTERUPT_OUT_DATA PIN_E1 
+.................... #define IO_INTERUPT_OUT_MIDI PIN_E2 
+.................... //#define IO_INTERUPT_OUT_MIDI PIN_E1 
+....................  
+.................... typedef struct 
+.................... { 
+....................   byte flags; 
+....................   byte data; 
+.................... } str_PLA_Data; 
+....................  
+....................  
+.................... short resync_required = true; 
+.................... int num_overflow_blinks = 0; 
+.................... int16 quiet_cycles = 0; // the number of cycles where we have heard nothing 
+.................... short enable_analogs = false; 
+.................... short processing_analogs = false; // this defines whethere we are in the analog processing loop 
+....................  
+.................... #define MAX_QUIET_CYCLES  5000 
+....................  
+.................... void MessageRead() 
+.................... { 
+....................   resync_required = false; 
+.................... } 
+....................  
+.................... #include "lcd.h" 
+....................  //////////////////////////////////////////////////////////////////////////// 
+.................... ////                             LCD.C                                  //// 
+.................... ////                 Driver for common LCD modules                      //// 
+.................... ////                                                                    //// 
+.................... ////  lcd_init()   Must be called before any other function.            //// 
+.................... ////                                                                    //// 
+.................... ////  lcd_putc(c)  Will display c on the next position of the LCD.      //// 
+.................... ////                     The following have special meaning:            //// 
+.................... ////                      \f  Clear display                             //// 
+.................... ////                      \n  Go to start of second line                //// 
+.................... ////                      \b  Move back one position                    //// 
+.................... ////                                                                    //// 
+.................... ////  lcd_gotoxy(x,y) Set write position on LCD (upper left is 1,1)     //// 
+.................... ////                                                                    //// 
+.................... ////  lcd_getc(x,y)   Returns character at position x,y on LCD          //// 
+.................... ////                                                                    //// 
+.................... //////////////////////////////////////////////////////////////////////////// 
+.................... ////        (C) Copyright 1996,1997 Custom Computer Services            //// 
+.................... //// This source code may only be used by licensed users of the CCS C   //// 
+.................... //// compiler.  This source code may only be distributed to other       //// 
+.................... //// licensed users of the CCS C compiler.  No other use, reproduction  //// 
+.................... //// or distribution is permitted without written permission.           //// 
+.................... //// Derivative programs created using this software in object code     //// 
+.................... //// form are not restricted in any way.                                //// 
+.................... //////////////////////////////////////////////////////////////////////////// 
+....................  
+.................... // This code Modified by Angelo Fraietta for use as a 3 wire interface 
+.................... // using a 16 x 2 LCD 
+....................  
+.................... // The following Pins must be defined 
+.................... // LCD_CLK 
+.................... // LCD_DATA 
+.................... // LCD_ENABLE 
+....................  
+....................  
+.................... #define lcd_type 2           // 0=5x7, 1=5x10, 2=2 lines 
+.................... #define lcd_line_two 0x40    // LCD RAM address for the second line 
+....................  
+.................... const byte LCD_INIT_STRING [] = {0x38, 0x01, 0x0C};  
+*
+003D:  BCF    0A.0
+003E:  BCF    0A.1
+003F:  BCF    0A.2
+0040:  ADDWF  02,F
+0041:  RETLW  38
+0042:  RETLW  01
+0043:  RETLW  0C
+....................                              // These bytes need to be sent to the LCD 
+....................                              // to start it up. 
+....................  
+....................  
+....................                              // The following are used for setting 
+....................                              // the I/O port direction register. 
+....................  
+....................  
+.................... // sends data to LCD. If data_type is True, then is a data byte, otherwise is a command byte 
+.................... void lcd_send_byte(byte out_byte, short data_type)  
+.................... { 
+.................... 	int byte_num; 
+.................... 	// prepare clock and enable 
+.................... 	output_low (LCD_CLK); 
+*
+00BE:  BCF    2D.3
+00BF:  MOVF   2D,W
+00C0:  BSF    03.5
+00C1:  MOVWF  07
+00C2:  BCF    03.5
+00C3:  BCF    07.3
+.................... 	output_high (LCD_ENABLE); 
+00C4:  BSF    03.5
+00C5:  BCF    08.0
+00C6:  BCF    03.5
+00C7:  BSF    08.0
+....................    
+.................... 	for (byte_num = 0; byte_num < 8; byte_num++) 
+00C8:  BSF    03.5
+00C9:  CLRF   33
+00CA:  BCF    03.5
+00CB:  BSF    03.5
+00CC:  MOVF   33,W
+00CD:  SUBLW  07
+00CE:  BTFSC  03.0
+00CF:  GOTO   0D2
+00D0:  BCF    03.5
+00D1:  GOTO   0F1
+00D2:  BCF    03.5
+.................... 		{	 
+.................... 			// write the high bit 
+.................... 			output_bit (LCD_DATA, bit_test (out_byte, 7)); 
+00D3:  BSF    03.5
+00D4:  BTFSS  31.7
+00D5:  GOTO   0D8
+00D6:  BCF    03.5
+00D7:  GOTO   0DB
+00D8:  BCF    03.5
+00D9:  BCF    08.1
+00DA:  GOTO   0DC
+00DB:  BSF    08.1
+00DC:  BSF    03.5
+00DD:  BCF    08.1
+.................... 			out_byte<<=1; 
+00DE:  BCF    03.0
+00DF:  RLF    31,F
+....................  
+.................... 			// now clock register 
+.................... 			output_high (LCD_CLK); 
+00E0:  BCF    03.5
+00E1:  BCF    2D.3
+00E2:  MOVF   2D,W
+00E3:  BSF    03.5
+00E4:  MOVWF  07
+00E5:  BCF    03.5
+00E6:  BSF    07.3
+.................... 			output_low (LCD_CLK); 
+00E7:  BCF    2D.3
+00E8:  MOVF   2D,W
+00E9:  BSF    03.5
+00EA:  MOVWF  07
+00EB:  BCF    03.5
+00EC:  BCF    07.3
+.................... 		} 
+00ED:  BSF    03.5
+00EE:  INCF   33,F
+00EF:  BCF    03.5
+00F0:  GOTO   0CB
+....................  
+.................... 	// now output the RS bit (do not clock) 
+.................... 	output_bit (LCD_DATA,data_type); 
+00F1:  BSF    03.5
+00F2:  MOVF   32,F
+00F3:  BTFSC  03.2
+00F4:  GOTO   0F7
+00F5:  BCF    03.5
+00F6:  GOTO   0FA
+00F7:  BCF    03.5
+00F8:  BCF    08.1
+00F9:  GOTO   0FB
+00FA:  BSF    08.1
+00FB:  BSF    03.5
+00FC:  BCF    08.1
+....................   	 
+....................   output_low (LCD_ENABLE); 
+00FD:  BCF    08.0
+00FE:  BCF    03.5
+00FF:  BCF    08.0
+0100:  RETLW  00
+.................... } 
+....................  
+....................  
+.................... void lcd_init()  
+.................... { 
+.................... 	byte i; 
+....................   byte j; 
+....................  
+.................... 	delay_ms(25); 
+*
+1044:  MOVLW  19
+1045:  BSF    03.5
+1046:  MOVWF  4F
+1047:  BCF    03.5
+1048:  BCF    0A.4
+1049:  CALL   0AB
+104A:  BSF    0A.4
+....................    
+....................   for (j = 0; j < 3; j++) 
+104B:  BSF    03.5
+104C:  CLRF   2C
+104D:  BCF    03.5
+104E:  BSF    03.5
+104F:  MOVF   2C,W
+1050:  SUBLW  02
+1051:  BTFSC  03.0
+1052:  GOTO   055
+1053:  BCF    03.5
+1054:  GOTO   069
+1055:  BCF    03.5
+....................     { 
+....................     lcd_send_byte(0x38, false); 
+1056:  MOVLW  38
+1057:  BSF    03.5
+1058:  MOVWF  31
+1059:  CLRF   32
+105A:  BCF    03.5
+105B:  BCF    0A.4
+105C:  CALL   0BE
+105D:  BSF    0A.4
+....................     delay_ms(2); 
+105E:  MOVLW  02
+105F:  BSF    03.5
+1060:  MOVWF  4F
+1061:  BCF    03.5
+1062:  BCF    0A.4
+1063:  CALL   0AB
+1064:  BSF    0A.4
+....................     } 
+1065:  BSF    03.5
+1066:  INCF   2C,F
+1067:  BCF    03.5
+1068:  GOTO   04E
+....................  
+.................... 	for(i = 0; i< sizeof(LCD_INIT_STRING); i++) 
+1069:  BSF    03.5
+106A:  CLRF   2B
+106B:  BCF    03.5
+106C:  BSF    03.5
+106D:  MOVF   2B,W
+106E:  SUBLW  02
+106F:  BTFSC  03.0
+1070:  GOTO   073
+1071:  BCF    03.5
+1072:  GOTO   08D
+1073:  BCF    03.5
+.................... 		{ 
+.................... 			lcd_send_byte(LCD_INIT_STRING[i], false); 
+1074:  BSF    03.5
+1075:  MOVF   2B,W
+1076:  BCF    03.5
+1077:  BCF    0A.4
+1078:  CALL   03D
+1079:  BSF    0A.4
+107A:  BSF    03.5
+107B:  MOVWF  2D
+107C:  MOVWF  31
+107D:  CLRF   32
+107E:  BCF    03.5
+107F:  BCF    0A.4
+1080:  CALL   0BE
+1081:  BSF    0A.4
+....................       delay_ms(2); 
+1082:  MOVLW  02
+1083:  BSF    03.5
+1084:  MOVWF  4F
+1085:  BCF    03.5
+1086:  BCF    0A.4
+1087:  CALL   0AB
+1088:  BSF    0A.4
+.................... 		} 
+1089:  BSF    03.5
+108A:  INCF   2B,F
+108B:  BCF    03.5
+108C:  GOTO   06C
+.................... } 
+....................  
+....................  
+.................... void lcd_gotoxy( byte x, byte y) { 
+....................    byte address; 
+....................  
+....................    if(y!=1) 
+*
+10CF:  BSF    03.5
+10D0:  DECFSZ 2E,W
+10D1:  GOTO   0D3
+10D2:  GOTO   0D5
+10D3:  BCF    03.5
+10D4:  GOTO   0D7
+10D5:  BCF    03.5
+10D6:  GOTO   0DC
+....................      address=lcd_line_two; 
+10D7:  MOVLW  40
+10D8:  BSF    03.5
+10D9:  MOVWF  2F
+....................    else 
+10DA:  BCF    03.5
+10DB:  GOTO   0DF
+....................      address=0; 
+10DC:  BSF    03.5
+10DD:  CLRF   2F
+10DE:  BCF    03.5
+....................    address+=x-1; 
+10DF:  MOVLW  01
+10E0:  BSF    03.5
+10E1:  SUBWF  2D,W
+10E2:  ADDWF  2F,F
+....................    lcd_send_byte(0x80|address, false); 
+10E3:  MOVF   2F,W
+10E4:  IORLW  80
+10E5:  MOVWF  30
+10E6:  MOVWF  31
+10E7:  CLRF   32
+10E8:  BCF    03.5
+10E9:  BCF    0A.4
+10EA:  CALL   0BE
+10EB:  BSF    0A.4
+.................... } 
+....................  
+.................... void lcd_putc( char c) { 
+....................    switch (c)  
+*
+10A2:  BSF    03.5
+10A3:  MOVF   2C,W
+10A4:  MOVWF  77
+10A5:  MOVLW  0C
+10A6:  SUBWF  77,W
+10A7:  BTFSS  03.2
+10A8:  GOTO   0AB
+10A9:  BCF    03.5
+10AA:  GOTO   0B9
+10AB:  MOVLW  0A
+10AC:  SUBWF  77,W
+10AD:  BTFSS  03.2
+10AE:  GOTO   0B1
+10AF:  BCF    03.5
+10B0:  GOTO   0C9
+10B1:  MOVLW  08
+10B2:  SUBWF  77,W
+10B3:  BTFSS  03.2
+10B4:  GOTO   0B7
+10B5:  BCF    03.5
+10B6:  GOTO   0ED
+10B7:  BCF    03.5
+10B8:  GOTO   0F6
+.................... 		 { 
+.................... 		 case '\f':  
+.................... 			 lcd_send_byte(1, false); 
+10B9:  MOVLW  01
+10BA:  BSF    03.5
+10BB:  MOVWF  31
+10BC:  CLRF   32
+10BD:  BCF    03.5
+10BE:  BCF    0A.4
+10BF:  CALL   0BE
+10C0:  BSF    0A.4
+.................... 			 delay_ms(2); 
+10C1:  MOVLW  02
+10C2:  BSF    03.5
+10C3:  MOVWF  4F
+10C4:  BCF    03.5
+10C5:  BCF    0A.4
+10C6:  CALL   0AB
+10C7:  BSF    0A.4
+.................... 			 break; 
+10C8:  GOTO   100
+.................... 			  
+.................... 		 case '\n':  
+.................... 			 lcd_gotoxy(1,2);         
+10C9:  MOVLW  01
+10CA:  BSF    03.5
+10CB:  MOVWF  2D
+10CC:  MOVLW  02
+10CD:  MOVWF  2E
+10CE:  BCF    03.5
+.................... 			 break; 
+*
+10EC:  GOTO   100
+....................  
+....................      case '\b':  
+.................... 			 lcd_send_byte(0x10, false);   
+10ED:  MOVLW  10
+10EE:  BSF    03.5
+10EF:  MOVWF  31
+10F0:  CLRF   32
+10F1:  BCF    03.5
+10F2:  BCF    0A.4
+10F3:  CALL   0BE
+10F4:  BSF    0A.4
+.................... 			 break; 
+10F5:  GOTO   100
+....................  
+....................      default:  
+.................... 			 lcd_send_byte(c, true);      
+10F6:  BSF    03.5
+10F7:  MOVF   2C,W
+10F8:  MOVWF  31
+10F9:  MOVLW  01
+10FA:  MOVWF  32
+10FB:  BCF    03.5
+10FC:  BCF    0A.4
+10FD:  CALL   0BE
+10FE:  BSF    0A.4
+.................... 			 break; 
+10FF:  GOTO   100
+....................    } 
+.................... } 
+....................  
+....................  
+.................... 
+.................... #include "watchdog.h" 
+....................   
+.................... #define NUM_WD_FLASHES	8 
+....................  
+.................... //#ifndef WATCHDOG_PIN 
+.................... #define WATCHDOG_PIN	PIN_C0 
+.................... //#endif 
+....................  
+.................... void FlashWatchdog(int16 ms_time) 
+.................... { 
+.................... 		output_high (WATCHDOG_PIN); 
+*
+1121:  BCF    2D.0
+1122:  MOVF   2D,W
+1123:  BSF    03.5
+1124:  MOVWF  07
+1125:  BCF    03.5
+1126:  BSF    07.0
+.................... 		restart_wdt(); 
+1127:  CLRWDT
+.................... #ifndef _SIMULATE 
+.................... 		delay_ms (ms_time); 
+1128:  BSF    03.5
+1129:  MOVF   2C,W
+112A:  MOVWF  4F
+112B:  BCF    03.5
+112C:  BCF    0A.4
+112D:  CALL   0AB
+112E:  BSF    0A.4
+.................... #endif 
+.................... 		restart_wdt(); 
+112F:  CLRWDT
+.................... 		output_low (WATCHDOG_PIN); 
+1130:  BCF    2D.0
+1131:  MOVF   2D,W
+1132:  BSF    03.5
+1133:  MOVWF  07
+1134:  BCF    03.5
+1135:  BCF    07.0
+.................... #ifndef _SIMULATE 
+.................... 		delay_ms (ms_time); 
+1136:  BSF    03.5
+1137:  MOVF   2C,W
+1138:  MOVWF  4F
+1139:  BCF    03.5
+113A:  BCF    0A.4
+113B:  CALL   0AB
+113C:  BSF    0A.4
+.................... #endif 
+.................... 		restart_wdt(); 
+113D:  CLRWDT
+.................... } 
+....................  
+.................... void SetWatchdogLed (short value) 
+.................... { 
+.................... 	output_bit (WATCHDOG_PIN, value); 
+*
+0C6E:  BSF    03.5
+0C6F:  MOVF   2D,F
+0C70:  BTFSC  03.2
+0C71:  GOTO   474
+0C72:  BCF    03.5
+0C73:  GOTO   477
+0C74:  BCF    03.5
+0C75:  BCF    07.0
+0C76:  GOTO   478
+0C77:  BSF    07.0
+0C78:  BCF    2D.0
+0C79:  MOVF   2D,W
+0C7A:  BSF    03.5
+0C7B:  MOVWF  07
+0C7C:  BCF    03.5
+.................... } 
+....................  
+.................... void InitialiseWatchdog() 
+.................... { 
+.................... 	int i; 
+.................... 	for (i = 0; i < NUM_WD_FLASHES; i++) 
+*
+1111:  BSF    03.5
+1112:  CLRF   2B
+1113:  BCF    03.5
+1114:  BSF    03.5
+1115:  MOVF   2B,W
+1116:  SUBLW  07
+1117:  BTFSC  03.0
+1118:  GOTO   11B
+1119:  BCF    03.5
+111A:  GOTO   143
+111B:  BCF    03.5
+.................... 		{ 
+.................... 			FlashWatchdog(100); 
+111C:  BSF    03.5
+111D:  CLRF   2D
+111E:  MOVLW  64
+111F:  MOVWF  2C
+1120:  BCF    03.5
+.................... 			restart_wdt(); 
+*
+113E:  CLRWDT
+.................... 		} 
+113F:  BSF    03.5
+1140:  INCF   2B,F
+1141:  BCF    03.5
+1142:  GOTO   114
+.................... } 
+....................  
+.................... 
+.................... #include "cfgram.h" 
+....................  /********************************************************* 
+.................... Module for storing configuration in Pic EEProm 
+.................... ********************************************************/ 
+....................  
+....................  
+.................... //#inline 
+.................... void WriteConfigByte (int index, byte config_byte) 
+.................... { 
+....................  
+.................... #ifndef _SIMULATE 
+....................   restart_wdt(); 
+*
+0BD9:  CLRWDT
+.................... 	write_eeprom (index, config_byte); 
+0BDA:  BSF    03.5
+0BDB:  MOVF   48,W
+0BDC:  BCF    03.5
+0BDD:  BSF    03.6
+0BDE:  MOVWF  0D
+0BDF:  CLRF   0F
+0BE0:  BSF    03.5
+0BE1:  BCF    03.6
+0BE2:  MOVF   49,W
+0BE3:  BCF    03.5
+0BE4:  BSF    03.6
+0BE5:  MOVWF  0C
+0BE6:  BSF    03.5
+0BE7:  BCF    0C.7
+0BE8:  BSF    0C.2
+0BE9:  BCF    03.5
+0BEA:  BCF    03.6
+0BEB:  MOVF   0B,W
+0BEC:  MOVWF  77
+0BED:  BCF    0B.7
+0BEE:  MOVLW  55
+0BEF:  BSF    03.5
+0BF0:  BSF    03.6
+0BF1:  MOVWF  0D
+0BF2:  MOVLW  AA
+0BF3:  MOVWF  0D
+0BF4:  BSF    0C.1
+0BF5:  BCF    03.5
+0BF6:  BCF    03.6
+0BF7:  BSF    03.5
+0BF8:  BSF    03.6
+0BF9:  BTFSS  0C.1
+0BFA:  GOTO   3FE
+0BFB:  BCF    03.5
+0BFC:  BCF    03.6
+0BFD:  GOTO   3F7
+0BFE:  BCF    0C.2
+0BFF:  MOVF   77,W
+0C00:  BCF    03.5
+0C01:  BCF    03.6
+0C02:  IORWF  0B,F
+....................   restart_wdt(); 
+0C03:  CLRWDT
+.................... #else // let us decode from here 
+....................   int x; 
+....................   x = index; 
+.................... #endif 
+.................... } // end WriteConfigByte 
+....................  
+....................  
+.................... #inline 
+.................... byte ReadConfigByte (int index) 
+.................... { 
+.................... 	return read_eeprom (index); 
+*
+0450:  BSF    03.5
+0451:  MOVF   43,W
+0452:  BCF    03.5
+0453:  BSF    03.6
+0454:  MOVWF  0D
+0455:  CLRF   0F
+0456:  BSF    03.5
+0457:  BCF    0C.7
+0458:  BSF    0C.0
+0459:  BCF    03.5
+045A:  MOVF   0C,W
+045B:  MOVWF  78
+045C:  BCF    03.6
+.................... } // end ReadConfigByte 
+.................... 
+.................... #include "24lc256.h" 
+....................  /********************************************************** 
+....................  * I2C driver for 24LC256 32k EEPROM 
+....................  *********************************************************/ 
+....................  
+.................... #define LC256_SLAVE_MASK 0xA0 // must be ORed with slave device number 
+....................   
+.................... #define LC256_MEM_SIZE 0x00008000 
+.................... #define LC256_PAGE_SIZE 64 
+.................... #define LC256_NUM_REPOLLS 1 
+.................... #define LC256_POLL_TIME 1 
+....................  
+.................... typedef struct 
+.................... { 
+.................... 	int lower_address; 
+.................... 	int upper_address :7; 
+.................... 	int restart:1; 
+.................... 	int device; 
+.................... } str_LC256; 
+....................  
+.................... str_LC256 LC_256_device_info; // this is current device info 
+....................  
+.................... void ExtEEpromIncAddress() 
+.................... { 
+.................... 			LC_256_device_info.lower_address++; 
+*
+029C:  INCFSZ 2E,F
+.................... 			 
+.................... 			// check for cycle 
+.................... 			if (!LC_256_device_info.lower_address) 
+029D:  GOTO   2AB
+.................... 				{ 
+.................... 					LC_256_device_info.upper_address++; 
+029E:  MOVF   2F,W
+029F:  ADDLW  01
+02A0:  ANDLW  7F
+02A1:  MOVWF  77
+02A2:  MOVLW  80
+02A3:  ANDWF  2F,W
+02A4:  IORWF  77,W
+02A5:  MOVWF  2F
+.................... 					 
+.................... 					if (!LC_256_device_info.upper_address) 
+02A6:  MOVF   2F,W
+02A7:  ANDLW  7F
+02A8:  XORLW  00
+02A9:  BTFSC  03.2
+.................... 						{ 
+.................... 							LC_256_device_info.device++; 
+02AA:  INCF   30,F
+.................... 						} 
+.................... 				} 
+02AB:  RETLW  00
+.................... } 
+....................  
+.................... void ExtEEpromScheduleRestart() 
+.................... { 
+.................... 	LC_256_device_info.restart = true; 
+*
+0AD1:  BSF    2F.7
+.................... } 
+....................  
+.................... void ResyncEEprom() 
+.................... { 
+.................... 	LC_256_device_info.restart = true; 
+*
+0149:  BSF    2F.7
+.................... 	 
+.................... #ifndef _SIMULATE 
+.................... 	 
+.................... 	i2c_read (0); // clock anything out in case we stopped during a read without sending a stop 
+014A:  CLRF   77
+014B:  CALL   101
+.................... 	i2c_stop(); 
+014C:  BSF    03.5
+014D:  BCF    06.7
+014E:  NOP
+014F:  BSF    06.6
+0150:  BCF    03.5
+0151:  BTFSS  06.6
+0152:  GOTO   151
+0153:  MOVLW  04
+0154:  MOVWF  77
+0155:  DECFSZ 77,F
+0156:  GOTO   155
+0157:  NOP
+0158:  NOP
+0159:  NOP
+015A:  BSF    03.5
+015B:  BSF    06.7
+015C:  MOVLW  04
+015D:  MOVWF  77
+015E:  BCF    03.5
+015F:  DECFSZ 77,F
+0160:  GOTO   15F
+0161:  RETLW  00
+.................... #endif 
+.................... 	 
+.................... } 
+....................  
+.................... void ResetEEPROM() 
+.................... { 
+.................... 	LC_256_device_info.lower_address = 0; 
+*
+0BAE:  CLRF   2E
+*
+1369:  CLRF   2E
+.................... 	LC_256_device_info.upper_address = 0; 
+*
+0BAF:  MOVLW  80
+0BB0:  ANDWF  2F,W
+0BB1:  MOVWF  2F
+*
+136A:  MOVLW  80
+136B:  ANDWF  2F,W
+136C:  MOVWF  2F
+.................... 	LC_256_device_info.restart = 1; 
+*
+0BB2:  BSF    2F.7
+*
+136D:  BSF    2F.7
+.................... 	LC_256_device_info.device = 0; 
+*
+0BB3:  CLRF   30
+*
+136E:  CLRF   30
+.................... 	 
+.................... 	ResyncEEprom(); 
+*
+0BB4:  BCF    0A.3
+0BB5:  CALL   149
+0BB6:  BSF    0A.3
+*
+136F:  BCF    0A.4
+1370:  CALL   149
+1371:  BSF    0A.4
+.................... 	 
+.................... } // ResetEEPROM 
+....................  
+.................... #inline 
+.................... int GenerateSlaveNum (int device_num) 
+.................... { 
+.................... 	// packs the Control Byte 
+.................... 	device_num <<= 1; 
+*
+01B5:  BCF    03.0
+01B6:  BSF    03.5
+01B7:  RLF    4C,F
+*
+02FC:  BCF    03.0
+02FD:  BSF    03.5
+02FE:  RLF    4C,F
+.................... 	return LC256_SLAVE_MASK | device_num; 
+*
+01B8:  MOVF   4C,W
+01B9:  IORLW  A0
+01BA:  MOVWF  78
+01BB:  BCF    03.5
+*
+02FF:  MOVF   4C,W
+0300:  IORLW  A0
+0301:  MOVWF  78
+0302:  BCF    03.5
+.................... } 
+....................  
+.................... short PollSlave(int device_address, short stop) 
+.................... { 
+*
+01C2:  BSF    03.5
+01C3:  BCF    4E.0
+.................... 	short ret = false; 
+.................... 	 
+.................... 	i2c_start(); 
+01C4:  BSF    06.7
+01C5:  MOVLW  04
+01C6:  MOVWF  77
+01C7:  BCF    03.5
+01C8:  DECFSZ 77,F
+01C9:  GOTO   1C8
+01CA:  BSF    03.5
+01CB:  BSF    06.6
+01CC:  MOVLW  06
+01CD:  MOVWF  77
+01CE:  BCF    03.5
+01CF:  DECFSZ 77,F
+01D0:  GOTO   1CF
+01D1:  BCF    06.7
+01D2:  BSF    03.5
+01D3:  BCF    06.7
+01D4:  MOVLW  04
+01D5:  MOVWF  77
+01D6:  BCF    03.5
+01D7:  DECFSZ 77,F
+01D8:  GOTO   1D7
+01D9:  BCF    06.6
+01DA:  BSF    03.5
+01DB:  BCF    06.6
+.................... 	ret = !i2c_write(device_address);  
+01DC:  MOVF   4C,W
+01DD:  MOVWF  4F
+01DE:  BCF    03.5
+01DF:  CALL   162
+01E0:  MOVF   78,W
+01E1:  XORLW  00
+01E2:  BTFSC  03.2
+01E3:  GOTO   1E8
+01E4:  BSF    03.5
+01E5:  BCF    4E.0
+01E6:  BCF    03.5
+01E7:  GOTO   1EB
+01E8:  BSF    03.5
+01E9:  BSF    4E.0
+01EA:  BCF    03.5
+.................... 	restart_wdt(); 
+01EB:  CLRWDT
+.................... 	if (!ret) 
+01EC:  BSF    03.5
+01ED:  BTFSS  4E.0
+01EE:  GOTO   1F1
+01EF:  BCF    03.5
+01F0:  GOTO   20C
+01F1:  BCF    03.5
+.................... 		{ 
+.................... 			i2c_stop(); 
+01F2:  BSF    03.5
+01F3:  BCF    06.7
+01F4:  NOP
+01F5:  BSF    06.6
+01F6:  BCF    03.5
+01F7:  BTFSS  06.6
+01F8:  GOTO   1F7
+01F9:  MOVLW  04
+01FA:  MOVWF  77
+01FB:  DECFSZ 77,F
+01FC:  GOTO   1FB
+01FD:  NOP
+01FE:  NOP
+01FF:  NOP
+0200:  BSF    03.5
+0201:  BSF    06.7
+0202:  MOVLW  04
+0203:  MOVWF  77
+0204:  BCF    03.5
+0205:  DECFSZ 77,F
+0206:  GOTO   205
+.................... 			delay_ms (LC256_POLL_TIME); 
+0207:  MOVLW  01
+0208:  BSF    03.5
+0209:  MOVWF  4F
+020A:  BCF    03.5
+020B:  CALL   0AB
+.................... 		} 
+.................... 	 
+.................... 	 
+.................... 	if (ret && stop) 
+020C:  BSF    03.5
+020D:  BTFSC  4E.0
+020E:  GOTO   211
+020F:  BCF    03.5
+0210:  GOTO   22E
+0211:  BCF    03.5
+0212:  BSF    03.5
+0213:  MOVF   4D,F
+0214:  BTFSS  03.2
+0215:  GOTO   218
+0216:  BCF    03.5
+0217:  GOTO   22E
+0218:  BCF    03.5
+.................... 		{ 
+.................... 			i2c_stop(); 
+0219:  BSF    03.5
+021A:  BCF    06.7
+021B:  NOP
+021C:  BSF    06.6
+021D:  BCF    03.5
+021E:  BTFSS  06.6
+021F:  GOTO   21E
+0220:  MOVLW  04
+0221:  MOVWF  77
+0222:  DECFSZ 77,F
+0223:  GOTO   222
+0224:  NOP
+0225:  NOP
+0226:  NOP
+0227:  BSF    03.5
+0228:  BSF    06.7
+0229:  MOVLW  04
+022A:  MOVWF  77
+022B:  BCF    03.5
+022C:  DECFSZ 77,F
+022D:  GOTO   22C
+.................... 		} 
+.................... 	 
+.................... 	return ret; 
+022E:  MOVLW  00
+022F:  BSF    03.5
+0230:  BTFSC  4E.0
+0231:  MOVLW  01
+0232:  MOVWF  78
+0233:  BCF    03.5
+.................... } // end PollSlave(int device_address, short stop) 
+....................  
+....................  
+.................... short WriteEEpromAddress () 
+.................... { 
+.................... 	short ret = false; 
+.................... 	 
+*
+0254:  BSF    03.5
+0255:  BCF    4A.0
+.................... #ifndef _SIMULATE 
+.................... 	ret = ! i2c_write (LC_256_device_info.upper_address); 
+0256:  BCF    03.5
+0257:  MOVF   2F,W
+0258:  ANDLW  7F
+0259:  BSF    03.5
+025A:  MOVWF  4B
+025B:  MOVWF  4F
+025C:  BCF    03.5
+025D:  CALL   162
+025E:  MOVF   78,W
+025F:  XORLW  00
+0260:  BTFSC  03.2
+0261:  GOTO   266
+0262:  BSF    03.5
+0263:  BCF    4A.0
+0264:  BCF    03.5
+0265:  GOTO   269
+0266:  BSF    03.5
+0267:  BSF    4A.0
+0268:  BCF    03.5
+.................... 	 
+.................... #else 
+.................... 	ret = true; 
+.................... #endif 
+.................... 	 
+.................... 	if (ret) 
+0269:  BSF    03.5
+026A:  BTFSC  4A.0
+026B:  GOTO   26E
+026C:  BCF    03.5
+026D:  GOTO   27F
+026E:  BCF    03.5
+.................... 		{ 
+.................... #ifndef _SIMULATE 
+.................... 			ret = !i2c_write (LC_256_device_info.lower_address); 
+026F:  MOVF   2E,W
+0270:  BSF    03.5
+0271:  MOVWF  4F
+0272:  BCF    03.5
+0273:  CALL   162
+0274:  MOVF   78,W
+0275:  XORLW  00
+0276:  BTFSC  03.2
+0277:  GOTO   27C
+0278:  BSF    03.5
+0279:  BCF    4A.0
+027A:  BCF    03.5
+027B:  GOTO   27F
+027C:  BSF    03.5
+027D:  BSF    4A.0
+027E:  BCF    03.5
+.................... #endif 
+.................... 		} 
+.................... 	 
+.................... 	return ret; 
+027F:  MOVLW  00
+0280:  BSF    03.5
+0281:  BTFSC  4A.0
+0282:  MOVLW  01
+0283:  MOVWF  78
+0284:  BCF    03.5
+.................... 	 
+.................... } //WriteEEpromAddress 
+....................  
+.................... short InitialiseReadExtEEProm (int port_num) 
+.................... { 
+.................... 	// we will convert Port Num to the Slave Address 
+.................... 	short ret; 
+.................... 	int device_address; 
+.................... 	 
+.................... 	i2c_start(); 
+*
+02E0:  BSF    03.5
+02E1:  BSF    06.7
+02E2:  MOVLW  04
+02E3:  MOVWF  77
+02E4:  BCF    03.5
+02E5:  DECFSZ 77,F
+02E6:  GOTO   2E5
+02E7:  BSF    03.5
+02E8:  BSF    06.6
+02E9:  MOVLW  06
+02EA:  MOVWF  77
+02EB:  BCF    03.5
+02EC:  DECFSZ 77,F
+02ED:  GOTO   2EC
+02EE:  BCF    06.7
+02EF:  BSF    03.5
+02F0:  BCF    06.7
+02F1:  MOVLW  04
+02F2:  MOVWF  77
+02F3:  BCF    03.5
+02F4:  DECFSZ 77,F
+02F5:  GOTO   2F4
+02F6:  BCF    06.6
+02F7:  BSF    03.5
+02F8:  BCF    06.6
+.................... 	 
+.................... 	device_address = GenerateSlaveNum (port_num) | 0x01; // the lsb is the read control bit  
+02F9:  MOVF   46,W
+02FA:  MOVWF  4C
+02FB:  BCF    03.5
+*
+0303:  MOVF   78,W
+0304:  IORLW  01
+0305:  BSF    03.5
+0306:  MOVWF  48
+.................... 	 
+.................... #ifndef _SIMULATE 
+.................... 	ret = !i2c_write (device_address); 
+0307:  MOVWF  4F
+0308:  BCF    03.5
+0309:  CALL   162
+030A:  MOVF   78,W
+030B:  XORLW  00
+030C:  BTFSC  03.2
+030D:  GOTO   312
+030E:  BSF    03.5
+030F:  BCF    47.0
+0310:  BCF    03.5
+0311:  GOTO   315
+0312:  BSF    03.5
+0313:  BSF    47.0
+0314:  BCF    03.5
+.................... #else 
+....................   ret = true; 
+.................... #endif 
+.................... 	 
+.................... 	return ret; 
+0315:  MOVLW  00
+0316:  BSF    03.5
+0317:  BTFSC  47.0
+0318:  MOVLW  01
+0319:  MOVWF  78
+031A:  BCF    03.5
+.................... } // InitialiseReadExtEEProm 
+....................  
+....................  
+.................... short InitialiseWriteExtEEPROM (int port_num) 
+.................... { 
+.................... 	// we will convert Port Num to the Slave Address 
+.................... 	short ret; 
+.................... 	int device_address; 
+.................... 	 
+.................... 	device_address = GenerateSlaveNum (port_num);  
+*
+01B1:  BSF    03.5
+01B2:  MOVF   49,W
+01B3:  MOVWF  4C
+01B4:  BCF    03.5
+*
+01BC:  MOVF   78,W
+01BD:  BSF    03.5
+01BE:  MOVWF  4B
+.................... 	 
+.................... #ifndef _SIMULATE 
+.................... 	ret = PollSlave (device_address, false); 
+01BF:  MOVWF  4C
+01C0:  CLRF   4D
+01C1:  BCF    03.5
+*
+0234:  MOVF   78,F
+0235:  BTFSS  03.2
+0236:  GOTO   23B
+0237:  BSF    03.5
+0238:  BCF    4A.0
+0239:  BCF    03.5
+023A:  GOTO   23E
+023B:  BSF    03.5
+023C:  BSF    4A.0
+023D:  BCF    03.5
+.................... #else 
+....................   ret = true; 
+.................... #endif 
+.................... 	 
+.................... 	return ret; 
+023E:  MOVLW  00
+023F:  BSF    03.5
+0240:  BTFSC  4A.0
+0241:  MOVLW  01
+0242:  MOVWF  78
+0243:  BCF    03.5
+.................... } // InitialiseWriteExtEEPROM 
+....................  
+....................  
+.................... short SetEEpromMemoryAddress () 
+.................... { 
+....................   short ret; 
+.................... 	 
+.................... 	ret = InitialiseWriteExtEEPROM (LC_256_device_info.device); 
+*
+01AD:  MOVF   30,W
+01AE:  BSF    03.5
+01AF:  MOVWF  49
+01B0:  BCF    03.5
+*
+0244:  MOVF   78,F
+0245:  BTFSS  03.2
+0246:  GOTO   24B
+0247:  BSF    03.5
+0248:  BCF    48.0
+0249:  BCF    03.5
+024A:  GOTO   24E
+024B:  BSF    03.5
+024C:  BSF    48.0
+024D:  BCF    03.5
+.................... 	 
+.................... 	ret |= WriteEEpromAddress (); 
+024E:  MOVLW  00
+024F:  BSF    03.5
+0250:  BTFSC  48.0
+0251:  MOVLW  01
+0252:  MOVWF  49
+0253:  BCF    03.5
+*
+0285:  BSF    03.5
+0286:  MOVF   49,W
+0287:  IORWF  78,W
+0288:  XORLW  00
+0289:  BTFSC  03.2
+028A:  GOTO   28D
+028B:  BCF    03.5
+028C:  GOTO   292
+028D:  BCF    03.5
+028E:  BSF    03.5
+028F:  BCF    48.0
+0290:  BCF    03.5
+0291:  GOTO   295
+0292:  BSF    03.5
+0293:  BSF    48.0
+0294:  BCF    03.5
+.................... 	 
+.................... 	return ret; 
+0295:  MOVLW  00
+0296:  BSF    03.5
+0297:  BTFSC  48.0
+0298:  MOVLW  01
+0299:  MOVWF  78
+029A:  BCF    03.5
+029B:  RETLW  00
+.................... } // SetEEpromMemoryAddress 
+....................  
+.................... #inline  
+.................... void FinishEEpromWrite() 
+.................... { 
+.................... 	i2c_stop(); 
+*
+0B97:  BSF    03.5
+0B98:  BCF    06.7
+0B99:  NOP
+0B9A:  BSF    06.6
+0B9B:  BCF    03.5
+0B9C:  BTFSS  06.6
+0B9D:  GOTO   39C
+0B9E:  MOVLW  04
+0B9F:  MOVWF  77
+0BA0:  DECFSZ 77,F
+0BA1:  GOTO   3A0
+0BA2:  NOP
+0BA3:  NOP
+0BA4:  NOP
+0BA5:  BSF    03.5
+0BA6:  BSF    06.7
+0BA7:  MOVLW  04
+0BA8:  MOVWF  77
+0BA9:  BCF    03.5
+0BAA:  DECFSZ 77,F
+0BAB:  GOTO   3AA
+.................... 	LC_256_device_info.restart = true; 
+0BAC:  BSF    2F.7
+.................... } 
+....................  
+.................... #inline 
+.................... short CheckCurrentEEpromDevice() 
+.................... { 
+.................... 	return true; // for some reason this is not working 
+*
+0435:  MOVLW  01
+0436:  MOVWF  78
+.................... 	//return PollSlave (LC_256_device_info.device, true); 
+.................... } 
+....................  
+.................... // write a byte of data to eeprom 
+.................... short WriteEEProm (int tx_byte) 
+.................... { 
+*
+0B1C:  BSF    03.5
+0B1D:  BCF    47.0
+.................... 	short ret = false; 
+.................... 	 
+.................... 	 
+.................... 	// we will restart if LC256_eeprom_address is zero or a multiple of LC256_PAGE_SIZE 
+.................... 	// this is becase of physical page boundaries 
+.................... 	LC_256_device_info.restart |= !(LC_256_device_info.lower_address % LC256_PAGE_SIZE); 
+0B1E:  MOVLW  00
+0B1F:  BCF    03.5
+0B20:  BTFSC  2F.7
+0B21:  MOVLW  01
+0B22:  BSF    03.5
+0B23:  MOVWF  48
+0B24:  BCF    03.5
+0B25:  MOVF   2E,W
+0B26:  ANDLW  3F
+0B27:  XORLW  00
+0B28:  BTFSC  03.2
+0B29:  GOTO   32C
+0B2A:  MOVLW  00
+0B2B:  GOTO   32D
+0B2C:  MOVLW  01
+0B2D:  BSF    03.5
+0B2E:  IORWF  48,W
+0B2F:  XORLW  00
+0B30:  BTFSC  03.2
+0B31:  GOTO   334
+0B32:  BCF    03.5
+0B33:  GOTO   337
+0B34:  BCF    03.5
+0B35:  BCF    2F.7
+0B36:  GOTO   338
+0B37:  BSF    2F.7
+.................... 	 
+.................... 	if (LC_256_device_info.restart) 
+0B38:  BTFSS  2F.7
+0B39:  GOTO   34B
+.................... 		{ 
+.................... 			ResyncEEprom(); 
+0B3A:  BCF    0A.3
+0B3B:  CALL   149
+0B3C:  BSF    0A.3
+.................... 			ret = SetEEpromMemoryAddress(); 
+0B3D:  BCF    0A.3
+0B3E:  CALL   1AD
+0B3F:  BSF    0A.3
+0B40:  MOVF   78,F
+0B41:  BTFSS  03.2
+0B42:  GOTO   347
+0B43:  BSF    03.5
+0B44:  BCF    47.0
+0B45:  BCF    03.5
+0B46:  GOTO   34A
+0B47:  BSF    03.5
+0B48:  BSF    47.0
+0B49:  BCF    03.5
+.................... 		} 
+.................... 	else 
+0B4A:  GOTO   34E
+.................... 		{ 
+.................... 			ret = true; 
+0B4B:  BSF    03.5
+0B4C:  BSF    47.0
+0B4D:  BCF    03.5
+.................... 		} 
+.................... 	 
+.................... 	if (ret) 
+0B4E:  BSF    03.5
+0B4F:  BTFSC  47.0
+0B50:  GOTO   353
+0B51:  BCF    03.5
+0B52:  GOTO   38A
+0B53:  BCF    03.5
+.................... 		{ 
+.................... #ifndef _SIMULATE 
+.................... 			ret = !i2c_write (tx_byte); 
+0B54:  BSF    03.5
+0B55:  MOVF   46,W
+0B56:  MOVWF  4F
+0B57:  BCF    03.5
+0B58:  BCF    0A.3
+0B59:  CALL   162
+0B5A:  BSF    0A.3
+0B5B:  MOVF   78,W
+0B5C:  XORLW  00
+0B5D:  BTFSC  03.2
+0B5E:  GOTO   363
+0B5F:  BSF    03.5
+0B60:  BCF    47.0
+0B61:  BCF    03.5
+0B62:  GOTO   366
+0B63:  BSF    03.5
+0B64:  BSF    47.0
+0B65:  BCF    03.5
+.................... #endif 
+.................... 			if (ret) 
+0B66:  BSF    03.5
+0B67:  BTFSC  47.0
+0B68:  GOTO   36B
+0B69:  BCF    03.5
+0B6A:  GOTO   38A
+0B6B:  BCF    03.5
+.................... 				{ 
+.................... 					ExtEEpromIncAddress(); 
+0B6C:  BCF    0A.3
+0B6D:  CALL   29C
+0B6E:  BSF    0A.3
+....................  
+.................... 					// test if we are going over boundary 
+.................... 					if (!(LC_256_device_info.lower_address % LC256_PAGE_SIZE)) 
+0B6F:  MOVF   2E,W
+0B70:  ANDLW  3F
+0B71:  XORLW  00
+0B72:  BTFSS  03.2
+0B73:  GOTO   38A
+.................... 						{ 
+.................... #ifndef _SIMULATE 
+.................... 							i2c_stop(); 
+0B74:  BSF    03.5
+0B75:  BCF    06.7
+0B76:  NOP
+0B77:  BSF    06.6
+0B78:  BCF    03.5
+0B79:  BTFSS  06.6
+0B7A:  GOTO   379
+0B7B:  MOVLW  04
+0B7C:  MOVWF  77
+0B7D:  DECFSZ 77,F
+0B7E:  GOTO   37D
+0B7F:  NOP
+0B80:  NOP
+0B81:  NOP
+0B82:  BSF    03.5
+0B83:  BSF    06.7
+0B84:  MOVLW  04
+0B85:  MOVWF  77
+0B86:  BCF    03.5
+0B87:  DECFSZ 77,F
+0B88:  GOTO   387
+.................... 							LC_256_device_info.restart = true; 
+0B89:  BSF    2F.7
+.................... #else 
+.................... 							tx_byte++; // set a break point in debugger 
+.................... #endif 
+.................... 						} 
+.................... 				} 
+.................... 		} 
+.................... 	 
+.................... 	LC_256_device_info.restart = !ret; 
+0B8A:  BCF    2F.7
+0B8B:  BSF    03.5
+0B8C:  BTFSC  47.0
+0B8D:  GOTO   391
+0B8E:  BCF    03.5
+0B8F:  BSF    2F.7
+0B90:  BSF    03.5
+.................... 	 
+.................... 	return ret; 
+0B91:  MOVLW  00
+0B92:  BTFSC  47.0
+0B93:  MOVLW  01
+0B94:  MOVWF  78
+0B95:  BCF    03.5
+.................... } // WriteEEProm  
+....................  
+....................  
+.................... short ReadEEprom (int *ret_byte) 
+.................... { 
+.................... 	short ret; 
+....................  
+.................... 	// we will restart if LC_256_device_info.upper_address is zero  
+.................... 	// this is becase of physical size of memory, not boundary 
+.................... 	LC_256_device_info.restart |= (!LC_256_device_info.upper_address && !LC_256_device_info.lower_address); 
+*
+02AC:  MOVLW  00
+02AD:  BTFSC  2F.7
+02AE:  MOVLW  01
+02AF:  BSF    03.5
+02B0:  MOVWF  45
+02B1:  BCF    03.5
+02B2:  MOVF   2F,W
+02B3:  ANDLW  7F
+02B4:  XORLW  00
+02B5:  BTFSS  03.2
+02B6:  GOTO   2BA
+02B7:  MOVF   2E,F
+02B8:  BTFSC  03.2
+02B9:  GOTO   2BC
+02BA:  MOVLW  00
+02BB:  GOTO   2BD
+02BC:  MOVLW  01
+02BD:  BSF    03.5
+02BE:  IORWF  45,W
+02BF:  XORLW  00
+02C0:  BTFSC  03.2
+02C1:  GOTO   2C4
+02C2:  BCF    03.5
+02C3:  GOTO   2C7
+02C4:  BCF    03.5
+02C5:  BCF    2F.7
+02C6:  GOTO   2C8
+02C7:  BSF    2F.7
+.................... 	 
+.................... 	if (LC_256_device_info.restart) 
+02C8:  BTFSS  2F.7
+02C9:  GOTO   32C
+.................... 		{ 
+.................... 			ResyncEEprom(); 
+02CA:  CALL   149
+.................... 			 
+....................       ret = SetEEpromMemoryAddress(); 
+02CB:  CALL   1AD
+02CC:  MOVF   78,F
+02CD:  BTFSS  03.2
+02CE:  GOTO   2D3
+02CF:  BSF    03.5
+02D0:  BCF    44.0
+02D1:  BCF    03.5
+02D2:  GOTO   2D6
+02D3:  BSF    03.5
+02D4:  BSF    44.0
+02D5:  BCF    03.5
+.................... 			 
+.................... 			ret &= InitialiseReadExtEEProm (LC_256_device_info.device); 
+02D6:  MOVLW  00
+02D7:  BSF    03.5
+02D8:  BTFSC  44.0
+02D9:  MOVLW  01
+02DA:  MOVWF  45
+02DB:  BCF    03.5
+02DC:  MOVF   30,W
+02DD:  BSF    03.5
+02DE:  MOVWF  46
+02DF:  BCF    03.5
+*
+031B:  BSF    03.5
+031C:  MOVF   45,W
+031D:  ANDWF  78,W
+031E:  XORLW  00
+031F:  BTFSC  03.2
+0320:  GOTO   323
+0321:  BCF    03.5
+0322:  GOTO   328
+0323:  BCF    03.5
+0324:  BSF    03.5
+0325:  BCF    44.0
+0326:  BCF    03.5
+0327:  GOTO   32B
+0328:  BSF    03.5
+0329:  BSF    44.0
+032A:  BCF    03.5
+.................... 		} 
+.................... 	else 
+032B:  GOTO   32F
+.................... 		{ 
+.................... 			ret = true; 
+032C:  BSF    03.5
+032D:  BSF    44.0
+032E:  BCF    03.5
+.................... 		} 
+.................... 	 
+.................... 	if (ret) 
+032F:  BSF    03.5
+0330:  BTFSC  44.0
+0331:  GOTO   334
+0332:  BCF    03.5
+0333:  GOTO   366
+0334:  BCF    03.5
+.................... 		{ 
+.................... 			ExtEEpromIncAddress(); 
+0335:  CALL   29C
+....................  
+.................... #ifndef _SIMULATE 
+.................... 			// if we are going over a boundary, we will have to send a stop 
+.................... 			if (LC_256_device_info.upper_address || LC_256_device_info.lower_address) 
+0336:  MOVF   2F,W
+0337:  ANDLW  7F
+0338:  XORLW  00
+0339:  BTFSS  03.2
+033A:  GOTO   33E
+033B:  MOVF   2E,F
+033C:  BTFSC  03.2
+033D:  GOTO   348
+.................... 				{ 
+.................... 					*ret_byte = i2c_read (1); // send ack 
+033E:  BSF    03.5
+033F:  MOVF   43,W
+0340:  MOVWF  04
+0341:  MOVLW  01
+0342:  MOVWF  77
+0343:  BCF    03.5
+0344:  CALL   101
+0345:  MOVF   78,W
+0346:  MOVWF  00
+.................... 				} 
+.................... 			else 
+0347:  GOTO   366
+.................... 				{ 
+.................... 					*ret_byte = i2c_read (0); // do not send ack 
+0348:  BSF    03.5
+0349:  MOVF   43,W
+034A:  MOVWF  04
+034B:  CLRF   77
+034C:  BCF    03.5
+034D:  CALL   101
+034E:  MOVF   78,W
+034F:  MOVWF  00
+.................... 					LC_256_device_info.restart = true; 
+0350:  BSF    2F.7
+.................... 					i2c_stop(); 
+0351:  BSF    03.5
+0352:  BCF    06.7
+0353:  NOP
+0354:  BSF    06.6
+0355:  BCF    03.5
+0356:  BTFSS  06.6
+0357:  GOTO   356
+0358:  MOVLW  04
+0359:  MOVWF  77
+035A:  DECFSZ 77,F
+035B:  GOTO   35A
+035C:  NOP
+035D:  NOP
+035E:  NOP
+035F:  BSF    03.5
+0360:  BSF    06.7
+0361:  MOVLW  04
+0362:  MOVWF  77
+0363:  BCF    03.5
+0364:  DECFSZ 77,F
+0365:  GOTO   364
+.................... 				} 
+.................... #endif 
+.................... 			 
+.................... 		} 
+....................  
+.................... 	LC_256_device_info.restart = !ret; 
+0366:  BCF    2F.7
+0367:  BSF    03.5
+0368:  BTFSC  44.0
+0369:  GOTO   36D
+036A:  BCF    03.5
+036B:  BSF    2F.7
+036C:  BSF    03.5
+....................  
+.................... 	return ret; 
+036D:  MOVLW  00
+036E:  BTFSC  44.0
+036F:  MOVLW  01
+0370:  MOVWF  78
+0371:  BCF    03.5
+0372:  RETLW  00
+.................... } 
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+.................... 
+.................... #include "extprom.h" 
+....................   
+.................... // this module implements the interface between the eeprom driver and the pla 
+.................... // requires 24lc256.h 
+....................   
+.................... typedef struct 
+.................... { 
+.................... 	int reading: 1; // flag to indicate that we are doing an eeprom read 
+.................... 	int bytes_read:3; // counter that cycles back to zero 
+.................... } str_ext_eeprom; 
+....................  
+....................  
+.................... str_ext_eeprom extprom_read_state; 
+.................... byte extprom_int_index = 0; // internal EEprom Index 
+....................  
+.................... #inline 
+.................... void InitialiseEEprom() 
+.................... { 
+.................... 	ResetEEprom(); 
+.................... 	extprom_read_state.reading = 0; // clear flag 
+*
+0BB7:  BCF    31.0
+*
+1372:  BCF    31.0
+.................... 	extprom_read_state.bytes_read = 0; // we let this cycle back to zero 
+*
+0BB8:  MOVLW  F1
+0BB9:  ANDWF  31,W
+0BBA:  MOVWF  31
+*
+1373:  MOVLW  F1
+1374:  ANDWF  31,W
+1375:  MOVWF  31
+.................... 	extprom_int_index = 0; 
+*
+0BBB:  CLRF   32
+*
+1376:  CLRF   32
+.................... } 
+....................  
+.................... // return true if more data, false if back at zero 
+.................... #inline 
+.................... short ReadIntEEprom(byte* ret_data) 
+.................... { 
+.................... 	*ret_data = ReadConfigByte (extprom_int_index); 
+*
+0448:  BSF    03.5
+0449:  MOVF   41,W
+044A:  MOVWF  42
+044B:  BCF    03.5
+044C:  MOVF   32,W
+044D:  BSF    03.5
+044E:  MOVWF  43
+044F:  BCF    03.5
+*
+045D:  BSF    03.5
+045E:  MOVF   42,W
+045F:  MOVWF  04
+0460:  MOVF   78,W
+0461:  MOVWF  00
+.................... 	extprom_int_index++; 
+0462:  BCF    03.5
+0463:  INCF   32,F
+.................... 	return (extprom_int_index); 
+0464:  MOVF   32,W
+0465:  MOVWF  78
+.................... } 
+....................  
+.................... #inline 
+.................... void WriteIntEEprom(byte data) 
+.................... { 
+.................... 	WriteConfigByte (extprom_int_index++, data); 
+*
+0BD1:  MOVF   32,W
+0BD2:  INCF   32,F
+0BD3:  BSF    03.5
+0BD4:  MOVWF  47
+0BD5:  MOVWF  48
+0BD6:  MOVF   46,W
+0BD7:  MOVWF  49
+0BD8:  BCF    03.5
+.................... } 
+....................  
+.................... #inline  
+.................... short EEpromWriteReady() 
+.................... { 
+.................... 	return CheckCurrentEEpromDevice(); 
+*
+0437:  MOVF   78,W
+.................... } 
+....................  
+....................  
+.................... short ReadExtEEpromByte (byte* ret_byte) 
+.................... { 
+*
+03D4:  BSF    03.5
+03D5:  BCF    42.0
+.................... 	short ret = false; 
+....................  
+.................... 	if (extprom_read_state.reading) 
+03D6:  BCF    03.5
+03D7:  BTFSS  31.0
+03D8:  GOTO   400
+.................... 		{ 
+.................... 			if (extprom_read_state.bytes_read) 
+03D9:  MOVF   31,W
+03DA:  MOVWF  77
+03DB:  RRF    77,W
+03DC:  ANDLW  07
+03DD:  XORLW  00
+03DE:  BTFSC  03.2
+03DF:  GOTO   3FE
+.................... 				{ 
+.................... 					ret = ReadEEprom (ret_byte); 
+03E0:  BSF    03.5
+03E1:  MOVF   41,W
+03E2:  MOVWF  43
+03E3:  BCF    03.5
+03E4:  CALL   2AC
+03E5:  MOVF   78,F
+03E6:  BTFSS  03.2
+03E7:  GOTO   3EC
+03E8:  BSF    03.5
+03E9:  BCF    42.0
+03EA:  BCF    03.5
+03EB:  GOTO   3EF
+03EC:  BSF    03.5
+03ED:  BSF    42.0
+03EE:  BCF    03.5
+.................... 					if (ret) 
+03EF:  BSF    03.5
+03F0:  BTFSC  42.0
+03F1:  GOTO   3F4
+03F2:  BCF    03.5
+03F3:  GOTO   3FD
+03F4:  BCF    03.5
+.................... 						{ 
+.................... 							extprom_read_state.bytes_read++; 
+03F5:  MOVF   31,W
+03F6:  ADDLW  02
+03F7:  ANDLW  0E
+03F8:  MOVWF  77
+03F9:  MOVLW  F1
+03FA:  ANDWF  31,W
+03FB:  IORWF  77,W
+03FC:  MOVWF  31
+.................... 						} 
+.................... 				} 
+.................... 			else //we have cycled back to zero Give them nothing and stop reading 
+03FD:  GOTO   3FF
+.................... 				{ 
+.................... 					extprom_read_state.reading = 0; 
+03FE:  BCF    31.0
+.................... 				} 
+.................... 		} 
+.................... 	else // we were not reading when we first got here but will be now 
+03FF:  GOTO   41E
+.................... 		{ 
+.................... 			ret = ReadEEprom (ret_byte); 
+0400:  BSF    03.5
+0401:  MOVF   41,W
+0402:  MOVWF  43
+0403:  BCF    03.5
+0404:  CALL   2AC
+0405:  MOVF   78,F
+0406:  BTFSS  03.2
+0407:  GOTO   40C
+0408:  BSF    03.5
+0409:  BCF    42.0
+040A:  BCF    03.5
+040B:  GOTO   40F
+040C:  BSF    03.5
+040D:  BSF    42.0
+040E:  BCF    03.5
+.................... 			if (ret) 
+040F:  BSF    03.5
+0410:  BTFSC  42.0
+0411:  GOTO   414
+0412:  BCF    03.5
+0413:  GOTO   41E
+0414:  BCF    03.5
+.................... 				{ 
+.................... 					extprom_read_state.bytes_read++; 
+0415:  MOVF   31,W
+0416:  ADDLW  02
+0417:  ANDLW  0E
+0418:  MOVWF  77
+0419:  MOVLW  F1
+041A:  ANDWF  31,W
+041B:  IORWF  77,W
+041C:  MOVWF  31
+.................... 					extprom_read_state.reading = 1; // we are reading now 
+041D:  BSF    31.0
+.................... 				} 
+.................... 		} 
+.................... 			 
+.................... 	return ret; 
+041E:  MOVLW  00
+041F:  BSF    03.5
+0420:  BTFSC  42.0
+0421:  MOVLW  01
+0422:  MOVWF  78
+0423:  BCF    03.5
+.................... } //ReadExtEEpromByte 
+....................  
+....................  
+....................  
+....................  
+....................  
+.................... 
+.................... #include "pla_io.h" 
+....................  #ifndef PLA_IO_H 
+.................... #define PLA_IO_H 
+....................  
+....................  
+.................... #define WRITE_TRIS_VAL 0xE0 
+.................... #define READ_TRIS_VAL  0xd0  
+....................  
+.................... void MessageRead(); //forward declaration of function 
+....................  
+.................... #define PLA_DATA_SIZE 2 // 2 bytes in a PLA transfer 
+.................... #define VALID_DATA_VALUE 0 // bit that defines whether a read has a valid value 
+....................  
+.................... short tx_ready = true; 
+.................... short message_received = false; 
+.................... short awaiting_response = false; 
+.................... short message_lost = false; 
+.................... short midi_tx = false; // defines whether we send a mid or data irq 
+....................  
+.................... str_PLA_Data pla_out_data, pla_in_data, prev_pla_out; 
+....................  
+.................... #inline 
+.................... void SavePlaMessage() // saves the Pla message in case we need to re-send it 
+.................... { 
+....................   // store the old value 
+....................   prev_pla_out.flags = pla_out_data.flags; 
+*
+0956:  MOVF   33,W
+0957:  MOVWF  37
+*
+0961:  MOVF   33,W
+0962:  MOVWF  37
+*
+09AD:  MOVF   33,W
+09AE:  MOVWF  37
+*
+0A0A:  MOVF   33,W
+0A0B:  MOVWF  37
+*
+0A17:  MOVF   33,W
+0A18:  MOVWF  37
+*
+0C23:  MOVF   33,W
+0C24:  MOVWF  37
+....................   prev_pla_out.data = pla_out_data.data; 
+*
+0958:  MOVF   34,W
+0959:  MOVWF  38
+*
+0963:  MOVF   34,W
+0964:  MOVWF  38
+*
+09AF:  MOVF   34,W
+09B0:  MOVWF  38
+*
+0A0C:  MOVF   34,W
+0A0D:  MOVWF  38
+*
+0A19:  MOVF   34,W
+0A1A:  MOVWF  38
+*
+0C25:  MOVF   34,W
+0C26:  MOVWF  38
+.................... } 
+....................  
+.................... #inline 
+.................... void WritePlaFlags() 
+.................... { 
+.................... 	if (bit_test (pla_out_data.flags, 7))  
+*
+04D0:  BTFSS  33.7
+04D1:  GOTO   4D7
+*
+04E5:  BTFSS  33.7
+04E6:  GOTO   4EC
+*
+04FA:  BTFSS  33.7
+04FB:  GOTO   501
+*
+050F:  BTFSS  33.7
+0510:  GOTO   516
+*
+0524:  BTFSS  33.7
+0525:  GOTO   52B
+*
+0539:  BTFSS  33.7
+053A:  GOTO   540
+*
+054E:  BTFSS  33.7
+054F:  GOTO   555
+*
+0563:  BTFSS  33.7
+0564:  GOTO   56A
+....................     { 
+....................       output_bit (SPI_PLA_DATA_OUT, 1); 
+*
+04D2:  BSF    08.4
+04D3:  BSF    03.5
+04D4:  BCF    08.4
+*
+04E7:  BSF    08.4
+04E8:  BSF    03.5
+04E9:  BCF    08.4
+*
+04FC:  BSF    08.4
+04FD:  BSF    03.5
+04FE:  BCF    08.4
+*
+0511:  BSF    08.4
+0512:  BSF    03.5
+0513:  BCF    08.4
+*
+0526:  BSF    08.4
+0527:  BSF    03.5
+0528:  BCF    08.4
+*
+053B:  BSF    08.4
+053C:  BSF    03.5
+053D:  BCF    08.4
+*
+0550:  BSF    08.4
+0551:  BSF    03.5
+0552:  BCF    08.4
+*
+0565:  BSF    08.4
+0566:  BSF    03.5
+0567:  BCF    08.4
+....................     } 
+.................... 	else 
+*
+04D5:  BCF    03.5
+04D6:  GOTO   4DB
+*
+04EA:  BCF    03.5
+04EB:  GOTO   4F0
+*
+04FF:  BCF    03.5
+0500:  GOTO   505
+*
+0514:  BCF    03.5
+0515:  GOTO   51A
+*
+0529:  BCF    03.5
+052A:  GOTO   52F
+*
+053E:  BCF    03.5
+053F:  GOTO   544
+*
+0553:  BCF    03.5
+0554:  GOTO   559
+*
+0568:  BCF    03.5
+0569:  GOTO   56E
+.................... 		{ 
+.................... 			output_bit (SPI_PLA_DATA_OUT, 0); 
+*
+04D7:  BCF    08.4
+04D8:  BSF    03.5
+04D9:  BCF    08.4
+04DA:  BCF    03.5
+*
+04EC:  BCF    08.4
+04ED:  BSF    03.5
+04EE:  BCF    08.4
+04EF:  BCF    03.5
+*
+0501:  BCF    08.4
+0502:  BSF    03.5
+0503:  BCF    08.4
+0504:  BCF    03.5
+*
+0516:  BCF    08.4
+0517:  BSF    03.5
+0518:  BCF    08.4
+0519:  BCF    03.5
+*
+052B:  BCF    08.4
+052C:  BSF    03.5
+052D:  BCF    08.4
+052E:  BCF    03.5
+*
+0540:  BCF    08.4
+0541:  BSF    03.5
+0542:  BCF    08.4
+0543:  BCF    03.5
+*
+0555:  BCF    08.4
+0556:  BSF    03.5
+0557:  BCF    08.4
+0558:  BCF    03.5
+*
+056A:  BCF    08.4
+056B:  BSF    03.5
+056C:  BCF    08.4
+056D:  BCF    03.5
+....................     } 
+....................  
+.................... 	// now clock register 
+.................... 	output_high (PLA_CLK); 
+*
+04DB:  BSF    03.5
+04DC:  BCF    08.5
+04DD:  BCF    03.5
+04DE:  BSF    08.5
+*
+04F0:  BSF    03.5
+04F1:  BCF    08.5
+04F2:  BCF    03.5
+04F3:  BSF    08.5
+*
+0505:  BSF    03.5
+0506:  BCF    08.5
+0507:  BCF    03.5
+0508:  BSF    08.5
+*
+051A:  BSF    03.5
+051B:  BCF    08.5
+051C:  BCF    03.5
+051D:  BSF    08.5
+*
+052F:  BSF    03.5
+0530:  BCF    08.5
+0531:  BCF    03.5
+0532:  BSF    08.5
+*
+0544:  BSF    03.5
+0545:  BCF    08.5
+0546:  BCF    03.5
+0547:  BSF    08.5
+*
+0559:  BSF    03.5
+055A:  BCF    08.5
+055B:  BCF    03.5
+055C:  BSF    08.5
+*
+056E:  BSF    03.5
+056F:  BCF    08.5
+0570:  BCF    03.5
+0571:  BSF    08.5
+.................... 	 
+.................... 	output_low (PLA_CLK); 
+*
+04DF:  BSF    03.5
+04E0:  BCF    08.5
+04E1:  BCF    03.5
+04E2:  BCF    08.5
+*
+04F4:  BSF    03.5
+04F5:  BCF    08.5
+04F6:  BCF    03.5
+04F7:  BCF    08.5
+*
+0509:  BSF    03.5
+050A:  BCF    08.5
+050B:  BCF    03.5
+050C:  BCF    08.5
+*
+051E:  BSF    03.5
+051F:  BCF    08.5
+0520:  BCF    03.5
+0521:  BCF    08.5
+*
+0533:  BSF    03.5
+0534:  BCF    08.5
+0535:  BCF    03.5
+0536:  BCF    08.5
+*
+0548:  BSF    03.5
+0549:  BCF    08.5
+054A:  BCF    03.5
+054B:  BCF    08.5
+*
+055D:  BSF    03.5
+055E:  BCF    08.5
+055F:  BCF    03.5
+0560:  BCF    08.5
+*
+0572:  BSF    03.5
+0573:  BCF    08.5
+0574:  BCF    03.5
+0575:  BCF    08.5
+.................... } // end WritePlaFlags 
+....................  
+.................... #inline 
+.................... void WritePlaData() 
+.................... { 
+.................... 	if (bit_test (pla_out_data.data, 7))  
+0576:  BTFSS  34.7
+0577:  GOTO   57D
+*
+058B:  BTFSS  34.7
+058C:  GOTO   592
+*
+05A0:  BTFSS  34.7
+05A1:  GOTO   5A7
+*
+05B5:  BTFSS  34.7
+05B6:  GOTO   5BC
+*
+05CA:  BTFSS  34.7
+05CB:  GOTO   5D1
+*
+05DF:  BTFSS  34.7
+05E0:  GOTO   5E6
+*
+05F4:  BTFSS  34.7
+05F5:  GOTO   5FB
+*
+0609:  BTFSS  34.7
+060A:  GOTO   610
+....................     { 
+....................       output_bit (SPI_PLA_DATA_OUT, 1); 
+*
+0578:  BSF    08.4
+0579:  BSF    03.5
+057A:  BCF    08.4
+*
+058D:  BSF    08.4
+058E:  BSF    03.5
+058F:  BCF    08.4
+*
+05A2:  BSF    08.4
+05A3:  BSF    03.5
+05A4:  BCF    08.4
+*
+05B7:  BSF    08.4
+05B8:  BSF    03.5
+05B9:  BCF    08.4
+*
+05CC:  BSF    08.4
+05CD:  BSF    03.5
+05CE:  BCF    08.4
+*
+05E1:  BSF    08.4
+05E2:  BSF    03.5
+05E3:  BCF    08.4
+*
+05F6:  BSF    08.4
+05F7:  BSF    03.5
+05F8:  BCF    08.4
+*
+060B:  BSF    08.4
+060C:  BSF    03.5
+060D:  BCF    08.4
+....................     } 
+.................... 	else 
+*
+057B:  BCF    03.5
+057C:  GOTO   581
+*
+0590:  BCF    03.5
+0591:  GOTO   596
+*
+05A5:  BCF    03.5
+05A6:  GOTO   5AB
+*
+05BA:  BCF    03.5
+05BB:  GOTO   5C0
+*
+05CF:  BCF    03.5
+05D0:  GOTO   5D5
+*
+05E4:  BCF    03.5
+05E5:  GOTO   5EA
+*
+05F9:  BCF    03.5
+05FA:  GOTO   5FF
+*
+060E:  BCF    03.5
+060F:  GOTO   614
+.................... 		{ 
+.................... 			output_bit (SPI_PLA_DATA_OUT, 0); 
+*
+057D:  BCF    08.4
+057E:  BSF    03.5
+057F:  BCF    08.4
+0580:  BCF    03.5
+*
+0592:  BCF    08.4
+0593:  BSF    03.5
+0594:  BCF    08.4
+0595:  BCF    03.5
+*
+05A7:  BCF    08.4
+05A8:  BSF    03.5
+05A9:  BCF    08.4
+05AA:  BCF    03.5
+*
+05BC:  BCF    08.4
+05BD:  BSF    03.5
+05BE:  BCF    08.4
+05BF:  BCF    03.5
+*
+05D1:  BCF    08.4
+05D2:  BSF    03.5
+05D3:  BCF    08.4
+05D4:  BCF    03.5
+*
+05E6:  BCF    08.4
+05E7:  BSF    03.5
+05E8:  BCF    08.4
+05E9:  BCF    03.5
+*
+05FB:  BCF    08.4
+05FC:  BSF    03.5
+05FD:  BCF    08.4
+05FE:  BCF    03.5
+*
+0610:  BCF    08.4
+0611:  BSF    03.5
+0612:  BCF    08.4
+0613:  BCF    03.5
+....................     } 
+.................... 	 
+....................  
+.................... 	 
+.................... 	// now clock register 
+.................... 	output_high (PLA_CLK); 
+*
+0581:  BSF    03.5
+0582:  BCF    08.5
+0583:  BCF    03.5
+0584:  BSF    08.5
+*
+0596:  BSF    03.5
+0597:  BCF    08.5
+0598:  BCF    03.5
+0599:  BSF    08.5
+*
+05AB:  BSF    03.5
+05AC:  BCF    08.5
+05AD:  BCF    03.5
+05AE:  BSF    08.5
+*
+05C0:  BSF    03.5
+05C1:  BCF    08.5
+05C2:  BCF    03.5
+05C3:  BSF    08.5
+*
+05D5:  BSF    03.5
+05D6:  BCF    08.5
+05D7:  BCF    03.5
+05D8:  BSF    08.5
+*
+05EA:  BSF    03.5
+05EB:  BCF    08.5
+05EC:  BCF    03.5
+05ED:  BSF    08.5
+*
+05FF:  BSF    03.5
+0600:  BCF    08.5
+0601:  BCF    03.5
+0602:  BSF    08.5
+*
+0614:  BSF    03.5
+0615:  BCF    08.5
+0616:  BCF    03.5
+0617:  BSF    08.5
+.................... 	 
+.................... 	output_low (PLA_CLK); 
+*
+0585:  BSF    03.5
+0586:  BCF    08.5
+0587:  BCF    03.5
+0588:  BCF    08.5
+*
+059A:  BSF    03.5
+059B:  BCF    08.5
+059C:  BCF    03.5
+059D:  BCF    08.5
+*
+05AF:  BSF    03.5
+05B0:  BCF    08.5
+05B1:  BCF    03.5
+05B2:  BCF    08.5
+*
+05C4:  BSF    03.5
+05C5:  BCF    08.5
+05C6:  BCF    03.5
+05C7:  BCF    08.5
+*
+05D9:  BSF    03.5
+05DA:  BCF    08.5
+05DB:  BCF    03.5
+05DC:  BCF    08.5
+*
+05EE:  BSF    03.5
+05EF:  BCF    08.5
+05F0:  BCF    03.5
+05F1:  BCF    08.5
+*
+0603:  BSF    03.5
+0604:  BCF    08.5
+0605:  BCF    03.5
+0606:  BCF    08.5
+*
+0618:  BSF    03.5
+0619:  BCF    08.5
+061A:  BCF    03.5
+061B:  BCF    08.5
+.................... } // end WritePlaData 
+....................  
+.................... #inline  
+.................... void ReadPlaFlags() 
+.................... { 
+.................... 	// read the input 
+.................... 	if (input (SPI_PLA_DATA_IN)) 
+*
+0703:  BSF    03.5
+0704:  BSF    08.6
+0705:  BCF    03.5
+0706:  BTFSC  08.6
+*
+0712:  BSF    03.5
+0713:  BSF    08.6
+0714:  BCF    03.5
+0715:  BTFSC  08.6
+*
+0721:  BSF    03.5
+0722:  BSF    08.6
+0723:  BCF    03.5
+0724:  BTFSC  08.6
+*
+0730:  BSF    03.5
+0731:  BSF    08.6
+0732:  BCF    03.5
+0733:  BTFSC  08.6
+*
+073F:  BSF    03.5
+0740:  BSF    08.6
+0741:  BCF    03.5
+0742:  BTFSC  08.6
+*
+074E:  BSF    03.5
+074F:  BSF    08.6
+0750:  BCF    03.5
+0751:  BTFSC  08.6
+*
+075D:  BSF    03.5
+075E:  BSF    08.6
+075F:  BCF    03.5
+0760:  BTFSC  08.6
+*
+076C:  BSF    03.5
+076D:  BSF    08.6
+076E:  BCF    03.5
+076F:  BTFSC  08.6
+*
+0845:  BSF    03.5
+0846:  BSF    08.6
+0847:  BCF    03.5
+0848:  BTFSC  08.6
+*
+0854:  BSF    03.5
+0855:  BSF    08.6
+0856:  BCF    03.5
+0857:  BTFSC  08.6
+*
+0863:  BSF    03.5
+0864:  BSF    08.6
+0865:  BCF    03.5
+0866:  BTFSC  08.6
+*
+0872:  BSF    03.5
+0873:  BSF    08.6
+0874:  BCF    03.5
+0875:  BTFSC  08.6
+*
+0881:  BSF    03.5
+0882:  BSF    08.6
+0883:  BCF    03.5
+0884:  BTFSC  08.6
+*
+0890:  BSF    03.5
+0891:  BSF    08.6
+0892:  BCF    03.5
+0893:  BTFSC  08.6
+*
+089F:  BSF    03.5
+08A0:  BSF    08.6
+08A1:  BCF    03.5
+08A2:  BTFSC  08.6
+*
+08AE:  BSF    03.5
+08AF:  BSF    08.6
+08B0:  BCF    03.5
+08B1:  BTFSC  08.6
+.................... 		{ 
+.................... 			pla_in_data.flags |= 0x01; 
+*
+0707:  BSF    35.0
+*
+0716:  BSF    35.0
+*
+0725:  BSF    35.0
+*
+0734:  BSF    35.0
+*
+0743:  BSF    35.0
+*
+0752:  BSF    35.0
+*
+0761:  BSF    35.0
+*
+0770:  BSF    35.0
+*
+0849:  BSF    35.0
+*
+0858:  BSF    35.0
+*
+0867:  BSF    35.0
+*
+0876:  BSF    35.0
+*
+0885:  BSF    35.0
+*
+0894:  BSF    35.0
+*
+08A3:  BSF    35.0
+*
+08B2:  BSF    35.0
+.................... 		} 
+.................... 	 
+.................... 	// now clock register 
+.................... 	output_high (PLA_CLK); 
+*
+0708:  BSF    03.5
+0709:  BCF    08.5
+070A:  BCF    03.5
+070B:  BSF    08.5
+*
+0717:  BSF    03.5
+0718:  BCF    08.5
+0719:  BCF    03.5
+071A:  BSF    08.5
+*
+0726:  BSF    03.5
+0727:  BCF    08.5
+0728:  BCF    03.5
+0729:  BSF    08.5
+*
+0735:  BSF    03.5
+0736:  BCF    08.5
+0737:  BCF    03.5
+0738:  BSF    08.5
+*
+0744:  BSF    03.5
+0745:  BCF    08.5
+0746:  BCF    03.5
+0747:  BSF    08.5
+*
+0753:  BSF    03.5
+0754:  BCF    08.5
+0755:  BCF    03.5
+0756:  BSF    08.5
+*
+0762:  BSF    03.5
+0763:  BCF    08.5
+0764:  BCF    03.5
+0765:  BSF    08.5
+*
+0771:  BSF    03.5
+0772:  BCF    08.5
+0773:  BCF    03.5
+0774:  BSF    08.5
+*
+084A:  BSF    03.5
+084B:  BCF    08.5
+084C:  BCF    03.5
+084D:  BSF    08.5
+*
+0859:  BSF    03.5
+085A:  BCF    08.5
+085B:  BCF    03.5
+085C:  BSF    08.5
+*
+0868:  BSF    03.5
+0869:  BCF    08.5
+086A:  BCF    03.5
+086B:  BSF    08.5
+*
+0877:  BSF    03.5
+0878:  BCF    08.5
+0879:  BCF    03.5
+087A:  BSF    08.5
+*
+0886:  BSF    03.5
+0887:  BCF    08.5
+0888:  BCF    03.5
+0889:  BSF    08.5
+*
+0895:  BSF    03.5
+0896:  BCF    08.5
+0897:  BCF    03.5
+0898:  BSF    08.5
+*
+08A4:  BSF    03.5
+08A5:  BCF    08.5
+08A6:  BCF    03.5
+08A7:  BSF    08.5
+*
+08B3:  BSF    03.5
+08B4:  BCF    08.5
+08B5:  BCF    03.5
+08B6:  BSF    08.5
+.................... 	 
+.................... 	output_low (PLA_CLK); 
+*
+070C:  BSF    03.5
+070D:  BCF    08.5
+070E:  BCF    03.5
+070F:  BCF    08.5
+*
+071B:  BSF    03.5
+071C:  BCF    08.5
+071D:  BCF    03.5
+071E:  BCF    08.5
+*
+072A:  BSF    03.5
+072B:  BCF    08.5
+072C:  BCF    03.5
+072D:  BCF    08.5
+*
+0739:  BSF    03.5
+073A:  BCF    08.5
+073B:  BCF    03.5
+073C:  BCF    08.5
+*
+0748:  BSF    03.5
+0749:  BCF    08.5
+074A:  BCF    03.5
+074B:  BCF    08.5
+*
+0757:  BSF    03.5
+0758:  BCF    08.5
+0759:  BCF    03.5
+075A:  BCF    08.5
+*
+0766:  BSF    03.5
+0767:  BCF    08.5
+0768:  BCF    03.5
+0769:  BCF    08.5
+*
+0775:  BSF    03.5
+0776:  BCF    08.5
+0777:  BCF    03.5
+0778:  BCF    08.5
+*
+084E:  BSF    03.5
+084F:  BCF    08.5
+0850:  BCF    03.5
+0851:  BCF    08.5
+*
+085D:  BSF    03.5
+085E:  BCF    08.5
+085F:  BCF    03.5
+0860:  BCF    08.5
+*
+086C:  BSF    03.5
+086D:  BCF    08.5
+086E:  BCF    03.5
+086F:  BCF    08.5
+*
+087B:  BSF    03.5
+087C:  BCF    08.5
+087D:  BCF    03.5
+087E:  BCF    08.5
+*
+088A:  BSF    03.5
+088B:  BCF    08.5
+088C:  BCF    03.5
+088D:  BCF    08.5
+*
+0899:  BSF    03.5
+089A:  BCF    08.5
+089B:  BCF    03.5
+089C:  BCF    08.5
+*
+08A8:  BSF    03.5
+08A9:  BCF    08.5
+08AA:  BCF    03.5
+08AB:  BCF    08.5
+*
+08B7:  BSF    03.5
+08B8:  BCF    08.5
+08B9:  BCF    03.5
+08BA:  BCF    08.5
+.................... 					 
+.................... } // end ReadPlaFlags; 
+....................  
+.................... #inline  
+.................... void ReadPlaData() 
+.................... { 
+.................... 	if (input (SPI_PLA_DATA_IN)) 
+*
+0779:  BSF    03.5
+077A:  BSF    08.6
+077B:  BCF    03.5
+077C:  BTFSC  08.6
+*
+0788:  BSF    03.5
+0789:  BSF    08.6
+078A:  BCF    03.5
+078B:  BTFSC  08.6
+*
+0797:  BSF    03.5
+0798:  BSF    08.6
+0799:  BCF    03.5
+079A:  BTFSC  08.6
+*
+07A6:  BSF    03.5
+07A7:  BSF    08.6
+07A8:  BCF    03.5
+07A9:  BTFSC  08.6
+*
+07B5:  BSF    03.5
+07B6:  BSF    08.6
+07B7:  BCF    03.5
+07B8:  BTFSC  08.6
+*
+07C4:  BSF    03.5
+07C5:  BSF    08.6
+07C6:  BCF    03.5
+07C7:  BTFSC  08.6
+*
+07D3:  BSF    03.5
+07D4:  BSF    08.6
+07D5:  BCF    03.5
+07D6:  BTFSC  08.6
+*
+07E2:  BSF    03.5
+07E3:  BSF    08.6
+07E4:  BCF    03.5
+07E5:  BTFSC  08.6
+*
+08BB:  BSF    03.5
+08BC:  BSF    08.6
+08BD:  BCF    03.5
+08BE:  BTFSC  08.6
+*
+08CA:  BSF    03.5
+08CB:  BSF    08.6
+08CC:  BCF    03.5
+08CD:  BTFSC  08.6
+*
+08D9:  BSF    03.5
+08DA:  BSF    08.6
+08DB:  BCF    03.5
+08DC:  BTFSC  08.6
+*
+08E8:  BSF    03.5
+08E9:  BSF    08.6
+08EA:  BCF    03.5
+08EB:  BTFSC  08.6
+*
+08F7:  BSF    03.5
+08F8:  BSF    08.6
+08F9:  BCF    03.5
+08FA:  BTFSC  08.6
+*
+0906:  BSF    03.5
+0907:  BSF    08.6
+0908:  BCF    03.5
+0909:  BTFSC  08.6
+*
+0915:  BSF    03.5
+0916:  BSF    08.6
+0917:  BCF    03.5
+0918:  BTFSC  08.6
+*
+0924:  BSF    03.5
+0925:  BSF    08.6
+0926:  BCF    03.5
+0927:  BTFSC  08.6
+.................... 		{ 
+.................... 			pla_in_data.data |= 0x01; 
+*
+077D:  BSF    36.0
+*
+078C:  BSF    36.0
+*
+079B:  BSF    36.0
+*
+07AA:  BSF    36.0
+*
+07B9:  BSF    36.0
+*
+07C8:  BSF    36.0
+*
+07D7:  BSF    36.0
+*
+07E6:  BSF    36.0
+*
+08BF:  BSF    36.0
+*
+08CE:  BSF    36.0
+*
+08DD:  BSF    36.0
+*
+08EC:  BSF    36.0
+*
+08FB:  BSF    36.0
+*
+090A:  BSF    36.0
+*
+0919:  BSF    36.0
+*
+0928:  BSF    36.0
+.................... 		} 
+.................... 	 
+.................... 	// now clock register 
+.................... 	output_high (PLA_CLK); 
+*
+077E:  BSF    03.5
+077F:  BCF    08.5
+0780:  BCF    03.5
+0781:  BSF    08.5
+*
+078D:  BSF    03.5
+078E:  BCF    08.5
+078F:  BCF    03.5
+0790:  BSF    08.5
+*
+079C:  BSF    03.5
+079D:  BCF    08.5
+079E:  BCF    03.5
+079F:  BSF    08.5
+*
+07AB:  BSF    03.5
+07AC:  BCF    08.5
+07AD:  BCF    03.5
+07AE:  BSF    08.5
+*
+07BA:  BSF    03.5
+07BB:  BCF    08.5
+07BC:  BCF    03.5
+07BD:  BSF    08.5
+*
+07C9:  BSF    03.5
+07CA:  BCF    08.5
+07CB:  BCF    03.5
+07CC:  BSF    08.5
+*
+07D8:  BSF    03.5
+07D9:  BCF    08.5
+07DA:  BCF    03.5
+07DB:  BSF    08.5
+*
+07E7:  BSF    03.5
+07E8:  BCF    08.5
+07E9:  BCF    03.5
+07EA:  BSF    08.5
+*
+08C0:  BSF    03.5
+08C1:  BCF    08.5
+08C2:  BCF    03.5
+08C3:  BSF    08.5
+*
+08CF:  BSF    03.5
+08D0:  BCF    08.5
+08D1:  BCF    03.5
+08D2:  BSF    08.5
+*
+08DE:  BSF    03.5
+08DF:  BCF    08.5
+08E0:  BCF    03.5
+08E1:  BSF    08.5
+*
+08ED:  BSF    03.5
+08EE:  BCF    08.5
+08EF:  BCF    03.5
+08F0:  BSF    08.5
+*
+08FC:  BSF    03.5
+08FD:  BCF    08.5
+08FE:  BCF    03.5
+08FF:  BSF    08.5
+*
+090B:  BSF    03.5
+090C:  BCF    08.5
+090D:  BCF    03.5
+090E:  BSF    08.5
+*
+091A:  BSF    03.5
+091B:  BCF    08.5
+091C:  BCF    03.5
+091D:  BSF    08.5
+*
+0929:  BSF    03.5
+092A:  BCF    08.5
+092B:  BCF    03.5
+092C:  BSF    08.5
+.................... 	 
+.................... 	output_low (PLA_CLK); 
+*
+0782:  BSF    03.5
+0783:  BCF    08.5
+0784:  BCF    03.5
+0785:  BCF    08.5
+*
+0791:  BSF    03.5
+0792:  BCF    08.5
+0793:  BCF    03.5
+0794:  BCF    08.5
+*
+07A0:  BSF    03.5
+07A1:  BCF    08.5
+07A2:  BCF    03.5
+07A3:  BCF    08.5
+*
+07AF:  BSF    03.5
+07B0:  BCF    08.5
+07B1:  BCF    03.5
+07B2:  BCF    08.5
+*
+07BE:  BSF    03.5
+07BF:  BCF    08.5
+07C0:  BCF    03.5
+07C1:  BCF    08.5
+*
+07CD:  BSF    03.5
+07CE:  BCF    08.5
+07CF:  BCF    03.5
+07D0:  BCF    08.5
+*
+07DC:  BSF    03.5
+07DD:  BCF    08.5
+07DE:  BCF    03.5
+07DF:  BCF    08.5
+*
+07EB:  BSF    03.5
+07EC:  BCF    08.5
+07ED:  BCF    03.5
+07EE:  BCF    08.5
+*
+08C4:  BSF    03.5
+08C5:  BCF    08.5
+08C6:  BCF    03.5
+08C7:  BCF    08.5
+*
+08D3:  BSF    03.5
+08D4:  BCF    08.5
+08D5:  BCF    03.5
+08D6:  BCF    08.5
+*
+08E2:  BSF    03.5
+08E3:  BCF    08.5
+08E4:  BCF    03.5
+08E5:  BCF    08.5
+*
+08F1:  BSF    03.5
+08F2:  BCF    08.5
+08F3:  BCF    03.5
+08F4:  BCF    08.5
+*
+0900:  BSF    03.5
+0901:  BCF    08.5
+0902:  BCF    03.5
+0903:  BCF    08.5
+*
+090F:  BSF    03.5
+0910:  BCF    08.5
+0911:  BCF    03.5
+0912:  BCF    08.5
+*
+091E:  BSF    03.5
+091F:  BCF    08.5
+0920:  BCF    03.5
+0921:  BCF    08.5
+*
+092D:  BSF    03.5
+092E:  BCF    08.5
+092F:  BCF    03.5
+0930:  BCF    08.5
+.................... 					 
+.................... } // end ReadPlaData 
+....................  
+.................... #inline 
+.................... short PlaTxReady() 
+.................... { 
+....................   return tx_ready; 
+*
+0C11:  MOVLW  00
+0C12:  BTFSC  29.3
+0C13:  MOVLW  01
+0C14:  MOVWF  78
+*
+138E:  MOVLW  00
+138F:  BTFSC  29.3
+1390:  MOVLW  01
+1391:  MOVWF  78
+.................... } 
+....................  
+.................... #inline MessageWaiting() 
+.................... { 
+....................   return message_received; 
+*
+082D:  MOVLW  00
+082E:  BTFSC  29.4
+082F:  MOVLW  01
+0830:  MOVWF  78
+*
+0997:  MOVLW  00
+0998:  BTFSC  29.4
+0999:  MOVLW  01
+099A:  MOVWF  78
+*
+1230:  MOVLW  00
+1231:  BTFSC  29.4
+1232:  MOVLW  01
+1233:  MOVWF  78
+.................... } 
+....................  
+.................... #int_ext 
+.................... ProcessInterrupt() 
+.................... { 
+....................   output_low(IO_INTERUPT_OUT_DATA); // by removing this we may just prevent the PC from reading an interrupt we just sent 
+*
+0051:  BCF    09.1
+....................   output_low(IO_INTERUPT_OUT_MIDI); // by removing this we may just prevent the PC from reading an interrupt we just sent 
+0052:  BCF    09.2
+....................   message_received = true; 
+0053:  BSF    29.4
+....................   tx_ready = true; 
+0054:  BSF    29.3
+....................   message_lost = false; 
+0055:  BCF    29.6
+....................  
+.................... } 
+....................  
+....................  
+.................... /******************************************************************** 
+....................  writes 16 bit word to pla 
+.................... *********************************************************************/ 
+....................  
+....................  
+0056:  BCF    0B.1
+0057:  BCF    0A.3
+0058:  BCF    0A.4
+0059:  GOTO   024
+.................... #inline 
+.................... void Pla_write_fast_data () 
+.................... { 
+.................... #use fast_io(d) 
+.................... 	int byte_num; 
+.................... 	int bit_num; 
+.................... 	byte out_val; 
+.................... 	short data_val; 
+....................  
+....................   // prepare Direction 
+....................   set_tris_d (WRITE_TRIS_VAL); 
+*
+04C9:  MOVLW  E0
+04CA:  BSF    03.5
+04CB:  MOVWF  08
+....................  
+.................... 	output_low (PLA_CLK); 
+04CC:  BCF    03.5
+04CD:  BCF    08.5
+.................... 	output_high(SPI_PLA_DATA_DIR); 
+04CE:  BSF    08.3
+....................  
+....................   // set the MSB to a one so we can stop the shifting in the pla 
+....................   bit_set (pla_out_data.flags, 7); 
+04CF:  BSF    33.7
+....................  
+....................   //out_val = pla_out_data.flags; 
+....................   WritePlaFlags(); 
+.................... 	pla_out_data.flags<<=1; 
+*
+04E3:  BCF    03.0
+04E4:  RLF    33,F
+....................   WritePlaFlags(); 
+.................... 	pla_out_data.flags<<=1; 
+*
+04F8:  BCF    03.0
+04F9:  RLF    33,F
+....................   WritePlaFlags(); 
+.................... 	pla_out_data.flags<<=1; 
+*
+050D:  BCF    03.0
+050E:  RLF    33,F
+....................   WritePlaFlags(); 
+.................... 	pla_out_data.flags<<=1; 
+*
+0522:  BCF    03.0
+0523:  RLF    33,F
+....................   WritePlaFlags(); 
+.................... 	pla_out_data.flags<<=1; 
+*
+0537:  BCF    03.0
+0538:  RLF    33,F
+....................   WritePlaFlags(); 
+.................... 	pla_out_data.flags<<=1; 
+*
+054C:  BCF    03.0
+054D:  RLF    33,F
+....................   WritePlaFlags(); 
+.................... 	pla_out_data.flags<<=1; 
+*
+0561:  BCF    03.0
+0562:  RLF    33,F
+....................   WritePlaFlags(); 
+....................  
+....................  
+....................  
+.................... 	// now write the data byte 
+.................... 	WritePlaData(); 
+.................... 	pla_out_data.data<<=1; 
+*
+0589:  BCF    03.0
+058A:  RLF    34,F
+.................... 	WritePlaData(); 
+.................... 	pla_out_data.data<<=1; 
+*
+059E:  BCF    03.0
+059F:  RLF    34,F
+.................... 	WritePlaData(); 
+.................... 	pla_out_data.data<<=1; 
+*
+05B3:  BCF    03.0
+05B4:  RLF    34,F
+.................... 	WritePlaData(); 
+.................... 	pla_out_data.data<<=1; 
+*
+05C8:  BCF    03.0
+05C9:  RLF    34,F
+.................... 	WritePlaData(); 
+.................... 	pla_out_data.data<<=1; 
+*
+05DD:  BCF    03.0
+05DE:  RLF    34,F
+.................... 	WritePlaData(); 
+.................... 	pla_out_data.data<<=1; 
+*
+05F2:  BCF    03.0
+05F3:  RLF    34,F
+.................... 	WritePlaData(); 
+.................... 	pla_out_data.data<<=1; 
+*
+0607:  BCF    03.0
+0608:  RLF    34,F
+.................... 	WritePlaData(); 
+.................... 	 
+.................... 	 
+....................   set_tris_d (READ_TRIS_VAL); 
+*
+061C:  MOVLW  D0
+061D:  BSF    03.5
+061E:  MOVWF  08
+061F:  BCF    03.5
+.................... } 
+....................  
+.................... /************************************************************************* 
+.................... Reads 16 bit word plus test bit from PLA. Returns true if test bit is valid 
+.................... ret_data contains returned data 
+.................... *************************************************************************/ 
+....................  
+.................... #inline 
+.................... void Pla_fast_read_data () 
+.................... { 
+.................... 	int byte_num; 
+.................... 	int bit_num; 
+.................... 	short data_val; 
+.................... #use fast_io(d) 
+....................  
+....................   message_received = false; // clear flag as there is no longer a message available 
+*
+06F5:  BCF    29.4
+*
+0837:  BCF    29.4
+.................... 	// prepare clock 
+....................  
+....................   set_tris_d (READ_TRIS_VAL); 
+*
+06F6:  MOVLW  D0
+06F7:  BSF    03.5
+06F8:  MOVWF  08
+*
+0838:  MOVLW  D0
+0839:  BSF    03.5
+083A:  MOVWF  08
+....................  
+.................... 	output_low (SPI_CLOCK); 
+*
+06F9:  BCF    03.5
+06FA:  BCF    2D.3
+06FB:  MOVF   2D,W
+06FC:  BSF    03.5
+06FD:  MOVWF  07
+06FE:  BCF    03.5
+06FF:  BCF    07.3
+*
+083B:  BCF    03.5
+083C:  BCF    2D.3
+083D:  MOVF   2D,W
+083E:  BSF    03.5
+083F:  MOVWF  07
+0840:  BCF    03.5
+0841:  BCF    07.3
+.................... 	pla_in_data.flags = 0; 
+*
+0700:  CLRF   35
+*
+0842:  CLRF   35
+.................... 	pla_in_data.data = 0; 
+*
+0701:  CLRF   36
+*
+0843:  CLRF   36
+....................  
+....................   // prepare for read 
+.................... 	output_low(SPI_PLA_DATA_DIR); 
+*
+0702:  BCF    08.3
+*
+0844:  BCF    08.3
+....................  
+.................... 	ReadPlaFlags();	 
+.................... 	pla_in_data.flags <<= 1;  
+*
+0710:  BCF    03.0
+0711:  RLF    35,F
+*
+0852:  BCF    03.0
+0853:  RLF    35,F
+.................... 	ReadPlaFlags();	 
+.................... 	pla_in_data.flags <<= 1;  
+*
+071F:  BCF    03.0
+0720:  RLF    35,F
+*
+0861:  BCF    03.0
+0862:  RLF    35,F
+.................... 	ReadPlaFlags();	 
+.................... 	pla_in_data.flags <<= 1;  
+*
+072E:  BCF    03.0
+072F:  RLF    35,F
+*
+0870:  BCF    03.0
+0871:  RLF    35,F
+.................... 	ReadPlaFlags();	 
+.................... 	pla_in_data.flags <<= 1;  
+*
+073D:  BCF    03.0
+073E:  RLF    35,F
+*
+087F:  BCF    03.0
+0880:  RLF    35,F
+.................... 	ReadPlaFlags();	 
+.................... 	pla_in_data.flags <<= 1;  
+*
+074C:  BCF    03.0
+074D:  RLF    35,F
+*
+088E:  BCF    03.0
+088F:  RLF    35,F
+.................... 	ReadPlaFlags();	 
+.................... 	pla_in_data.flags <<= 1;  
+*
+075B:  BCF    03.0
+075C:  RLF    35,F
+*
+089D:  BCF    03.0
+089E:  RLF    35,F
+.................... 	ReadPlaFlags();	 
+.................... 	pla_in_data.flags <<= 1;  
+*
+076A:  BCF    03.0
+076B:  RLF    35,F
+*
+08AC:  BCF    03.0
+08AD:  RLF    35,F
+.................... 	ReadPlaFlags();	 
+....................  
+....................  
+.................... 	ReadPlaData(); 
+.................... 	pla_in_data.data <<= 1;  
+*
+0786:  BCF    03.0
+0787:  RLF    36,F
+*
+08C8:  BCF    03.0
+08C9:  RLF    36,F
+.................... 	ReadPlaData(); 
+.................... 	pla_in_data.data <<= 1;  
+*
+0795:  BCF    03.0
+0796:  RLF    36,F
+*
+08D7:  BCF    03.0
+08D8:  RLF    36,F
+.................... 	ReadPlaData(); 
+.................... 	pla_in_data.data <<= 1;  
+*
+07A4:  BCF    03.0
+07A5:  RLF    36,F
+*
+08E6:  BCF    03.0
+08E7:  RLF    36,F
+.................... 	ReadPlaData(); 
+.................... 	pla_in_data.data <<= 1;  
+*
+07B3:  BCF    03.0
+07B4:  RLF    36,F
+*
+08F5:  BCF    03.0
+08F6:  RLF    36,F
+.................... 	ReadPlaData(); 
+.................... 	pla_in_data.data <<= 1;  
+*
+07C2:  BCF    03.0
+07C3:  RLF    36,F
+*
+0904:  BCF    03.0
+0905:  RLF    36,F
+.................... 	ReadPlaData(); 
+.................... 	pla_in_data.data <<= 1;  
+*
+07D1:  BCF    03.0
+07D2:  RLF    36,F
+*
+0913:  BCF    03.0
+0914:  RLF    36,F
+.................... 	ReadPlaData(); 
+.................... 	pla_in_data.data <<= 1;  
+*
+07E0:  BCF    03.0
+07E1:  RLF    36,F
+*
+0922:  BCF    03.0
+0923:  RLF    36,F
+.................... 	ReadPlaData(); 
+....................  
+....................  
+....................   // make PLA Data Dir Write 
+....................   output_high(SPI_PLA_DATA_DIR); 
+*
+07EF:  BSF    08.3
+*
+0931:  BSF    08.3
+....................  
+.................... } 
+....................  
+....................  
+....................  
+.................... void Pla_Send_data () //(int* out_data) 
+.................... { 
+.................... #use fast_io(e)   
+.................... #use fast_io(d)   
+....................    
+....................   tx_ready = false; // set flag that we are no longer ready to Transmit 
+*
+04C5:  BCF    29.3
+....................   message_lost = false; 
+04C6:  BCF    29.6
+....................  
+....................  
+....................   output_low(IO_INTERUPT_OUT_DATA); 
+04C7:  BCF    09.1
+....................   output_low(IO_INTERUPT_OUT_MIDI); 
+04C8:  BCF    09.2
+....................    
+....................   Pla_write_fast_data(); 
+....................  
+....................   awaiting_response = true;   
+*
+0620:  BSF    29.5
+....................  
+....................   //enable_interrupts(GLOBAL); 
+....................  
+....................   if (midi_tx) 
+0621:  BTFSS  29.7
+0622:  GOTO   625
+....................     output_high(IO_INTERUPT_OUT_MIDI); 
+0623:  BSF    09.2
+....................   else   
+0624:  GOTO   626
+....................     output_high(IO_INTERUPT_OUT_DATA); 
+0625:  BSF    09.1
+0626:  RETLW  00
+....................  
+.................... } 
+....................  
+....................  
+.................... void InitialisePlaIn() 
+.................... { 
+....................   message_received = false; // clear flag as there is no longer a message available 
+*
+06EE:  BCF    29.4
+.................... 	output_low (SPI_CLOCK); 
+06EF:  BCF    2D.3
+06F0:  MOVF   2D,W
+06F1:  BSF    03.5
+06F2:  MOVWF  07
+06F3:  BCF    03.5
+06F4:  BCF    07.3
+....................  
+....................   Pla_fast_read_data (); 
+....................  
+....................   output_low(IO_INTERUPT_OUT_DATA); // PREPARE THE iNTERRUPT PIN 
+*
+07F0:  BCF    09.1
+....................   output_low(IO_INTERUPT_OUT_MIDI); // PREPARE THE iNTERRUPT PIN 
+07F1:  BCF    09.2
+07F2:  RETLW  00
+....................  
+.................... } 
+....................  
+.................... #endif 
+....................  
+....................  
+....................  
+....................  
+.................... 
+.................... #include "Pla_out.h" 
+....................  /************************************************************** 
+....................  * Author: Angelo Fraietta 
+....................  * Description: Midi output interface 
+....................  *************************************************************/ 
+....................  
+.................... #define PLA_OUT_QUEUE_SIZE  4 
+....................  
+.................... // forward declarations 
+.................... void ProcessPlaInputStream(); 
+.................... short PlaOutFree(); 
+....................  
+.................... typedef struct 
+.................... { 
+....................   str_PLA_Data queue_data [PLA_OUT_QUEUE_SIZE]; 
+....................   int  head :2; // the size is important as we just make the value  
+....................   int  tail :2; // cycle from 0x0 to QUEUE_SIZE by incrementing 
+....................   int overflow :1; 
+....................   int empty :1; 
+....................  
+.................... } str_pla_queue;   
+....................  
+....................  
+.................... str_pla_queue pla_out_queue; 
+....................  
+....................  
+.................... #inline  
+.................... short PlaOutQueueEmpty() 
+.................... { 
+....................   return pla_out_queue.empty; 
+*
+0477:  MOVLW  00
+0478:  BTFSC  41.5
+0479:  MOVLW  01
+047A:  MOVWF  78
+.................... } // end PlaOutQueueEmpty 
+....................  
+.................... #inline  
+.................... short PlaOutQueueFull() 
+.................... { 
+.................... 	return (!pla_out_queue.empty && pla_out_queue.tail == pla_out_queue.head); 
+*
+12B1:  BTFSC  41.5
+12B2:  GOTO   2C4
+12B3:  MOVF   41,W
+12B4:  MOVWF  77
+12B5:  RRF    77,F
+12B6:  RRF    77,W
+12B7:  ANDLW  03
+12B8:  BSF    03.5
+12B9:  MOVWF  3E
+12BA:  BCF    03.5
+12BB:  MOVF   41,W
+12BC:  ANDLW  03
+12BD:  BSF    03.5
+12BE:  SUBWF  3E,W
+12BF:  BTFSS  03.2
+12C0:  GOTO   2C3
+12C1:  BCF    03.5
+12C2:  GOTO   2C6
+12C3:  BCF    03.5
+12C4:  MOVLW  00
+12C5:  GOTO   2C7
+12C6:  MOVLW  01
+12C7:  MOVWF  78
+.................... } // end PlaOutQueueFull 
+....................  
+.................... #inline 
+.................... void InitialisePlaOutQueue() 
+.................... { 
+....................   pla_out_queue.tail = 0;  
+*
+1143:  MOVLW  F3
+1144:  ANDWF  41,W
+1145:  MOVWF  41
+....................   pla_out_queue.head = 0; 
+1146:  MOVLW  FC
+1147:  ANDWF  41,W
+1148:  MOVWF  41
+....................   pla_out_queue.overflow = false; 
+1149:  BCF    41.4
+....................   pla_out_queue.empty = true; 
+114A:  BSF    41.5
+....................  
+.................... } // end InitialiseOutQueue 
+....................  
+.................... #inline 
+.................... void AddPlaQueue (byte flags, byte data) 
+.................... { 
+.................... 	pla_out_queue.queue_data [pla_out_queue.tail].flags = flags; 
+*
+12D1:  MOVF   41,W
+12D2:  MOVWF  77
+12D3:  RRF    77,F
+12D4:  RRF    77,W
+12D5:  ANDLW  03
+12D6:  MOVWF  77
+12D7:  BCF    03.0
+12D8:  RLF    77,F
+12D9:  MOVF   77,W
+12DA:  ADDLW  39
+12DB:  MOVWF  04
+12DC:  BSF    03.5
+12DD:  MOVF   3E,W
+12DE:  MOVWF  00
+.................... 	pla_out_queue.queue_data [pla_out_queue.tail].data = data; 
+12DF:  BCF    03.5
+12E0:  MOVF   41,W
+12E1:  MOVWF  77
+12E2:  RRF    77,F
+12E3:  RRF    77,W
+12E4:  ANDLW  03
+12E5:  MOVWF  77
+12E6:  BCF    03.0
+12E7:  RLF    77,F
+12E8:  MOVF   77,W
+12E9:  ADDLW  01
+12EA:  ADDLW  39
+12EB:  MOVWF  04
+12EC:  BSF    03.5
+12ED:  MOVF   3F,W
+12EE:  MOVWF  00
+....................  
+.................... 	pla_out_queue.tail++; 
+12EF:  BCF    03.5
+12F0:  MOVF   41,W
+12F1:  ADDLW  04
+12F2:  ANDLW  0C
+12F3:  MOVWF  77
+12F4:  MOVLW  F3
+12F5:  ANDWF  41,W
+12F6:  IORWF  77,W
+12F7:  MOVWF  41
+....................  
+.................... 	pla_out_queue.empty = false; 
+12F8:  BCF    41.5
+.................... }  // end AddPlaQueue 
+....................  
+.................... #inline  
+.................... void GetPlaQueue () 
+.................... { 
+....................   pla_out_data.flags = pla_out_queue.queue_data [pla_out_queue.head].flags;  
+*
+047E:  MOVF   41,W
+047F:  ANDLW  03
+0480:  MOVWF  77
+0481:  BCF    03.0
+0482:  RLF    77,F
+0483:  MOVF   77,W
+0484:  ADDLW  39
+0485:  MOVWF  04
+0486:  MOVF   00,W
+0487:  MOVWF  33
+....................   pla_out_data.data = pla_out_queue.queue_data [pla_out_queue.head].data;  
+0488:  MOVF   41,W
+0489:  ANDLW  03
+048A:  MOVWF  77
+048B:  BCF    03.0
+048C:  RLF    77,F
+048D:  MOVF   77,W
+048E:  ADDLW  01
+048F:  ADDLW  39
+0490:  MOVWF  04
+0491:  MOVF   00,W
+0492:  MOVWF  34
+....................  
+....................   pla_out_queue.head++; 
+0493:  MOVF   41,W
+0494:  ADDLW  01
+0495:  ANDLW  03
+0496:  MOVWF  77
+0497:  MOVLW  FC
+0498:  ANDWF  41,W
+0499:  IORWF  77,W
+049A:  MOVWF  41
+....................  
+....................   if (pla_out_queue.tail == pla_out_queue.head) 
+049B:  MOVWF  77
+049C:  RRF    77,F
+049D:  RRF    77,W
+049E:  ANDLW  03
+049F:  BSF    03.5
+04A0:  MOVWF  41
+04A1:  BCF    03.5
+04A2:  MOVF   41,W
+04A3:  ANDLW  03
+04A4:  BSF    03.5
+04A5:  SUBWF  41,W
+04A6:  BTFSC  03.2
+04A7:  GOTO   4AA
+04A8:  BCF    03.5
+04A9:  GOTO   4AC
+04AA:  BCF    03.5
+....................     { 
+....................       pla_out_queue.empty = true; 
+04AB:  BSF    41.5
+....................     } 
+.................... } // end GetPlaQueue 
+....................  
+....................  
+.................... #inline 
+.................... short OutputPla (int flags, int value) 
+.................... { 
+*
+12AE:  BSF    03.5
+12AF:  BCF    3D.0
+12B0:  BCF    03.5
+.................... 	short ret = false; 
+....................  
+.................... 	if  (!PlaOutQueueFull ()) 
+*
+12C8:  MOVF   78,F
+12C9:  BTFSS  03.2
+12CA:  GOTO   301
+.................... 		{ 
+.................... 			AddPlaQueue (flags, value); 
+12CB:  BSF    03.5
+12CC:  MOVF   3B,W
+12CD:  MOVWF  3E
+12CE:  MOVF   3C,W
+12CF:  MOVWF  3F
+12D0:  BCF    03.5
+.................... 			ProcessPlaInputStream(); 
+*
+12F9:  BCF    0A.4
+12FA:  BSF    0A.3
+12FB:  CALL   02A
+12FC:  BSF    0A.4
+12FD:  BCF    0A.3
+.................... 			ret = true; 
+12FE:  BSF    03.5
+12FF:  BSF    3D.0
+1300:  BCF    03.5
+.................... 		} 
+....................  
+.................... 	return ret; 
+1301:  MOVLW  00
+1302:  BSF    03.5
+1303:  BTFSC  3D.0
+1304:  MOVLW  01
+1305:  MOVWF  78
+1306:  BCF    03.5
+.................... } 
+....................  
+....................  
+.................... #inline 
+.................... short OutputAnalog (int channel, int value) 
+.................... { 
+....................   int flags = 0; 
+....................  
+....................   flags = (ANALOG_DATA | channel); 
+....................  
+....................   return OutputPla (flags, value); 
+.................... } 
+....................  
+.................... #inline 
+.................... short OutputDigital (int channel, int value) 
+.................... { 
+*
+12A5:  BSF    03.5
+12A6:  CLRF   3A
+....................   int flags = 0; 
+....................   flags = (DIGITAL_DATA | channel); 
+12A7:  MOVF   38,W
+12A8:  IORLW  30
+12A9:  MOVWF  3A
+....................   return OutputPla (flags, value); 
+12AA:  MOVWF  3B
+12AB:  MOVF   39,W
+12AC:  MOVWF  3C
+12AD:  BCF    03.5
+*
+1307:  MOVF   78,W
+....................  
+.................... } 
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+.................... 
+.................... #include "max520.h" 
+....................  /********************************************************** 
+....................  * I2C driver for Max520 ADC 
+....................  *********************************************************/ 
+....................  
+.................... #define MAX520_SLAVE_MASK 0x50 // must be ORed with slave device number 
+.................... #define NUM_520_OP 4     // the maximum outputs of a Max 520 
+....................  
+....................  
+.................... #inline 
+.................... short WriteAnalogueOutput (int port_num, byte outval) 
+.................... { 
+.................... 	short ret; 
+.................... 	byte slave_num, op_num, device_address; 
+....................  
+.................... 	i2c_start(); 
+*
+0A83:  BSF    03.5
+0A84:  BSF    06.7
+0A85:  MOVLW  04
+0A86:  MOVWF  77
+0A87:  BCF    03.5
+0A88:  DECFSZ 77,F
+0A89:  GOTO   288
+0A8A:  BSF    03.5
+0A8B:  BSF    06.6
+0A8C:  MOVLW  06
+0A8D:  MOVWF  77
+0A8E:  BCF    03.5
+0A8F:  DECFSZ 77,F
+0A90:  GOTO   28F
+0A91:  BCF    06.7
+0A92:  BSF    03.5
+0A93:  BCF    06.7
+0A94:  MOVLW  04
+0A95:  MOVWF  77
+0A96:  BCF    03.5
+0A97:  DECFSZ 77,F
+0A98:  GOTO   297
+0A99:  BCF    06.6
+0A9A:  BSF    03.5
+0A9B:  BCF    06.6
+....................  
+.................... 	slave_num = port_num / NUM_520_OP; 
+0A9C:  BCF    03.0
+0A9D:  RRF    46,W
+0A9E:  MOVWF  49
+0A9F:  RRF    49,F
+0AA0:  MOVLW  3F
+0AA1:  ANDWF  49,F
+....................   slave_num <<= 1; 
+0AA2:  BCF    03.0
+0AA3:  RLF    49,F
+.................... 	device_address = MAX520_SLAVE_MASK | slave_num; 
+0AA4:  MOVF   49,W
+0AA5:  IORLW  50
+0AA6:  MOVWF  4B
+.................... #ifndef _SIMULATE 
+.................... 	i2c_write (device_address); 
+0AA7:  MOVWF  4F
+0AA8:  BCF    03.5
+0AA9:  BCF    0A.3
+0AAA:  CALL   162
+0AAB:  BSF    0A.3
+.................... #endif 
+....................  
+.................... 	op_num = port_num % NUM_520_OP; 
+0AAC:  BSF    03.5
+0AAD:  MOVF   46,W
+0AAE:  ANDLW  03
+0AAF:  MOVWF  4A
+....................  
+.................... #ifndef _SIMULATE 
+.................... 	i2c_write (op_num); 
+0AB0:  MOVWF  4F
+0AB1:  BCF    03.5
+0AB2:  BCF    0A.3
+0AB3:  CALL   162
+0AB4:  BSF    0A.3
+.................... 	i2c_write (outval); 
+0AB5:  BSF    03.5
+0AB6:  MOVF   47,W
+0AB7:  MOVWF  4F
+0AB8:  BCF    03.5
+0AB9:  BCF    0A.3
+0ABA:  CALL   162
+0ABB:  BSF    0A.3
+.................... 	i2c_stop(); 
+0ABC:  BSF    03.5
+0ABD:  BCF    06.7
+0ABE:  NOP
+0ABF:  BSF    06.6
+0AC0:  BCF    03.5
+0AC1:  BTFSS  06.6
+0AC2:  GOTO   2C1
+0AC3:  MOVLW  04
+0AC4:  MOVWF  77
+0AC5:  DECFSZ 77,F
+0AC6:  GOTO   2C5
+0AC7:  NOP
+0AC8:  NOP
+0AC9:  NOP
+0ACA:  BSF    03.5
+0ACB:  BSF    06.7
+0ACC:  MOVLW  04
+0ACD:  MOVWF  77
+0ACE:  BCF    03.5
+0ACF:  DECFSZ 77,F
+0AD0:  GOTO   2CF
+.................... #else 
+....................   op_num = port_num % NUM_520_OP; 
+.................... #endif 
+.................... } 
+.................... 
+.................... #include "anaout.h" 
+....................  /********************************************************************** 
+.................... Performs the ana;logue output using an SPI write 
+.................... ***********************************************************************/ 
+....................   
+....................  
+.................... void GenerateAnalogueOutput (int out_num, byte val) 
+.................... { 
+.................... 	WriteAnalogueOutput (out_num, val); 
+*
+0A7D:  BSF    03.5
+0A7E:  MOVF   44,W
+0A7F:  MOVWF  46
+0A80:  MOVF   45,W
+0A81:  MOVWF  47
+0A82:  BCF    03.5
+.................... } 
+....................  
+....................  
+.................... 
+.................... #include "midiin.h" 
+....................  /************************************************************* 
+.................... * Author: Angelo Fraietta 
+.................... * Description Process the reception of Input and output using a  
+.................... * sixteen byte queue 
+.................... * Dependancy : calls ProcessMidiIn 
+.................... *************************************************************/ 
+.................... #byte PIR1 = 0x0C 
+.................... #byte TXREG = 0x19 
+....................  
+.................... // define a  volatile flag that becomes true when a char is received 
+.................... // and is reset by external program 
+.................... short input_unlocked;  
+....................                     
+....................  
+.................... #define QUEUE_SIZE  32 
+....................  
+.................... typedef struct 
+.................... { 
+....................   byte queue_data [QUEUE_SIZE]; 
+....................  
+....................   int  head :5; // the size is important as we just make the value  
+....................   int dummy :3; 
+....................   int  tail :5; // cycle from 0x0 to QUEUE_SIZE by incrementing 
+....................   int overflow :1; 
+....................   int empty :1; 
+....................  
+.................... } str_data_queue;   
+....................  
+.................... str_data_queue in_queue; 
+....................  
+....................  
+.................... // return true if flag was set when we cleared it 
+.................... #inline  
+.................... short ClearRxFlag() 
+.................... { 
+.................... 	short ret; 
+....................  
+.................... 	ret = input_unlocked; 
+.................... 	input_unlocked = 0; 
+.................... 	return ret; 
+.................... } 
+....................  
+.................... #inline  
+.................... short InQueueEmpty() 
+.................... { 
+....................   return in_queue.empty; 
+*
+0389:  MOVLW  00
+038A:  BTFSC  64.6
+038B:  MOVLW  01
+038C:  MOVWF  78
+.................... } 
+....................  
+....................  
+.................... #ifdef _USE_OUT_BUFFER 
+.................... #inline  
+.................... short OutQueueEmpty() 
+.................... { 
+....................   return out_queue.empty; 
+.................... } 
+.................... #endif 
+....................  
+.................... #inline  
+.................... short InOverflow() 
+.................... { 
+....................   return in_queue.overflow; 
+*
+0C7D:  MOVLW  00
+0C7E:  BTFSC  64.5
+0C7F:  MOVLW  01
+0C80:  MOVWF  78
+.................... } 
+....................  
+.................... #inline  
+.................... short InQueueFull() 
+.................... { 
+.................... 	return (!in_queue.empty && in_queue.tail == in_queue.head); 
+*
+007D:  BTFSC  64.6
+007E:  GOTO   08D
+007F:  MOVF   64,W
+0080:  ANDLW  1F
+0081:  BSF    03.5
+0082:  MOVWF  67
+0083:  BCF    03.5
+0084:  MOVF   63,W
+0085:  ANDLW  1F
+0086:  BSF    03.5
+0087:  SUBWF  67,W
+0088:  BTFSS  03.2
+0089:  GOTO   08C
+008A:  BCF    03.5
+008B:  GOTO   08F
+008C:  BCF    03.5
+008D:  MOVLW  00
+008E:  GOTO   090
+008F:  MOVLW  01
+0090:  MOVWF  78
+.................... } 
+....................  
+....................  
+.................... #ifdef _USE_OUT_BUFFER 
+.................... #inline  
+.................... short OutQueueFull() 
+.................... { 
+.................... 	return (!out_queue.empty && out_queue.tail == out_queue.head); 
+.................... } 
+.................... #endif 
+....................  
+.................... #inline 
+.................... void InitialiseQueue(str_data_queue& q) 
+.................... { 
+....................   q.tail = 0;  
+*
+006B:  MOVLW  E0
+006C:  ANDWF  64,W
+006D:  MOVWF  64
+....................   q.head = 0; 
+006E:  MOVLW  E0
+006F:  ANDWF  63,W
+0070:  MOVWF  63
+....................   q.overflow = false; 
+0071:  BCF    64.5
+....................   q.empty = true; 
+0072:  BSF    64.6
+....................  
+.................... } 
+....................  
+....................  
+.................... void InitialiseInQueue() 
+.................... { 
+....................   disable_interrupts (INT_RDA); // disable any Midi in  
+*
+0068:  BSF    03.5
+0069:  BCF    0C.5
+006A:  BCF    03.5
+.................... 	InitialiseQueue (in_queue); 
+.................... 	input_unlocked = true; 
+*
+0073:  BSF    42.0
+....................   enable_interrupts (INT_RDA); // disable any Midi in   
+0074:  BSF    03.5
+0075:  BSF    0C.5
+0076:  BCF    03.5
+0077:  RETLW  00
+.................... } 
+....................  
+....................  
+....................  
+.................... // function called when adding function. Called by interrupt by input 
+.................... #inline 
+.................... void AddQueue (byte new_byte, str_data_queue& q) 
+.................... { 
+.................... 	q.queue_data [q.tail] = new_byte; 
+.................... 	q.tail++; 
+....................  
+.................... 	q.empty = false; 
+....................  
+.................... }   
+....................  
+.................... #inline  
+.................... byte GetQueue (str_data_queue& q) 
+.................... { 
+....................   byte ret; 
+....................   ret = q.queue_data [q.head];  
+*
+0394:  MOVF   63,W
+0395:  ANDLW  1F
+0396:  ADDLW  43
+0397:  MOVWF  04
+0398:  MOVF   00,W
+0399:  BSF    03.5
+039A:  MOVWF  42
+....................   q.head++; 
+039B:  BCF    03.5
+039C:  MOVF   63,W
+039D:  ADDLW  01
+039E:  ANDLW  1F
+039F:  MOVWF  77
+03A0:  MOVLW  E0
+03A1:  ANDWF  63,W
+03A2:  IORWF  77,W
+03A3:  MOVWF  63
+....................  
+....................   if (q.tail == q.head) 
+03A4:  MOVF   64,W
+03A5:  ANDLW  1F
+03A6:  BSF    03.5
+03A7:  MOVWF  43
+03A8:  BCF    03.5
+03A9:  MOVF   63,W
+03AA:  ANDLW  1F
+03AB:  BSF    03.5
+03AC:  SUBWF  43,W
+03AD:  BTFSC  03.2
+03AE:  GOTO   3B1
+03AF:  BCF    03.5
+03B0:  GOTO   3B3
+03B1:  BCF    03.5
+....................     { 
+....................       q.empty = true; 
+03B2:  BSF    64.6
+....................     } 
+.................... 	return ret; 
+03B3:  BSF    03.5
+03B4:  MOVF   42,W
+03B5:  MOVWF  78
+03B6:  BCF    03.5
+.................... } 
+....................  
+.................... #inline 
+.................... void ClearInQueueOverflow() 
+.................... { 
+....................   in_queue.overflow = false; 
+.................... } 
+....................  
+.................... #inline 
+.................... void AddInQueue (byte new_byte) 
+.................... { 
+.................... 	AddQueue (new_byte, in_queue); 
+.................... } 
+....................  
+.................... #int_rda 
+.................... DataReceived() 
+.................... { 
+....................   int midi_char; 
+....................   midi_char = getc(); 
+*
+0078:  GOTO   05A
+0079:  MOVF   78,W
+007A:  BSF    03.5
+007B:  MOVWF  66
+007C:  BCF    03.5
+....................   if (InQueueFull()) 
+*
+0091:  MOVF   78,F
+0092:  BTFSC  03.2
+0093:  GOTO   096
+.................... 		{ 
+.................... 			InitialiseInQueue(); 
+0094:  CALL   068
+.................... 			in_queue.overflow = true; 
+0095:  BSF    64.5
+.................... 		} 
+....................  
+.................... 	in_queue.queue_data [in_queue.tail] = midi_char; 
+0096:  MOVF   64,W
+0097:  ANDLW  1F
+0098:  ADDLW  43
+0099:  MOVWF  04
+009A:  BSF    03.5
+009B:  MOVF   66,W
+009C:  MOVWF  00
+.................... 	in_queue.tail++; 
+009D:  BCF    03.5
+009E:  MOVF   64,W
+009F:  ADDLW  01
+00A0:  ANDLW  1F
+00A1:  MOVWF  77
+00A2:  MOVLW  E0
+00A3:  ANDWF  64,W
+00A4:  IORWF  77,W
+00A5:  MOVWF  64
+....................  
+.................... 	in_queue.empty = false; 
+00A6:  BCF    64.6
+....................  
+.................... } 
+....................  
+....................  
+00A7:  BCF    0C.5
+00A8:  BCF    0A.3
+00A9:  BCF    0A.4
+00AA:  GOTO   024
+.................... #inline  
+.................... void WriteOutData (byte out_byte) 
+.................... { 
+.................... #use rs232(baud=31250, xmit=MIDIOUT_1_PIN, rcv=MIDI_IN_PIN, ERRORS)  
+.................... #ifndef _SIMULATE 
+.................... 	putc (out_byte); 
+*
+0A60:  BSF    03.5
+0A61:  MOVF   44,W
+0A62:  BCF    03.5
+0A63:  BTFSS  0C.4
+0A64:  GOTO   263
+0A65:  MOVWF  19
+.................... #endif 
+....................  
+.................... } 
+....................  
+.................... #inline 
+.................... byte GetInChar() 
+.................... { 
+....................   byte ret; 
+....................    
+....................   disable_interrupts (INT_RDA); // disable any Midi in  
+*
+0391:  BSF    03.5
+0392:  BCF    0C.5
+0393:  BCF    03.5
+....................  
+....................   ret = GetQueue (in_queue); 
+*
+03B7:  MOVF   78,W
+03B8:  BSF    03.5
+03B9:  MOVWF  41
+....................    
+....................   enable_interrupts (INT_RDA); // re-enable Midi in  
+03BA:  BSF    0C.5
+....................  
+....................   input_unlocked = true; // set flag 
+03BB:  BCF    03.5
+03BC:  BSF    42.0
+....................  
+....................   return ret; 
+03BD:  BSF    03.5
+03BE:  MOVF   41,W
+03BF:  MOVWF  78
+03C0:  BCF    03.5
+.................... } 
+....................  
+....................  
+....................  
+....................  
+....................  
+.................... #inline  
+.................... void WriteOutData2 (byte out_byte) 
+.................... { 
+.................... #use rs232(baud=31250, xmit=MIDIOUT_2_PIN, rcv=MIDI_IN_PIN, ERRORS)  
+*
+0800:  BCF    2D.5
+0801:  MOVF   2D,W
+0802:  BSF    03.5
+0803:  MOVWF  07
+0804:  BCF    03.5
+0805:  BCF    07.5
+0806:  MOVLW  08
+0807:  MOVWF  78
+0808:  NOP
+0809:  NOP
+080A:  NOP
+080B:  BSF    78.7
+080C:  GOTO   01F
+080D:  BCF    78.7
+080E:  BSF    03.5
+080F:  RRF    45,F
+0810:  BCF    03.5
+0811:  BTFSC  03.0
+0812:  BSF    07.5
+0813:  BTFSS  03.0
+0814:  BCF    07.5
+0815:  BSF    78.6
+0816:  GOTO   01F
+0817:  BCF    78.6
+0818:  DECFSZ 78,F
+0819:  GOTO   00E
+081A:  NOP
+081B:  NOP
+081C:  NOP
+081D:  BSF    07.5
+081E:  GOTO   01F
+081F:  MOVLW  2F
+0820:  MOVWF  04
+0821:  DECFSZ 04,F
+0822:  GOTO   021
+0823:  BTFSC  78.7
+0824:  GOTO   00D
+0825:  BTFSC  78.6
+0826:  GOTO   017
+0827:  BSF    0A.3
+0828:  BCF    0A.4
+0829:  GOTO   274 (RETURN)
+....................   // we have to disable the interrupts here otherwise the data will become corrupted because it has no uart 
+....................   disable_interrupts(GLOBAL); 
+*
+0A6B:  BCF    0B.6
+0A6C:  BCF    0B.7
+0A6D:  BTFSC  0B.7
+0A6E:  GOTO   26C
+.................... #ifndef _SIMULATE 
+.................... 	putc (out_byte); 
+0A6F:  BSF    03.5
+0A70:  MOVF   44,W
+0A71:  MOVWF  45
+0A72:  BCF    03.5
+0A73:  GOTO   000
+.................... #endif 
+....................   enable_interrupts(GLOBAL); 
+0A74:  MOVLW  C0
+0A75:  IORWF  0B,F
+.................... } 
+....................  
+....................  
+.................... 
+.................... #include "spi_read.h" 
+....................  /******************************************************************************* 
+.................... *	Author: Angelo Fraietta 
+.................... *	Description: General SPI Read function 
+.................... *	Processor N/A 
+.................... * Inputs:  
+.................... *    data_size: size of the data structure receiving the data 
+.................... *    data_pin: the I/O pin that receives the data*      
+.................... * Outputs: 
+.................... *           ret_data: pointer to structure to receive data  
+.................... * 
+.................... * Global 
+.................... *    SPI_IN_LATCH: the I/O pin that latches input registers 
+.................... *    SPI_CLOCK: the I/O pin that clocks the device shift registers 
+....................  
+....................  
+.................... *	Description: 
+.................... *  
+.................... *		The registers are latched.  
+.................... *   [iterate] 
+.................... *   The state of the Input is read and shifted left 
+.................... *   When 8 bits are read and shifted, the value is stored into ret_data 
+....................  
+....................  
+.................... * Notes: asuumes the I/O pins are configured if not using standard I/O 
+.................... * Assumes a Low latch and a Low to High clock 
+.................... *******************************************************************************/ 
+.................... #inline 
+.................... void Spi_read_data (int* ret_data,  
+.................... 											int data_size,  
+.................... 											int data_pin) 
+.................... { 
+.................... 	int byte_num; 
+.................... 	int bit_num; 
+.................... 	byte in_val; 
+.................... 	short data_val; 
+....................  
+.................... 	// prepare clock 
+.................... 	output_low (SPI_CLOCK); 
+*
+118D:  BCF    2D.3
+118E:  MOVF   2D,W
+118F:  BSF    03.5
+1190:  MOVWF  07
+1191:  BCF    03.5
+1192:  BCF    07.3
+....................  
+....................   // latch the data 
+....................   switch (data_pin) 
+1193:  BSF    03.5
+1194:  MOVF   33,W
+1195:  MOVWF  77
+1196:  MOVLW  3C
+1197:  SUBWF  77,W
+1198:  BTFSS  03.2
+1199:  GOTO   19C
+119A:  BCF    03.5
+119B:  GOTO   19E
+119C:  BCF    03.5
+119D:  GOTO   1AB
+....................   { 
+....................     case DIGITAL_IN_DATA: 
+.................... 	 
+.................... 	    output_low (SPI_IN_LATCH); 
+119E:  BCF    2D.2
+119F:  MOVF   2D,W
+11A0:  BSF    03.5
+11A1:  MOVWF  07
+11A2:  BCF    03.5
+11A3:  BCF    07.2
+.................... 	    output_high (SPI_IN_LATCH); 
+11A4:  BCF    2D.2
+11A5:  MOVF   2D,W
+11A6:  BSF    03.5
+11A7:  MOVWF  07
+11A8:  BCF    03.5
+11A9:  BSF    07.2
+....................       break; 
+11AA:  GOTO   1AC
+....................  
+....................     default: 
+....................       break; 
+11AB:  GOTO   1AC
+....................   } 
+....................  
+.................... 	 
+.................... 	for (byte_num = 0; byte_num < data_size; byte_num++) 
+11AC:  BSF    03.5
+11AD:  CLRF   34
+11AE:  BCF    03.5
+11AF:  BSF    03.5
+11B0:  MOVF   32,W
+11B1:  SUBWF  34,W
+11B2:  BTFSS  03.0
+11B3:  GOTO   1B6
+11B4:  BCF    03.5
+11B5:  GOTO   203
+11B6:  BCF    03.5
+.................... 		{ 
+.................... 			in_val = 0; 
+11B7:  BSF    03.5
+11B8:  CLRF   36
+....................  
+.................... 			for (bit_num = 0; bit_num < 8; bit_num++) 
+11B9:  CLRF   35
+11BA:  BCF    03.5
+11BB:  BSF    03.5
+11BC:  MOVF   35,W
+11BD:  SUBLW  07
+11BE:  BTFSC  03.0
+11BF:  GOTO   1C2
+11C0:  BCF    03.5
+11C1:  GOTO   1F8
+11C2:  BCF    03.5
+.................... 				{ 
+.................... 					in_val <<= 1; // first shift is a dummy. Only seven are really shifted 
+11C3:  BCF    03.0
+11C4:  BSF    03.5
+11C5:  RLF    36,F
+....................  
+.................... 					// read the input 
+.................... 					switch (data_pin) 
+11C6:  MOVF   33,W
+11C7:  MOVWF  77
+11C8:  MOVLW  3C
+11C9:  SUBWF  77,W
+11CA:  BTFSS  03.2
+11CB:  GOTO   1CE
+11CC:  BCF    03.5
+11CD:  GOTO   1D0
+11CE:  BCF    03.5
+11CF:  GOTO   1DF
+.................... 						{ 
+.................... 							case DIGITAL_IN_DATA: 
+.................... 								data_val = input (DIGITAL_IN_DATA); 
+11D0:  BSF    2D.4
+11D1:  MOVF   2D,W
+11D2:  BSF    03.5
+11D3:  MOVWF  07
+11D4:  BCF    03.5
+11D5:  BTFSC  07.4
+11D6:  GOTO   1DB
+11D7:  BSF    03.5
+11D8:  BCF    37.0
+11D9:  BCF    03.5
+11DA:  GOTO   1DE
+11DB:  BSF    03.5
+11DC:  BSF    37.0
+11DD:  BCF    03.5
+.................... 								break; 
+11DE:  GOTO   1DF
+....................                
+.................... 						} 
+....................  
+.................... 					if (data_val) 
+11DF:  BSF    03.5
+11E0:  BTFSC  37.0
+11E1:  GOTO   1E4
+11E2:  BCF    03.5
+11E3:  GOTO   1E8
+11E4:  BCF    03.5
+.................... 						{ 
+.................... 							in_val |= 0x0001; 
+11E5:  BSF    03.5
+11E6:  BSF    36.0
+11E7:  BCF    03.5
+.................... 						} 
+....................  
+.................... 					// now clock register 
+.................... 					output_high (SPI_CLOCK); 
+11E8:  BCF    2D.3
+11E9:  MOVF   2D,W
+11EA:  BSF    03.5
+11EB:  MOVWF  07
+11EC:  BCF    03.5
+11ED:  BSF    07.3
+.................... 					output_low (SPI_CLOCK); 
+11EE:  BCF    2D.3
+11EF:  MOVF   2D,W
+11F0:  BSF    03.5
+11F1:  MOVWF  07
+11F2:  BCF    03.5
+11F3:  BCF    07.3
+.................... 				} 
+11F4:  BSF    03.5
+11F5:  INCF   35,F
+11F6:  BCF    03.5
+11F7:  GOTO   1BB
+....................  
+.................... 			// now store that byte in ret_data 
+.................... 			ret_data [byte_num] = in_val; 
+11F8:  BSF    03.5
+11F9:  MOVF   31,W
+11FA:  ADDWF  34,W
+11FB:  MOVWF  04
+11FC:  MOVF   36,W
+11FD:  MOVWF  00
+11FE:  BCF    03.5
+.................... 		} 
+11FF:  BSF    03.5
+1200:  INCF   34,F
+1201:  BCF    03.5
+1202:  GOTO   1AF
+.................... } 
+....................  
+....................  
+.................... /******************************************************************************* 
+.................... *	Author: Angelo Fraietta 
+.................... *	Description: General SPI Write function 
+.................... *	Processor N/A 
+.................... * Inputs:  
+.................... *    out_data: structure containing the data to be written 
+.................... *    data_size: size of the data structure receiving the data 
+.................... *    latch_pin: the I/O pin that receives the data*      
+.................... * Outputs: 
+.................... *           Data written to the outputs after being latched 
+.................... * 
+.................... * Global 
+.................... *    SPI_CLOCK: the I/O pin that clocks the device shift registers 
+.................... *    SPI_DATA_OUT: the data I/O pin that receives the output data 
+....................  
+.................... *	Description: 
+.................... *  
+.................... *		The registers are latched.  
+.................... *   [iterate] 
+.................... *   The state of the Output is written and shifted left 
+.................... *   When 8 bits are read and shifted, the value is stored into ret_data 
+....................  
+....................  
+.................... * Notes: asuumes the I/O pins are configured if not using standard I/O 
+.................... * Assumes a Low latch and a Low to High clock 
+.................... *******************************************************************************/ 
+.................... #inline 
+.................... void Spi_write_data (int* out_data,  
+.................... 											int data_size,  
+.................... 											int latch_pin) 
+.................... { 
+.................... 	int byte_num; 
+.................... 	int bit_num; 
+.................... 	byte out_val; 
+.................... 	short data_val; 
+....................    
+.................... 	// prepare clock 
+.................... 	output_low (SPI_CLOCK); 
+*
+069A:  BCF    2D.3
+069B:  MOVF   2D,W
+069C:  BSF    03.5
+069D:  MOVWF  07
+069E:  BCF    03.5
+069F:  BCF    07.3
+....................  
+.................... 	for (byte_num = 0; byte_num < data_size; byte_num++) 
+06A0:  BSF    03.5
+06A1:  CLRF   4C
+06A2:  BCF    03.5
+06A3:  BSF    03.5
+06A4:  MOVF   4A,W
+06A5:  SUBWF  4C,W
+06A6:  BTFSS  03.0
+06A7:  GOTO   6AA
+06A8:  BCF    03.5
+06A9:  GOTO   6DF
+06AA:  BCF    03.5
+.................... 		{ 
+.................... 			out_val = out_data [byte_num]; 
+06AB:  BSF    03.5
+06AC:  MOVF   49,W
+06AD:  ADDWF  4C,W
+06AE:  MOVWF  04
+06AF:  MOVF   00,W
+06B0:  MOVWF  4E
+....................   
+....................  
+.................... 			for (bit_num = 0; bit_num < 8; bit_num++) 
+06B1:  CLRF   4D
+06B2:  BCF    03.5
+06B3:  BSF    03.5
+06B4:  MOVF   4D,W
+06B5:  SUBLW  07
+06B6:  BTFSC  03.0
+06B7:  GOTO   6BA
+06B8:  BCF    03.5
+06B9:  GOTO   6DB
+06BA:  BCF    03.5
+.................... 				{ 
+.................... 					// write the high bit 
+....................           output_bit (SPI_DATA_OUT, out_val & 0x80); 
+06BB:  BSF    03.5
+06BC:  MOVF   4E,W
+06BD:  ANDLW  80
+06BE:  XORLW  00
+06BF:  BTFSC  03.2
+06C0:  GOTO   6C3
+06C1:  BCF    03.5
+06C2:  GOTO   6C6
+06C3:  BCF    03.5
+06C4:  BCF    08.1
+06C5:  GOTO   6C7
+06C6:  BSF    08.1
+....................           out_val<<=1; 
+06C7:  BCF    03.0
+06C8:  BSF    03.5
+06C9:  RLF    4E,F
+....................  
+.................... 					// now clock register 
+.................... 					output_high (SPI_CLOCK); 
+06CA:  BCF    03.5
+06CB:  BCF    2D.3
+06CC:  MOVF   2D,W
+06CD:  BSF    03.5
+06CE:  MOVWF  07
+06CF:  BCF    03.5
+06D0:  BSF    07.3
+.................... 					output_low (SPI_CLOCK); 
+06D1:  BCF    2D.3
+06D2:  MOVF   2D,W
+06D3:  BSF    03.5
+06D4:  MOVWF  07
+06D5:  BCF    03.5
+06D6:  BCF    07.3
+.................... 				} 
+06D7:  BSF    03.5
+06D8:  INCF   4D,F
+06D9:  BCF    03.5
+06DA:  GOTO   6B3
+....................  
+....................  
+.................... 		} 
+06DB:  BSF    03.5
+06DC:  INCF   4C,F
+06DD:  BCF    03.5
+06DE:  GOTO   6A3
+....................  
+.................... 	// latch the data 
+....................   switch (latch_pin) 
+06DF:  BSF    03.5
+06E0:  MOVF   4B,W
+06E1:  MOVWF  77
+06E2:  MOVLW  42
+06E3:  SUBWF  77,W
+06E4:  BTFSS  03.2
+06E5:  GOTO   6E8
+06E6:  BCF    03.5
+06E7:  GOTO   6EA
+06E8:  BCF    03.5
+06E9:  GOTO   6ED
+....................   { 
+....................     case DIGITAL_OUT_LATCH: 
+.................... 	    output_low (DIGITAL_OUT_LATCH); 
+06EA:  BCF    08.2
+.................... 	    output_high (DIGITAL_OUT_LATCH); 
+06EB:  BSF    08.2
+....................       break; 
+06EC:  GOTO   6ED
+....................  
+....................   } 
+.................... } 
+....................  
+....................  
+....................  
+.................... 
+.................... #include "digout.h" 
+....................  /********************************************************************** 
+.................... Performs the digital output using an SPI write 
+.................... ***********************************************************************/ 
+....................  
+.................... int16 current_value = 0; // this is the current state of the digital pins 
+....................  
+....................  
+.................... void GenerateDigitalOutput (int out_num, byte val) 
+.................... { 
+.................... 	int16 new_state; 
+....................   byte offset; 
+....................    
+....................   offset =  8; 
+*
+0627:  MOVLW  08
+0628:  BSF    03.5
+0629:  MOVWF  48
+....................  
+....................   if (out_num >= 8) 
+062A:  MOVF   44,W
+062B:  SUBLW  07
+062C:  BTFSS  03.0
+062D:  GOTO   630
+062E:  BCF    03.5
+062F:  GOTO   634
+0630:  BCF    03.5
+....................     { 
+....................     offset = 0; 
+0631:  BSF    03.5
+0632:  CLRF   48
+0633:  BCF    03.5
+....................     } 
+....................    
+....................  
+....................   new_state = current_value; 
+0634:  MOVF   66,W
+0635:  BSF    03.5
+0636:  MOVWF  47
+0637:  BCF    03.5
+0638:  MOVF   65,W
+0639:  BSF    03.5
+063A:  MOVWF  46
+....................  
+.................... 	if (val > 63) 
+063B:  MOVF   45,W
+063C:  SUBLW  3F
+063D:  BTFSS  03.0
+063E:  GOTO   641
+063F:  BCF    03.5
+0640:  GOTO   65C
+0641:  BCF    03.5
+.................... 		{ 
+.................... 			bit_set (new_state, out_num + offset); 
+0642:  BSF    03.5
+0643:  MOVF   48,W
+0644:  ADDWF  44,W
+0645:  MOVWF  49
+0646:  CLRF   7A
+0647:  MOVLW  01
+0648:  MOVWF  79
+0649:  MOVF   49,W
+064A:  MOVWF  77
+064B:  BTFSS  03.2
+064C:  GOTO   64F
+064D:  BCF    03.5
+064E:  GOTO   655
+064F:  BCF    03.5
+0650:  BCF    03.0
+0651:  RLF    79,F
+0652:  RLF    7A,F
+0653:  DECFSZ 77,F
+0654:  GOTO   650
+0655:  MOVF   79,W
+0656:  BSF    03.5
+0657:  IORWF  46,F
+0658:  MOVF   7A,W
+0659:  IORWF  47,F
+.................... 		} 
+.................... 	else 
+065A:  BCF    03.5
+065B:  GOTO   67A
+.................... 		{ 
+.................... 			bit_clear (new_state, out_num + offset); 
+065C:  BSF    03.5
+065D:  MOVF   48,W
+065E:  ADDWF  44,W
+065F:  MOVWF  49
+0660:  CLRF   7A
+0661:  MOVLW  01
+0662:  MOVWF  79
+0663:  MOVF   49,W
+0664:  MOVWF  77
+0665:  BTFSS  03.2
+0666:  GOTO   669
+0667:  BCF    03.5
+0668:  GOTO   66F
+0669:  BCF    03.5
+066A:  BCF    03.0
+066B:  RLF    79,F
+066C:  RLF    7A,F
+066D:  DECFSZ 77,F
+066E:  GOTO   66A
+066F:  MOVF   79,W
+0670:  XORLW  FF
+0671:  MOVWF  77
+0672:  MOVLW  FF
+0673:  XORWF  7A,F
+0674:  MOVF   77,W
+0675:  BSF    03.5
+0676:  ANDWF  46,F
+0677:  MOVF   7A,W
+0678:  ANDWF  47,F
+0679:  BCF    03.5
+.................... 		} 
+....................  
+.................... 	if (new_state != current_value) 
+067A:  MOVF   65,W
+067B:  BSF    03.5
+067C:  SUBWF  46,W
+067D:  BTFSC  03.2
+067E:  GOTO   681
+067F:  BCF    03.5
+0680:  GOTO   68A
+0681:  BCF    03.5
+0682:  MOVF   66,W
+0683:  BSF    03.5
+0684:  SUBWF  47,W
+0685:  BTFSS  03.2
+0686:  GOTO   689
+0687:  BCF    03.5
+0688:  GOTO   6ED
+0689:  BCF    03.5
+.................... 		{ 
+.................... 			current_value = new_state; 
+068A:  BSF    03.5
+068B:  MOVF   47,W
+068C:  BCF    03.5
+068D:  MOVWF  66
+068E:  BSF    03.5
+068F:  MOVF   46,W
+0690:  BCF    03.5
+0691:  MOVWF  65
+....................       //current_value *=2; 
+.................... 			Spi_write_data (&current_value, sizeof(current_value), DIGITAL_OUT_LATCH); 
+0692:  MOVLW  65
+0693:  BSF    03.5
+0694:  MOVWF  49
+0695:  MOVLW  02
+0696:  MOVWF  4A
+0697:  MOVLW  42
+0698:  MOVWF  4B
+0699:  BCF    03.5
+.................... 		} 
+*
+06ED:  RETLW  00
+.................... } 
+....................  
+.................... void InitialiseDigitalOut() 
+.................... { 
+....................   current_value = 0; 
+*
+0969:  CLRF   66
+096A:  CLRF   65
+....................   GenerateDigitalOutput (0, 0xff); 
+096B:  BSF    03.5
+096C:  CLRF   44
+096D:  MOVLW  FF
+096E:  MOVWF  45
+096F:  BCF    03.5
+0970:  BCF    0A.3
+0971:  CALL   627
+0972:  BSF    0A.3
+....................   GenerateDigitalOutput (0, 0); 
+0973:  BSF    03.5
+0974:  CLRF   44
+0975:  CLRF   45
+0976:  BCF    03.5
+0977:  BCF    0A.3
+0978:  CALL   627
+0979:  BSF    0A.3
+.................... } 
+.................... 
+.................... #include "anain.h" 
+....................  /********************************************************************* 
+.................... Module defines functions used for Reading Analogue In 
+.................... *********************************************************************/ 
+.................... int current_analogue_val[NUM_ANALOGUE_IN_CHANS]; 
+....................  
+.................... void ReadAnalogueIn(byte produce_output); 
+....................  
+.................... // initialise the previous analogue in values 
+.................... // Sets RA0, RA1 and RA3 as analogue inputs 
+.................... // Sets the B1 to B3 as Outputs 
+.................... #USE FAST_IO(B) 
+....................  
+.................... #define CLEAR_BANK_MASK 0b11110001 // ANDing Mask will clear bits 1-3 
+.................... void InitialiseAnalogueIn() 
+.................... { 
+.................... 	int i; 
+.................... 	setup_adc (ADC_CLOCK_INTERNAL); 
+*
+114B:  MOVF   1F,W
+114C:  ANDLW  38
+114D:  IORLW  C1
+114E:  MOVWF  1F
+.................... 	setup_adc_ports (RA0_RA1_ANALOG_RA3_REF); 
+114F:  MOVLW  05
+1150:  BSF    03.5
+1151:  MOVWF  1F
+....................  
+.................... 	set_tris_b (CLEAR_BANK_MASK); 
+1152:  MOVLW  F1
+1153:  MOVWF  06
+....................  
+....................  	for (i = 0; i < NUM_ANALOG_VALID_READS; i++) 
+1154:  CLRF   2B
+1155:  BCF    03.5
+1156:  BSF    03.5
+1157:  MOVF   2B,W
+1158:  SUBLW  01
+1159:  BTFSC  03.0
+115A:  GOTO   15D
+115B:  BCF    03.5
+115C:  GOTO   168
+115D:  BCF    03.5
+....................  		{ 
+....................  			current_analogue_val[i] = 0; 
+115E:  MOVLW  67
+115F:  BSF    03.5
+1160:  ADDWF  2B,W
+1161:  MOVWF  04
+1162:  CLRF   00
+1163:  BCF    03.5
+....................  		} 
+1164:  BSF    03.5
+1165:  INCF   2B,F
+1166:  BCF    03.5
+1167:  GOTO   156
+....................  
+.................... } 
+....................  
+.................... // reads the analogue in and produces output if different 
+.................... short ProcessAnalogueIn() 
+.................... { 
+.................... 	return ReadAnalogueIn (true); 
+.................... } 
+....................  
+....................  
+.................... // if produce_output is true, the result will be sent to the output  
+.................... // if different from previous value 
+.................... short ReadAnalogueIn(byte produce_output) 
+.................... { 
+....................   short ret = false; 
+.................... 	int sub_bank; 
+.................... 	int init_b; 
+.................... 	int bank_num; 
+.................... 	int adc_val; 
+....................   int adc_val_second_read; 
+.................... 	int channel_num; 
+....................  
+.................... 	init_b = PORTB;	 
+.................... 	// clear sub_bank bits 
+.................... 	init_b &= CLEAR_BANK_MASK; 
+....................  
+.................... 	for (sub_bank = 0; sub_bank < NUM_ANALOGUE_IN_SUB_BANKS; sub_bank++) 
+.................... 		{ 
+.................... 			restart_wdt(); 
+.................... 			// now write the sub_bank address to PORTB bits 1-3 
+.................... 			PORTB = init_b | (sub_bank<<1); 
+....................  
+.................... 			delay_us (AD_SWITCH_DELAY); 
+....................  
+.................... 			for (bank_num = 0; bank_num < NUM_ANALOGUE_IN_BANKS; bank_num++) 
+.................... 				{ 
+....................  
+.................... #ifdef IOCARD_BUILD 
+....................           if (MessageWaiting()) 
+....................           { 
+.................... 						ret = ProcessPlaInputStream();  
+.................... 					} 
+....................  
+.................... #endif 
+....................  
+.................... 					channel_num = bank_num * NUM_ANALOGUE_IN_SUB_BANKS + sub_bank; 
+....................  
+.................... 					set_adc_channel (bank_num); 
+.................... 					delay_us (AD_READ_DELAY); 
+....................  
+.................... 					// only eight bits of AD required 
+.................... 					adc_val = read_adc(); 
+....................  
+....................           // now read channel second time 
+.................... 					set_adc_channel (bank_num); 
+.................... 					delay_us (AD_READ_DELAY); 
+....................           adc_val_second_read = read_adc(); 
+....................  
+.................... #ifdef SEVEN_BIT_AD 
+.................... 					adc_val >>= 1; 
+....................           adc_val_second_read >>= 1; 
+.................... #endif 
+....................  
+....................  
+.................... 					// see if this read and last matched 
+....................  
+.................... 					if (adc_val_second_read == adc_val && current_analogue_val[channel_num] != adc_val ) 
+.................... 						{ 
+....................  
+.................... 							if (produce_output) 
+.................... 								{ 
+.................... 									if (OutputAnalog (channel_num, adc_val)) 
+.................... 										{ 
+.................... 											current_analogue_val[channel_num] = adc_val; 
+....................                       ret = true; 
+.................... 										} 
+.................... 								} 
+.................... 							else 
+.................... 								{ 
+.................... 									current_analogue_val[channel_num] = adc_val; 
+.................... 								} 
+....................  						} 
+....................  
+.................... 				} 
+.................... 		} 
+....................   return ret; 
+.................... } 
+....................  
+....................  
+.................... 
+.................... #include "digin.h" 
+....................  /****************************************************************************** 
+.................... Module for processing Digital Inputs 
+.................... ******************************************************************************/ 
+.................... // digital Read variables 
+.................... int16 prev_digital_val; 
+.................... int16 current_digital_val; 
+....................  
+....................  
+.................... short ProcessDigitalInputs(int produce_output) 
+.................... { 
+....................   short ret = false; 
+.................... 	int bit_num; 
+.................... 	int byte_num; 
+.................... 	byte *cur_val = &current_digital_val; 
+*
+117E:  BSF    03.5
+117F:  BCF    2C.0
+1180:  MOVLW  A0
+1181:  MOVWF  2F
+1182:  MOVLW  7C
+1183:  MOVWF  30
+.................... 	byte *prev_val = &prev_digital_val; 
+....................  
+.................... 	current_digital_val = 0; 
+1184:  CLRF   21
+1185:  CLRF   20
+....................  
+.................... 	Spi_read_data (&current_digital_val, sizeof(current_digital_val), DIGITAL_IN_DATA); 
+1186:  MOVLW  A0
+1187:  MOVWF  31
+1188:  MOVLW  02
+1189:  MOVWF  32
+118A:  MOVLW  3C
+118B:  MOVWF  33
+118C:  BCF    03.5
+....................  
+.................... 	if (current_digital_val != prev_digital_val) 
+*
+1203:  MOVF   7C,W
+1204:  BSF    03.5
+1205:  SUBWF  20,W
+1206:  BTFSC  03.2
+1207:  GOTO   20A
+1208:  BCF    03.5
+1209:  GOTO   213
+120A:  BCF    03.5
+120B:  MOVF   7D,W
+120C:  BSF    03.5
+120D:  SUBWF  21,W
+120E:  BTFSS  03.2
+120F:  GOTO   212
+1210:  BCF    03.5
+1211:  GOTO   352
+1212:  BCF    03.5
+.................... 		{ 
+.................... 			if (produce_output) 
+1213:  BSF    03.5
+1214:  MOVF   2B,F
+1215:  BTFSS  03.2
+1216:  GOTO   219
+1217:  BCF    03.5
+1218:  GOTO   352
+1219:  BCF    03.5
+.................... 				{ 
+....................           // iterate through each byte 
+.................... 					for (byte_num = 0; byte_num < sizeof(current_digital_val); byte_num++) 
+121A:  BSF    03.5
+121B:  CLRF   2E
+121C:  BCF    03.5
+121D:  BSF    03.5
+121E:  MOVF   2E,W
+121F:  SUBLW  01
+1220:  BTFSC  03.0
+1221:  GOTO   224
+1222:  BCF    03.5
+1223:  GOTO   352
+1224:  BCF    03.5
+.................... 						{ 
+.................... 							// iterate through each bit 
+.................... 							for (bit_num = 0; bit_num < 8; bit_num++) 
+1225:  BSF    03.5
+1226:  CLRF   2D
+1227:  BCF    03.5
+1228:  BSF    03.5
+1229:  MOVF   2D,W
+122A:  SUBLW  07
+122B:  BTFSC  03.0
+122C:  GOTO   22F
+122D:  BCF    03.5
+122E:  GOTO   34E
+122F:  BCF    03.5
+.................... 								{ 
+.................... #ifdef IOCARD_BUILD 
+....................                 if (MessageWaiting()) 
+*
+1234:  MOVF   78,F
+1235:  BTFSC  03.2
+1236:  GOTO   23F
+....................                   { 
+....................                     ProcessPlaInputStream();  
+1237:  BCF    0A.4
+1238:  BSF    0A.3
+1239:  CALL   02A
+123A:  BSF    0A.4
+123B:  BCF    0A.3
+....................                     ret = true; 
+123C:  BSF    03.5
+123D:  BSF    2C.0
+123E:  BCF    03.5
+....................                   } 
+.................... #endif 
+.................... 									if (Bit_test (cur_val[byte_num], bit_num)  
+.................... 											!= bit_test(prev_val[byte_num], bit_num)) 
+123F:  BSF    03.5
+1240:  MOVF   2F,W
+1241:  ADDWF  2E,W
+1242:  MOVWF  04
+1243:  MOVF   00,W
+1244:  MOVWF  31
+1245:  MOVWF  77
+1246:  MOVF   2D,W
+1247:  MOVWF  78
+1248:  BTFSS  03.2
+1249:  GOTO   24C
+124A:  BCF    03.5
+124B:  GOTO   251
+124C:  BCF    03.5
+124D:  BCF    03.0
+124E:  RRF    77,F
+124F:  DECFSZ 78,F
+1250:  GOTO   24D
+1251:  MOVLW  00
+1252:  BTFSC  77.0
+1253:  MOVLW  01
+1254:  BSF    03.5
+1255:  MOVWF  32
+1256:  MOVF   30,W
+1257:  ADDWF  2E,W
+1258:  MOVWF  04
+1259:  MOVF   00,W
+125A:  MOVWF  33
+125B:  MOVWF  77
+125C:  MOVF   2D,W
+125D:  MOVWF  78
+125E:  BTFSS  03.2
+125F:  GOTO   262
+1260:  BCF    03.5
+1261:  GOTO   267
+1262:  BCF    03.5
+1263:  BCF    03.0
+1264:  RRF    77,F
+1265:  DECFSZ 78,F
+1266:  GOTO   263
+1267:  MOVLW  00
+1268:  BTFSC  77.0
+1269:  MOVLW  01
+126A:  BSF    03.5
+126B:  SUBWF  32,W
+126C:  BTFSS  03.2
+126D:  GOTO   270
+126E:  BCF    03.5
+126F:  GOTO   34A
+1270:  BCF    03.5
+.................... 										{ 
+.................... 											// we use this fancy calculation because of the endian of an int16 
+.................... 											// we want the first byte to be the high order byte 
+....................                       // also, a one will produce a zero ouitput 
+.................... 											if (OutputDigital ((sizeof(current_digital_val)-1 - byte_num) * 8 + bit_num,  
+.................... 																				 (!Bit_test (cur_val[byte_num], bit_num)) * DIG_ON_VAL)) 
+1271:  BSF    03.5
+1272:  MOVF   2E,W
+1273:  SUBLW  01
+1274:  MOVWF  77
+1275:  BCF    03.0
+1276:  RLF    77,F
+1277:  RLF    77,F
+1278:  RLF    77,F
+1279:  MOVLW  F8
+127A:  ANDWF  77,F
+127B:  MOVF   77,W
+127C:  ADDWF  2D,W
+127D:  MOVWF  33
+127E:  MOVF   2F,W
+127F:  ADDWF  2E,W
+1280:  MOVWF  04
+1281:  MOVF   00,W
+1282:  MOVWF  34
+1283:  MOVWF  77
+1284:  MOVF   2D,W
+1285:  MOVWF  78
+1286:  BTFSS  03.2
+1287:  GOTO   28A
+1288:  BCF    03.5
+1289:  GOTO   28F
+128A:  BCF    03.5
+128B:  BCF    03.0
+128C:  RRF    77,F
+128D:  DECFSZ 78,F
+128E:  GOTO   28B
+128F:  MOVLW  00
+1290:  BTFSS  77.0
+1291:  MOVLW  01
+1292:  BSF    03.5
+1293:  MOVWF  36
+1294:  MOVWF  37
+1295:  MOVLW  FF
+1296:  MOVWF  38
+1297:  BCF    03.5
+1298:  BCF    0A.4
+1299:  BSF    0A.3
+129A:  GOTO   434
+129B:  BSF    0A.4
+129C:  BCF    0A.3
+129D:  MOVF   78,W
+129E:  BSF    03.5
+129F:  MOVWF  37
+12A0:  MOVF   33,W
+12A1:  MOVWF  38
+12A2:  MOVF   37,W
+12A3:  MOVWF  39
+12A4:  BCF    03.5
+*
+1308:  MOVF   78,F
+1309:  BTFSC  03.2
+130A:  GOTO   34A
+.................... 												{ 
+.................... 													if (Bit_test (cur_val[byte_num], bit_num) ) 
+130B:  BSF    03.5
+130C:  MOVF   2F,W
+130D:  ADDWF  2E,W
+130E:  MOVWF  04
+130F:  MOVF   00,W
+1310:  MOVWF  31
+1311:  MOVWF  77
+1312:  MOVF   2D,W
+1313:  MOVWF  78
+1314:  BTFSS  03.2
+1315:  GOTO   318
+1316:  BCF    03.5
+1317:  GOTO   31D
+1318:  BCF    03.5
+1319:  BCF    03.0
+131A:  RRF    77,F
+131B:  DECFSZ 78,F
+131C:  GOTO   319
+131D:  BTFSS  77.0
+131E:  GOTO   333
+.................... 														{ 
+.................... 															Bit_set(prev_val[byte_num], bit_num); 
+131F:  BSF    03.5
+1320:  MOVF   30,W
+1321:  ADDWF  2E,W
+1322:  MOVWF  04
+1323:  MOVLW  01
+1324:  MOVWF  77
+1325:  MOVF   2D,W
+1326:  MOVWF  78
+1327:  BTFSS  03.2
+1328:  GOTO   32B
+1329:  BCF    03.5
+132A:  GOTO   330
+132B:  BCF    03.5
+132C:  BCF    03.0
+132D:  RLF    77,F
+132E:  DECFSZ 78,F
+132F:  GOTO   32C
+1330:  MOVF   77,W
+1331:  IORWF  00,F
+.................... 														} 
+.................... 													else 
+1332:  GOTO   347
+.................... 														{ 
+.................... 															Bit_clear(prev_val[byte_num], bit_num); 
+1333:  BSF    03.5
+1334:  MOVF   30,W
+1335:  ADDWF  2E,W
+1336:  MOVWF  04
+1337:  MOVLW  01
+1338:  MOVWF  77
+1339:  MOVF   2D,W
+133A:  MOVWF  78
+133B:  BTFSS  03.2
+133C:  GOTO   33F
+133D:  BCF    03.5
+133E:  GOTO   344
+133F:  BCF    03.5
+1340:  BCF    03.0
+1341:  RLF    77,F
+1342:  DECFSZ 78,F
+1343:  GOTO   340
+1344:  MOVF   77,W
+1345:  XORLW  FF
+1346:  ANDWF  00,F
+.................... 														} 
+....................                           ret = true; 
+1347:  BSF    03.5
+1348:  BSF    2C.0
+1349:  BCF    03.5
+.................... 												} 
+.................... 										} 
+.................... 								} 
+134A:  BSF    03.5
+134B:  INCF   2D,F
+134C:  BCF    03.5
+134D:  GOTO   228
+.................... 						} 
+134E:  BSF    03.5
+134F:  INCF   2E,F
+1350:  BCF    03.5
+1351:  GOTO   21D
+.................... 				} 
+.................... 			 
+.................... 		} 
+....................  
+....................   return ret; 
+1352:  MOVLW  00
+1353:  BSF    03.5
+1354:  BTFSC  2C.0
+1355:  MOVLW  01
+1356:  MOVWF  78
+1357:  BCF    03.5
+.................... } 
+.................... 
+.................... #include "proc_pla.h" 
+....................  /******************************************************************** 
+.................... Process Pla Messages 
+.................... ********************************************************************/ 
+....................  
+.................... // flag indicating that our transmitted data has been received by the 386 
+....................  
+.................... str_PLA_Data last_tx_data; 
+....................  
+.................... // count the number of actual data bytes transmitted and received 
+.................... int num_tx_data_bytes = 0;  
+.................... int num_rx_data_bytes = 0; 
+.................... short re_transmit_required = false; // this means that transmitted messages are out of sync 
+.................... short proc_pla_eeprom_read = false; 
+.................... short proc_pla_eeprom_write = false; 
+.................... short proc_pla_int_eeprom = false; 
+....................  
+.................... #ifdef DIAG_COUNT 
+.................... byte diag_flags = 0, diag_data = 0; 
+.................... #endif 
+....................  
+.................... #inline 
+.................... short RequestEEProm() 
+.................... { 
+.................... 	return proc_pla_eeprom_read || proc_pla_eeprom_write; 
+.................... } 
+....................  
+....................  
+.................... #inline  
+.................... void ResendLastMessage() 
+.................... { 
+....................   midi_tx = false; 
+....................   pla_out_data.flags = prev_pla_out.flags; 
+....................   pla_out_data.data = prev_pla_out.data;           
+....................   Pla_Send_data(); 
+.................... } 
+....................  
+.................... #inline  
+.................... void RequestNumRxBytes() 
+.................... { 
+....................   midi_tx = false; 
+*
+097C:  BCF    29.7
+*
+0985:  BCF    29.7
+*
+09A1:  BCF    29.7
+*
+1361:  BCF    29.7
+*
+13AB:  BCF    29.7
+*
+13D2:  BCF    29.7
+....................   pla_out_data.flags = DIAG_DIAG_MESSAGE_FLAG; 
+*
+097D:  MOVLW  FF
+097E:  MOVWF  33
+*
+0986:  MOVLW  FF
+0987:  MOVWF  33
+*
+09A2:  MOVLW  FF
+09A3:  MOVWF  33
+*
+1362:  MOVLW  FF
+1363:  MOVWF  33
+*
+13AC:  MOVLW  FF
+13AD:  MOVWF  33
+*
+13D3:  MOVLW  FF
+13D4:  MOVWF  33
+....................   pla_out_data.data = DIAG_REQUEST_RX_BYTES;           
+*
+097F:  MOVLW  07
+0980:  MOVWF  34
+*
+0988:  MOVLW  07
+0989:  MOVWF  34
+*
+09A4:  MOVLW  07
+09A5:  MOVWF  34
+*
+1364:  MOVLW  07
+1365:  MOVWF  34
+*
+13AE:  MOVLW  07
+13AF:  MOVWF  34
+*
+13D5:  MOVLW  07
+13D6:  MOVWF  34
+....................   Pla_Send_data(); 
+*
+0981:  BCF    0A.3
+0982:  CALL   4C5
+0983:  BSF    0A.3
+*
+098A:  BCF    0A.3
+098B:  CALL   4C5
+098C:  BSF    0A.3
+*
+09A6:  BCF    0A.3
+09A7:  CALL   4C5
+09A8:  BSF    0A.3
+*
+1366:  BCF    0A.4
+1367:  CALL   4C5
+1368:  BSF    0A.4
+*
+13B0:  BCF    0A.4
+13B1:  CALL   4C5
+13B2:  BSF    0A.4
+*
+13D7:  BCF    0A.4
+13D8:  CALL   4C5
+13D9:  BSF    0A.4
+.................... } 
+....................  
+.................... #inline  
+.................... void RequestNumTxBytes() 
+.................... { 
+....................   midi_tx = false; 
+*
+09EA:  BCF    29.7
+....................   pla_out_data.flags = DIAG_DIAG_MESSAGE_FLAG; 
+09EB:  MOVLW  FF
+09EC:  MOVWF  33
+....................   pla_out_data.data = DIAG_REQUEST_TX_BYTES;           
+09ED:  MOVLW  08
+09EE:  MOVWF  34
+....................   Pla_Send_data(); 
+09EF:  BCF    0A.3
+09F0:  CALL   4C5
+09F1:  BSF    0A.3
+.................... } 
+....................  
+....................  
+.................... short   GetNextPlaMessage ()  
+.................... { 
+*
+0373:  BSF    03.5
+0374:  BCF    40.0
+....................   short ret = false; 
+....................   midi_tx = false; 
+0375:  BCF    03.5
+0376:  BCF    29.7
+....................   pla_out_data.flags = DIAG_DIAG_MESSAGE_FLAG; 
+0377:  MOVLW  FF
+0378:  MOVWF  33
+....................   pla_out_data.data = DIAG_ETX; 
+0379:  MOVLW  01
+037A:  MOVWF  34
+....................  
+....................   if (re_transmit_required) 
+037B:  BTFSS  42.1
+037C:  GOTO   389
+....................   { 
+....................     pla_out_data.flags = last_tx_data.flags; 
+037D:  BSF    03.5
+037E:  MOVF   22,W
+037F:  BCF    03.5
+0380:  MOVWF  33
+....................     pla_out_data.data = last_tx_data.data;           
+0381:  BSF    03.5
+0382:  MOVF   23,W
+0383:  BCF    03.5
+0384:  MOVWF  34
+....................     ret = true; 
+0385:  BSF    03.5
+0386:  BSF    40.0
+....................   } 
+....................   else if (!InQueueEmpty()) 
+0387:  BCF    03.5
+0388:  GOTO   4AF
+*
+038D:  MOVF   78,F
+038E:  BTFSS  03.2
+038F:  GOTO   3CC
+....................   { 
+....................     restart_wdt(); 
+0390:  CLRWDT
+.................... 		pla_out_data.data = GetInChar(); 
+*
+03C1:  MOVF   78,W
+03C2:  MOVWF  34
+....................  
+....................     if (pla_out_data.data != 0xff) 
+03C3:  INCFSZ 34,W
+03C4:  GOTO   3C6
+03C5:  GOTO   3C7
+....................       { 
+....................       midi_tx = true; 
+03C6:  BSF    29.7
+....................       } 
+....................  
+....................     pla_out_data.flags = MIDI_CHAN_1_DATA; 
+03C7:  CLRF   33
+....................      
+....................     ret = true; 
+03C8:  BSF    03.5
+03C9:  BSF    40.0
+....................   } 
+....................   else 
+03CA:  BCF    03.5
+03CB:  GOTO   4AF
+....................   { 
+.................... 		if (proc_pla_eeprom_read && !processing_analogs) 
+03CC:  BTFSS  42.2
+03CD:  GOTO   431
+03CE:  BTFSC  29.2
+03CF:  GOTO   431
+.................... 			{ 
+.................... 				if (ReadExtEEpromByte (&pla_out_data.data)) 
+03D0:  MOVLW  34
+03D1:  BSF    03.5
+03D2:  MOVWF  41
+03D3:  BCF    03.5
+*
+0424:  MOVF   78,F
+0425:  BTFSC  03.2
+0426:  GOTO   42A
+.................... 					{ 
+.................... 						pla_out_data.flags = EEPROM_DATA; 
+0427:  MOVLW  40
+0428:  MOVWF  33
+.................... 					} 
+.................... 				else 
+0429:  GOTO   42D
+.................... 					{ 
+.................... 						pla_out_data.flags = EEPROM_END_READ; 
+042A:  MOVLW  45
+042B:  MOVWF  33
+.................... 						proc_pla_eeprom_read = false; 
+042C:  BCF    42.2
+.................... 					} 
+.................... 				ret = true; 
+042D:  BSF    03.5
+042E:  BSF    40.0
+.................... 			} 
+.................... 		 
+.................... 		else if (proc_pla_eeprom_write && !processing_analogs) 
+042F:  BCF    03.5
+0430:  GOTO   471
+0431:  BTFSS  42.3
+0432:  GOTO   442
+0433:  BTFSC  29.2
+0434:  GOTO   442
+.................... 			{ 
+.................... 				// we must let the device know we are ready for a write 
+.................... 				if (EEpromWriteReady()) 
+*
+0438:  MOVF   78,F
+0439:  BTFSC  03.2
+043A:  GOTO   441
+.................... 					{ 
+.................... 						proc_pla_eeprom_write = false; 
+043B:  BCF    42.3
+.................... 						pla_out_data.flags = EEPROM_WRITE_READY; 
+043C:  MOVLW  44
+043D:  MOVWF  33
+.................... 						ret = true; 
+043E:  BSF    03.5
+043F:  BSF    40.0
+0440:  BCF    03.5
+.................... 					} 
+.................... 			} 
+....................  
+.................... 		else if (proc_pla_int_eeprom) 
+0441:  GOTO   471
+0442:  BTFSS  42.4
+0443:  GOTO   471
+.................... 			{ 
+.................... 				 
+.................... 				proc_pla_int_eeprom = ReadIntEEprom (&pla_out_data.data); 
+0444:  MOVLW  34
+0445:  BSF    03.5
+0446:  MOVWF  41
+0447:  BCF    03.5
+*
+0466:  MOVF   78,F
+0467:  BTFSS  03.2
+0468:  GOTO   46B
+0469:  BCF    42.4
+046A:  GOTO   46C
+046B:  BSF    42.4
+.................... 				pla_out_data.flags = INT_EEPROM_DATA; 
+046C:  MOVLW  49
+046D:  MOVWF  33
+.................... 				ret = true; 
+046E:  BSF    03.5
+046F:  BSF    40.0
+0470:  BCF    03.5
+.................... 			} 
+....................  
+.................... 		if (!ret && !PlaOutQueueEmpty()) 
+0471:  BSF    03.5
+0472:  BTFSS  40.0
+0473:  GOTO   476
+0474:  BCF    03.5
+0475:  GOTO   4AF
+0476:  BCF    03.5
+*
+047B:  MOVF   78,F
+047C:  BTFSS  03.2
+047D:  GOTO   4AF
+....................     { 
+....................       GetPlaQueue(); 
+....................       ret = true; 
+*
+04AC:  BSF    03.5
+04AD:  BSF    40.0
+04AE:  BCF    03.5
+....................     } 
+.................... #ifdef DIAG_COUNT 
+....................   else 
+....................     { 
+....................     diag_flags = 0; 
+....................     diag_data++; 
+....................     pla_out_data.flags = diag_flags; 
+....................     pla_out_data.data = diag_data; 
+....................     ret = true; 
+....................     } 
+.................... #endif   
+....................  
+....................   } 
+....................  
+....................   last_tx_data.flags = pla_out_data.flags; 
+04AF:  MOVF   33,W
+04B0:  BSF    03.5
+04B1:  MOVWF  22
+....................   last_tx_data.data = pla_out_data.data; 
+04B2:  BCF    03.5
+04B3:  MOVF   34,W
+04B4:  BSF    03.5
+04B5:  MOVWF  23
+....................  
+....................   if (ret && (!re_transmit_required)) 
+04B6:  BTFSC  40.0
+04B7:  GOTO   4BA
+04B8:  BCF    03.5
+04B9:  GOTO   4BD
+04BA:  BCF    03.5
+04BB:  BTFSS  42.1
+....................   { 
+....................     num_tx_data_bytes++; 
+04BC:  INCF   7E,F
+....................   } 
+....................  
+....................   re_transmit_required = false; 
+04BD:  BCF    42.1
+....................   return ret; 
+04BE:  MOVLW  00
+04BF:  BSF    03.5
+04C0:  BTFSC  40.0
+04C1:  MOVLW  01
+04C2:  MOVWF  78
+04C3:  BCF    03.5
+04C4:  RETLW  00
+....................  
+.................... } // end GetNextMessage 
+....................  
+.................... #inline 
+.................... void ProcessEEpromData (int flags, int data) 
+.................... { 
+.................... 	disable_interrupts(GLOBAL); 
+*
+0AD9:  BCF    0B.6
+0ADA:  BCF    0B.7
+0ADB:  BTFSC  0B.7
+0ADC:  GOTO   2DA
+....................  
+.................... 	switch(flags) 
+0ADD:  BSF    03.5
+0ADE:  MOVF   44,W
+0ADF:  MOVWF  77
+0AE0:  MOVLW  40
+0AE1:  SUBWF  77,W
+0AE2:  BTFSS  03.2
+0AE3:  GOTO   2E6
+0AE4:  BCF    03.5
+0AE5:  GOTO   318
+0AE6:  MOVLW  43
+0AE7:  SUBWF  77,W
+0AE8:  BTFSS  03.2
+0AE9:  GOTO   2EC
+0AEA:  BCF    03.5
+0AEB:  GOTO   397
+0AEC:  MOVLW  41
+0AED:  SUBWF  77,W
+0AEE:  BTFSS  03.2
+0AEF:  GOTO   2F2
+0AF0:  BCF    03.5
+0AF1:  GOTO   3AE
+0AF2:  MOVLW  46
+0AF3:  SUBWF  77,W
+0AF4:  BTFSS  03.2
+0AF5:  GOTO   2F8
+0AF6:  BCF    03.5
+0AF7:  GOTO   3BD
+0AF8:  MOVLW  42
+0AF9:  SUBWF  77,W
+0AFA:  BTFSS  03.2
+0AFB:  GOTO   2FE
+0AFC:  BCF    03.5
+0AFD:  GOTO   3BF
+0AFE:  MOVLW  47
+0AFF:  SUBWF  77,W
+0B00:  BTFSS  03.2
+0B01:  GOTO   304
+0B02:  BCF    03.5
+0B03:  GOTO   3C1
+0B04:  MOVLW  48
+0B05:  SUBWF  77,W
+0B06:  BTFSS  03.2
+0B07:  GOTO   30A
+0B08:  BCF    03.5
+0B09:  GOTO   3C6
+0B0A:  MOVLW  4A
+0B0B:  SUBWF  77,W
+0B0C:  BTFSS  03.2
+0B0D:  GOTO   310
+0B0E:  BCF    03.5
+0B0F:  GOTO   3CB
+0B10:  MOVLW  49
+0B11:  SUBWF  77,W
+0B12:  BTFSS  03.2
+0B13:  GOTO   316
+0B14:  BCF    03.5
+0B15:  GOTO   3CD
+0B16:  BCF    03.5
+0B17:  GOTO   405
+.................... 		{ 
+.................... 		case EEPROM_DATA: 
+.................... 			WriteEEProm (data); 
+0B18:  BSF    03.5
+0B19:  MOVF   45,W
+0B1A:  MOVWF  46
+0B1B:  BCF    03.5
+.................... 			break; 
+*
+0B96:  GOTO   406
+....................  
+.................... 		case EEPROM_END_WRITE: 
+.................... 			FinishEEpromWrite(); 
+.................... 			break; 
+*
+0BAD:  GOTO   406
+....................  
+.................... 		case EEPROM_INIT_ADDRESS: 
+.................... 			InitialiseEEprom(); 
+.................... 			break; 
+*
+0BBC:  GOTO   406
+....................  
+.................... 		case EEPROM_BLOCK_READ: 
+.................... 			proc_pla_eeprom_read = true; 
+0BBD:  BSF    42.2
+.................... 			break; 
+0BBE:  GOTO   406
+....................  
+.................... 		case EEPROM_START_WRITE: 
+.................... 			proc_pla_eeprom_write = true; 
+0BBF:  BSF    42.3
+.................... 			break; 
+0BC0:  GOTO   406
+....................  
+.................... 		case EEPROM_START: 
+.................... 			enable_analogs = false; 
+0BC1:  BCF    29.1
+.................... 			disable_interrupts (INT_RDA); // disable any Midi in  
+0BC2:  BSF    03.5
+0BC3:  BCF    0C.5
+.................... 			break; 
+0BC4:  BCF    03.5
+0BC5:  GOTO   406
+....................  
+.................... 		case EEPROM_END: 
+.................... 			enable_analogs = true; 
+0BC6:  BSF    29.1
+.................... 			enable_interrupts (INT_RDA); // disable any Midi in  
+0BC7:  BSF    03.5
+0BC8:  BSF    0C.5
+.................... 			break; 
+0BC9:  BCF    03.5
+0BCA:  GOTO   406
+....................  
+.................... 		case INT_EEPROM_READ: 
+.................... 			proc_pla_int_eeprom = true; 
+0BCB:  BSF    42.4
+.................... 			break; 
+0BCC:  GOTO   406
+....................  
+.................... 		case INT_EEPROM_DATA: 
+.................... 			WriteIntEEprom (data); 
+0BCD:  BSF    03.5
+0BCE:  MOVF   45,W
+0BCF:  MOVWF  46
+0BD0:  BCF    03.5
+.................... 			break; 
+*
+0C04:  GOTO   406
+.................... 	 
+.................... 		default: 
+.................... 			break; 
+0C05:  GOTO   406
+.................... 		} 
+....................  
+.................... 	enable_interrupts(GLOBAL); 
+0C06:  MOVLW  C0
+0C07:  IORWF  0B,F
+.................... } //ProcessEEpromData 
+....................  
+.................... void ProcessOutputData (int flags, int data) 
+.................... { 
+....................   int channel; 
+....................   int data_type; 
+.................... 	 
+....................   channel = flags & 0x0f; 
+*
+0A2B:  BSF    03.5
+0A2C:  MOVF   40,W
+0A2D:  ANDLW  0F
+0A2E:  MOVWF  42
+....................    
+....................   data_type = flags & 0x70; 
+0A2F:  MOVF   40,W
+0A30:  ANDLW  70
+0A31:  MOVWF  43
+.................... 	 
+....................   switch (data_type) 
+0A32:  MOVWF  77
+0A33:  MOVLW  30
+0A34:  SUBWF  77,W
+0A35:  BTFSS  03.2
+0A36:  GOTO   239
+0A37:  BCF    03.5
+0A38:  GOTO   252
+0A39:  MOVF   77,W
+0A3A:  BTFSS  03.2
+0A3B:  GOTO   23E
+0A3C:  BCF    03.5
+0A3D:  GOTO   25C
+0A3E:  MOVLW  10
+0A3F:  SUBWF  77,W
+0A40:  BTFSS  03.2
+0A41:  GOTO   244
+0A42:  BCF    03.5
+0A43:  GOTO   267
+0A44:  MOVLW  20
+0A45:  SUBWF  77,W
+0A46:  BTFSS  03.2
+0A47:  GOTO   24A
+0A48:  BCF    03.5
+0A49:  GOTO   277
+0A4A:  MOVLW  40
+0A4B:  SUBWF  77,W
+0A4C:  BTFSS  03.2
+0A4D:  GOTO   250
+0A4E:  BCF    03.5
+0A4F:  GOTO   2D3
+0A50:  BCF    03.5
+0A51:  GOTO   409
+.................... 		{ 
+....................     case DIGITAL_DATA: 
+....................       GenerateDigitalOutput (channel, data); 
+0A52:  BSF    03.5
+0A53:  MOVF   42,W
+0A54:  MOVWF  44
+0A55:  MOVF   41,W
+0A56:  MOVWF  45
+0A57:  BCF    03.5
+0A58:  BCF    0A.3
+0A59:  CALL   627
+0A5A:  BSF    0A.3
+....................       break; 
+0A5B:  GOTO   40A
+.................... 			 
+....................     case MIDI_CHAN_1_DATA: 
+....................       WriteOutData (data); 
+0A5C:  BSF    03.5
+0A5D:  MOVF   41,W
+0A5E:  MOVWF  44
+0A5F:  BCF    03.5
+....................       break; 
+*
+0A66:  GOTO   40A
+.................... 			 
+....................     case MIDI_CHAN_2_DATA: 
+....................       WriteOutData2 (data); 
+0A67:  BSF    03.5
+0A68:  MOVF   41,W
+0A69:  MOVWF  44
+0A6A:  BCF    03.5
+....................       break; 
+*
+0A76:  GOTO   40A
+.................... 			 
+.................... 		case ANALOG_DATA: 
+....................       GenerateAnalogueOutput (channel, data); 
+0A77:  BSF    03.5
+0A78:  MOVF   42,W
+0A79:  MOVWF  44
+0A7A:  MOVF   41,W
+0A7B:  MOVWF  45
+0A7C:  BCF    03.5
+.................... 			ExtEEpromScheduleRestart(); 
+....................       break; 
+*
+0AD2:  GOTO   40A
+.................... 			 
+.................... 		case EEPROM_DATA: 
+.................... 			ProcessEEpromData (flags, data); 
+0AD3:  BSF    03.5
+0AD4:  MOVF   40,W
+0AD5:  MOVWF  44
+0AD6:  MOVF   41,W
+0AD7:  MOVWF  45
+0AD8:  BCF    03.5
+.................... 			break; 
+*
+0C08:  GOTO   40A
+....................  
+....................     default: 
+....................       //output_high(IO_INTERUPT_OUT_PIN3); // set for debugging 
+....................       break; 
+0C09:  GOTO   40A
+....................   } 
+....................        
+....................  
+....................  
+.................... } 
+....................  
+....................  
+....................  
+.................... // returns true if the Pla is in a state that a transmission can take place 
+.................... short PlaOutFree() 
+.................... { 
+....................   return (InQueueEmpty () && PlaTxReady() && !MessageWaiting()); 
+.................... } 
+....................  
+....................  
+....................  
+.................... // check for input data 
+.................... // if there is data 
+.................... #inline 
+.................... void ProcessPlaInputMessage() 
+.................... { 
+....................     int rx_data;  
+....................  
+....................     output_low(IO_INTERUPT_OUT_DATA); // PREPARE THE iNTERRUPT PIN 
+*
+0835:  BCF    09.1
+....................     output_low(IO_INTERUPT_OUT_MIDI); // PREPARE THE iNTERRUPT PIN 
+0836:  BCF    09.2
+....................  
+....................     Pla_fast_read_data(); 
+.................... 		 
+.................... 		if ( pla_in_data.flags == DIAG_DIAG_MESSAGE_FLAG) 
+*
+0932:  INCFSZ 35,W
+0933:  GOTO   214
+.................... 			{ 
+....................         switch (pla_in_data.data) 
+0934:  MOVF   36,W
+0935:  MOVWF  77
+0936:  MOVLW  01
+0937:  SUBWF  77,W
+0938:  BTFSC  03.2
+0939:  GOTO   14F
+093A:  MOVLW  06
+093B:  SUBWF  77,W
+093C:  BTFSC  03.2
+093D:  GOTO   15E
+093E:  MOVLW  03
+093F:  SUBWF  77,W
+0940:  BTFSC  03.2
+0941:  GOTO   169
+0942:  MOVLW  FF
+0943:  SUBWF  77,W
+0944:  BTFSC  03.2
+0945:  GOTO   17C
+0946:  MOVLW  05
+0947:  SUBWF  77,W
+0948:  BTFSC  03.2
+0949:  GOTO   185
+094A:  MOVLW  04
+094B:  SUBWF  77,W
+094C:  BTFSC  03.2
+094D:  GOTO   18E
+094E:  GOTO   1B5
+....................           { 
+....................           case DIAG_ETX: // make first as it is most likely 
+....................             awaiting_response = false; 
+094F:  BCF    29.5
+.................... 						 
+....................             // see if we have anything to send 
+....................             if (GetNextPlaMessage()) 
+0950:  BCF    0A.3
+0951:  CALL   373
+0952:  BSF    0A.3
+0953:  MOVF   78,F
+0954:  BTFSC  03.2
+0955:  GOTO   15D
+.................... 							{ 
+.................... 								SavePlaMessage(); 
+.................... 								Pla_Send_data (); 
+*
+095A:  BCF    0A.3
+095B:  CALL   4C5
+095C:  BSF    0A.3
+.................... 							} 
+.................... 						 
+.................... 						break; 
+095D:  GOTO   213
+.................... 						 
+....................           case DIAG_RECEIVE_RESPONSE: // we must respond 
+....................             // there is no real point in setting transmitted_data_received as we are about to reset it again 
+.................... 						 
+....................             GetNextPlaMessage(); 
+095E:  BCF    0A.3
+095F:  CALL   373
+0960:  BSF    0A.3
+....................             SavePlaMessage(); 
+.................... 						 
+....................              
+....................             Pla_Send_data (); 
+*
+0965:  BCF    0A.3
+0966:  CALL   4C5
+0967:  BSF    0A.3
+....................             break; 
+0968:  GOTO   213
+.................... 						 
+....................           case DIAG_RESET: 
+....................             InitialiseDigitalOut(); 
+....................             while (1); // watchdog out 
+*
+097A:  GOTO   17A
+....................             break; 
+097B:  GOTO   213
+.................... 						 
+....................           case DIAG_INVALID_RX_DATA: // They received rubbish from us 
+.................... 						 
+....................             RequestNumRxBytes(); 
+....................             break; 
+*
+0984:  GOTO   213
+.................... 						 
+....................           case DIAG_SYNC_MESSAGE_READY: 
+....................             // get a count to see if theye got our last message 
+....................             RequestNumRxBytes();             
+....................             break; 
+*
+098D:  GOTO   213
+.................... 						 
+....................           case DIAG_ASYNC_MESSAGE_READY: 
+....................             // we will have to check whether we are waiting for a response from us 
+....................             if (awaiting_response) // we have a conflict here.  
+098E:  BTFSS  29.5
+098F:  GOTO   1AA
+.................... 							{ 
+.................... 								delay_ms(3); //wait and see if we get a response to the message we sent them 
+0990:  MOVLW  03
+0991:  BSF    03.5
+0992:  MOVWF  4F
+0993:  BCF    03.5
+0994:  BCF    0A.3
+0995:  CALL   0AB
+0996:  BSF    0A.3
+.................... 								 
+.................... 								// this can only be the case if we are expecting one, because this case only 
+.................... 								// occurs as an unsolicited response 
+.................... 								if (MessageWaiting())  // clear it and get them to send it again in synch with us 
+*
+099B:  MOVF   78,F
+099C:  BTFSC  03.2
+099D:  GOTO   1A1
+.................... 									{ 
+.................... 										InitialisePlaIn(); 
+099E:  BCF    0A.3
+099F:  CALL   6EE
+09A0:  BSF    0A.3
+.................... 									} 
+.................... 								 
+.................... 								RequestNumRxBytes(); 
+.................... 							} 
+....................             else 
+*
+09A9:  GOTO   1B4
+.................... 							{ 
+.................... 								GetNextPlaMessage(); 
+09AA:  BCF    0A.3
+09AB:  CALL   373
+09AC:  BSF    0A.3
+.................... 								SavePlaMessage(); 
+.................... 								Pla_Send_data ();             
+*
+09B1:  BCF    0A.3
+09B2:  CALL   4C5
+09B3:  BSF    0A.3
+.................... 							} 
+....................              
+....................              
+....................             break; 
+09B4:  GOTO   213
+.................... 						 
+....................           default: 
+....................             rx_data = pla_in_data.data & DIAG_TEST_RETURN_BYTES_MASK; 
+09B5:  MOVF   36,W
+09B6:  ANDLW  F0
+09B7:  BSF    03.5
+09B8:  MOVWF  3F
+.................... 						 
+....................             switch (rx_data) 
+09B9:  MOVWF  77
+09BA:  MOVLW  E0
+09BB:  SUBWF  77,W
+09BC:  BTFSS  03.2
+09BD:  GOTO   1C0
+09BE:  BCF    03.5
+09BF:  GOTO   1C8
+09C0:  MOVLW  D0
+09C1:  SUBWF  77,W
+09C2:  BTFSS  03.2
+09C3:  GOTO   1C6
+09C4:  BCF    03.5
+09C5:  GOTO   1F3
+09C6:  BCF    03.5
+09C7:  GOTO   211
+.................... 							{ 
+....................               case DIAG_RETURN_RX_BYTES: 
+....................                 if ((pla_in_data.data & DIAG_RETURN_BYTES_MASK)  
+.................... 										!= (num_tx_data_bytes & DIAG_RETURN_BYTES_MASK)) 
+09C8:  MOVF   36,W
+09C9:  ANDLW  01
+09CA:  BSF    03.5
+09CB:  MOVWF  40
+09CC:  MOVF   7E,W
+09CD:  ANDLW  01
+09CE:  SUBWF  40,W
+09CF:  BTFSS  03.2
+09D0:  GOTO   1D3
+09D1:  BCF    03.5
+09D2:  GOTO   1E9
+09D3:  BCF    03.5
+.................... 									 
+.................... 									if((last_tx_data.flags == DIAG_DIAG_MESSAGE_FLAG) 
+....................  										 && (last_tx_data.data == DIAG_ETX)) 
+09D4:  BSF    03.5
+09D5:  INCFSZ 22,W
+09D6:  GOTO   1D8
+09D7:  GOTO   1DA
+09D8:  BCF    03.5
+09D9:  GOTO   1E7
+09DA:  BCF    03.5
+09DB:  BSF    03.5
+09DC:  MOVF   23,W
+09DD:  SUBLW  01
+09DE:  BTFSC  03.2
+09DF:  GOTO   1E2
+09E0:  BCF    03.5
+09E1:  GOTO   1E7
+09E2:  BCF    03.5
+....................  										{ 
+....................  											// our last message was an ETX.  
+....................  											//We will have to synchronise ourselves with the pic 
+.................... 											 
+....................  											num_tx_data_bytes = pla_in_data.data; 
+09E3:  MOVF   36,W
+09E4:  MOVWF  7E
+....................                       re_transmit_required = false; 
+09E5:  BCF    42.1
+....................  										} 
+....................  									else 
+09E6:  GOTO   1E8
+....................  										{ 
+.................... 											re_transmit_required = true; 
+09E7:  BSF    42.1
+....................  										} 
+.................... 								 
+.................... 								 
+....................                 else 
+09E8:  GOTO   1EA
+.................... 									{ 
+.................... 										re_transmit_required = false; 
+09E9:  BCF    42.1
+.................... 									} 
+.................... 								 
+....................                 // see how many they transmitted 
+....................                 RequestNumTxBytes(); 
+....................        
+....................                 // do this for now as we are debugging 
+.................... 								//GetNextPlaMessage(); 
+.................... 								//SavePlaMessage(); 
+.................... 										 
+.................... 								//Pla_Send_data ();								 
+....................                 break; 
+*
+09F2:  GOTO   212
+.................... 								 
+....................               case DIAG_RETURN_TX_BYTES: 
+....................                 if ((pla_in_data.data & DIAG_RETURN_BYTES_MASK)  
+.................... 										!= (num_rx_data_bytes & DIAG_RETURN_BYTES_MASK)) 
+09F3:  MOVF   36,W
+09F4:  ANDLW  01
+09F5:  BSF    03.5
+09F6:  MOVWF  40
+09F7:  MOVF   24,W
+09F8:  ANDLW  01
+09F9:  SUBWF  40,W
+09FA:  BTFSS  03.2
+09FB:  GOTO   1FE
+09FC:  BCF    03.5
+09FD:  GOTO   207
+09FE:  BCF    03.5
+.................... 									{ 
+.................... 										midi_tx = false; 
+09FF:  BCF    29.7
+.................... 										pla_out_data.flags = DIAG_DIAG_MESSAGE_FLAG; 
+0A00:  MOVLW  FF
+0A01:  MOVWF  33
+.................... 										pla_out_data.data = (byte) DIAG_RE_TRANSMIT_LAST_MESSAGE; 
+0A02:  CLRF   34
+.................... 										 
+.................... 										// write that message back. Pla will no longer be free 
+.................... 										Pla_Send_data ();  
+0A03:  BCF    0A.3
+0A04:  CALL   4C5
+0A05:  BSF    0A.3
+.................... 									} 
+....................                 else 
+0A06:  GOTO   211
+.................... 									{ 
+.................... 										GetNextPlaMessage(); 
+0A07:  BCF    0A.3
+0A08:  CALL   373
+0A09:  BSF    0A.3
+.................... 										SavePlaMessage(); 
+.................... 										 
+.................... 										Pla_Send_data (); 
+*
+0A0E:  BCF    0A.3
+0A0F:  CALL   4C5
+0A10:  BSF    0A.3
+.................... 									} 
+.................... 								 
+....................               default: 
+....................                 break; 
+0A11:  GOTO   212
+.................... 							} 
+.................... 						 
+....................             break; 
+0A12:  GOTO   213
+....................           } // end diag message case 
+....................          
+.................... 				 
+.................... 			} 
+.................... 		else 
+0A13:  GOTO   40D
+.................... 			{ 
+.................... 				// we have to respond 
+.................... 				GetNextPlaMessage(); 
+0A14:  BCF    0A.3
+0A15:  CALL   373
+0A16:  BSF    0A.3
+.................... 				SavePlaMessage(); 
+.................... 				Pla_Send_data ();  
+*
+0A1B:  BCF    0A.3
+0A1C:  CALL   4C5
+0A1D:  BSF    0A.3
+.................... 				 
+.................... 				 
+.................... 				// we need to process the message if the Tx flag is Clear, indicating data 
+.................... 				if (!(pla_in_data.flags & TX_DATA_FLAG)) 
+0A1E:  MOVF   35,W
+0A1F:  ANDLW  80
+0A20:  XORLW  00
+0A21:  BTFSS  03.2
+0A22:  GOTO   40D
+....................           { 
+....................             ProcessOutputData (pla_in_data.flags, pla_in_data.data); 
+0A23:  MOVF   35,W
+0A24:  BSF    03.5
+0A25:  MOVWF  40
+0A26:  BCF    03.5
+0A27:  MOVF   36,W
+0A28:  BSF    03.5
+0A29:  MOVWF  41
+0A2A:  BCF    03.5
+....................             num_rx_data_bytes++; 
+*
+0C0A:  BSF    03.5
+0C0B:  INCF   24,F
+0C0C:  BCF    03.5
+....................           } 
+.................... 				 
+.................... 			} 
+.................... 		 
+....................    
+.................... } // end ProcessPlaInputMessage 
+....................  
+....................  
+.................... // read message.  
+.................... // if Midi input is available, read it and send it 
+.................... // if there was no midi, read the output queue and send it if available 
+.................... // return true if a response to PLA is required 
+.................... short ProcessPlaInputStream() 
+.................... { 
+....................  
+*
+082A:  BSF    03.5
+082B:  BCF    3E.0
+082C:  BCF    03.5
+.................... 	short ret = false; 
+....................  
+....................   while (MessageWaiting()) 
+*
+0831:  MOVF   78,F
+0832:  BTFSC  03.2
+0833:  GOTO   411
+....................     { 
+....................       restart_wdt(); 
+0834:  CLRWDT
+....................       ProcessPlaInputMessage(); 
+.................... 			ret = true; 
+*
+0C0D:  BSF    03.5
+0C0E:  BSF    3E.0
+....................     } 
+0C0F:  BCF    03.5
+0C10:  GOTO   02D
+....................  
+.................... 	 
+....................   if (PlaTxReady() && !awaiting_response) 
+*
+0C15:  MOVF   78,F
+0C16:  BTFSC  03.2
+0C17:  GOTO   42D
+0C18:  BTFSC  29.5
+0C19:  GOTO   42D
+....................   { 
+.................... 		restart_wdt(); 
+0C1A:  CLRWDT
+....................  
+.................... 		if (GetNextPlaMessage ()) 
+0C1B:  BCF    0A.3
+0C1C:  CALL   373
+0C1D:  BSF    0A.3
+0C1E:  MOVF   78,F
+0C1F:  BTFSC  03.2
+0C20:  GOTO   42D
+.................... 			{ 
+....................         output_low(IO_INTERUPT_OUT_DATA); // PREPARE THE iNTERRUPT PIN 
+0C21:  BCF    09.1
+....................         output_low(IO_INTERUPT_OUT_MIDI); // PREPARE THE iNTERRUPT PIN 
+0C22:  BCF    09.2
+....................          
+.................... 				SavePlaMessage(); 
+.................... 				Pla_Send_data (); 
+*
+0C27:  BCF    0A.3
+0C28:  CALL   4C5
+0C29:  BSF    0A.3
+.................... 				ret = true; 
+0C2A:  BSF    03.5
+0C2B:  BSF    3E.0
+0C2C:  BCF    03.5
+.................... 			} 
+....................      
+....................  
+....................   } 
+....................    
+.................... 	return ret; 
+0C2D:  MOVLW  00
+0C2E:  BSF    03.5
+0C2F:  BTFSC  3E.0
+0C30:  MOVLW  01
+0C31:  MOVWF  78
+0C32:  BCF    03.5
+0C33:  RETLW  00
+.................... } // end ProcessPlaInputStream 
+....................  
+.................... 
+.................... // LED timers 
+.................... int16 watchdog_flash_count = 0; // when becomes zero, changes state of LED 
+.................... short watchdog_led = 0; 
+.................... short overflow_val = 0; 
+....................  
+.................... const byte LCD_INIT_TEXT [] = "Wait ..."; 
+*
+0044:  BCF    0A.0
+0045:  BCF    0A.1
+0046:  BCF    0A.2
+0047:  ADDWF  02,F
+0048:  RETLW  57
+0049:  RETLW  61
+004A:  RETLW  69
+004B:  RETLW  74
+004C:  RETLW  20
+004D:  RETLW  2E
+004E:  RETLW  2E
+004F:  RETLW  2E
+0050:  RETLW  00
+....................  
+.................... void BlinkWatchdog() 
+.................... { 
+....................   str_PLA_Data pla_data; 
+....................  
+....................   if (!watchdog_flash_count) 
+*
+0C5D:  BSF    03.5
+0C5E:  MOVF   25,W
+0C5F:  IORWF  26,W
+0C60:  BTFSC  03.2
+0C61:  GOTO   464
+0C62:  BCF    03.5
+0C63:  GOTO   495
+0C64:  BCF    03.5
+....................     { 
+....................     watchdog_led = ~watchdog_led; 
+0C65:  MOVLW  20
+0C66:  XORWF  42,F
+....................     SetWatchdogLed (watchdog_led); 
+0C67:  MOVLW  00
+0C68:  BTFSC  42.5
+0C69:  MOVLW  01
+0C6A:  BSF    03.5
+0C6B:  MOVWF  2C
+0C6C:  MOVWF  2D
+0C6D:  BCF    03.5
+....................  
+....................  
+....................     if (InOverflow()) 
+*
+0C81:  MOVF   78,F
+0C82:  BTFSC  03.2
+0C83:  GOTO   48F
+....................       { 
+....................       watchdog_flash_count = WATCHDOG_OVERFLOW_COUNT; 
+0C84:  BSF    03.5
+0C85:  CLRF   26
+0C86:  MOVLW  FF
+0C87:  MOVWF  25
+....................       num_overflow_blinks++; 
+0C88:  BCF    03.5
+0C89:  INCF   2A,F
+....................  
+....................       if (num_overflow_blinks > NUM_MAX_OVERFLOW_BLINK) 
+0C8A:  MOVF   2A,W
+0C8B:  SUBLW  0A
+0C8C:  BTFSS  03.0
+....................         { 
+....................         num_overflow_blinks = 0; 
+0C8D:  CLRF   2A
+....................         //ClearInQueueOverflow(); 
+....................         } 
+....................        
+....................  
+....................       } 
+....................     else 
+0C8E:  GOTO   495
+....................       { 
+....................       watchdog_flash_count = WATCHDOG_NORMAL_COUNT; 
+0C8F:  MOVLW  13
+0C90:  BSF    03.5
+0C91:  MOVWF  26
+0C92:  MOVLW  88
+0C93:  MOVWF  25
+0C94:  BCF    03.5
+....................       } 
+....................     } 
+....................  
+....................   watchdog_flash_count--; 
+0C95:  BSF    03.5
+0C96:  MOVF   25,W
+0C97:  BTFSC  03.2
+0C98:  DECF   26,F
+0C99:  DECF   25,F
+0C9A:  BCF    03.5
+0C9B:  BCF    0A.3
+0C9C:  BSF    0A.4
+0C9D:  GOTO   37E (RETURN)
+....................  
+.................... } 
+....................  
+.................... void ResetController () 
+.................... { 
+....................   int i; 
+....................  
+....................   disable_interrupts(GLOBAL); 
+*
+1040:  BCF    0B.6
+1041:  BCF    0B.7
+1042:  BTFSC  0B.7
+1043:  GOTO   041
+.................... 	//DigoutInitialise(); 
+....................  
+.................... #ifndef _SIMULATE 
+....................   lcd_init(); 
+....................  
+....................   for (i = 0; i < sizeof(LCD_INIT_TEXT) - 1; i++) 
+*
+108D:  BSF    03.5
+108E:  CLRF   2A
+108F:  BCF    03.5
+1090:  BSF    03.5
+1091:  MOVF   2A,W
+1092:  SUBLW  07
+1093:  BTFSC  03.0
+1094:  GOTO   097
+1095:  BCF    03.5
+1096:  GOTO   10B
+1097:  BCF    03.5
+....................   { 
+.................... 	  lcd_putc(LCD_INIT_TEXT[i]); 
+1098:  BSF    03.5
+1099:  MOVF   2A,W
+109A:  BCF    03.5
+109B:  BCF    0A.4
+109C:  CALL   044
+109D:  BSF    0A.4
+109E:  BSF    03.5
+109F:  MOVWF  2B
+10A0:  MOVWF  2C
+10A1:  BCF    03.5
+....................     delay_ms (2); 
+*
+1100:  MOVLW  02
+1101:  BSF    03.5
+1102:  MOVWF  4F
+1103:  BCF    03.5
+1104:  BCF    0A.4
+1105:  CALL   0AB
+1106:  BSF    0A.4
+....................   } 
+.................... #endif 
+1107:  BSF    03.5
+1108:  INCF   2A,F
+1109:  BCF    03.5
+110A:  GOTO   090
+....................   set_tris_e (0x00); 
+110B:  MOVLW  00
+110C:  BSF    03.5
+110D:  MOVWF  09
+....................  
+....................   output_low(IO_INTERUPT_OUT_DATA); // PREPARE THE iNTERRUPT PIN 
+110E:  BCF    03.5
+110F:  BCF    09.1
+....................   output_low(IO_INTERUPT_OUT_MIDI); // PREPARE THE iNTERRUPT PIN 
+1110:  BCF    09.2
+....................  
+.................... #ifndef _SIMULATE 
+....................   InitialiseWatchdog(); 
+.................... #endif 
+....................  
+....................   InitialisePlaOutQueue(); 
+....................  
+.................... #ifndef _SIMULATE 
+.................... 	InitialiseAnalogueIn(); 
+.................... #endif 
+....................  
+....................   last_tx_data.flags = DIAG_DIAG_MESSAGE_FLAG; 
+*
+1168:  MOVLW  FF
+1169:  BSF    03.5
+116A:  MOVWF  22
+....................   last_tx_data.data = DIAG_ETX; 
+116B:  MOVLW  01
+116C:  MOVWF  23
+....................  
+....................   prev_pla_out.flags = DIAG_DIAG_MESSAGE_FLAG; 
+116D:  MOVLW  FF
+116E:  BCF    03.5
+116F:  MOVWF  37
+....................   prev_pla_out.data = DIAG_REQUEST_RX_BYTES; 
+1170:  MOVLW  07
+1171:  MOVWF  38
+1172:  MOVF   0B,W
+1173:  ANDWF  0B,W
+1174:  BCF    0B.7
+1175:  MOVWF  20
+....................  
+....................   InitialiseInQueue(); 
+1176:  BCF    0A.4
+1177:  CALL   068
+1178:  BSF    0A.4
+1179:  MOVF   20,W
+117A:  IORWF  0B,F
+.................... 	ProcessDigitalInputs(false);			 
+117B:  BSF    03.5
+117C:  CLRF   2B
+117D:  BCF    03.5
+....................  
+....................  
+....................   ext_int_edge(L_TO_H);      // init interrupt triggering for positive transition 
+*
+1358:  BSF    03.5
+1359:  BSF    01.6
+....................   enable_interrupts(INT_EXT);// turn on interrupt 
+135A:  BCF    03.5
+135B:  BSF    0B.4
+....................    
+....................   InitialisePlaIn(); 
+135C:  BCF    0A.4
+135D:  CALL   6EE
+135E:  BSF    0A.4
+....................  
+....................   enable_interrupts(GLOBAL); 
+135F:  MOVLW  C0
+1360:  IORWF  0B,F
+....................  
+....................   RequestNumRxBytes(); 
+....................  
+....................   InitialiseEEprom(); 
+.................... } 
+....................  
+....................  
+.................... main() { 
+....................  
+....................   int wait_cycles = 0; 
+....................   int delay_time = 0;  
+*
+103C:  BSF    03.5
+103D:  CLRF   27
+103E:  CLRF   28
+103F:  BCF    03.5
+....................   byte eeprom_byte;   
+*
+1000:  CLRF   04
+1001:  MOVLW  1F
+1002:  ANDWF  03,F
+1003:  MOVLW  9F
+1004:  MOVWF  04
+1005:  MOVLW  07
+1006:  MOVWF  00
+1007:  CLRF   28
+1008:  MOVLW  09
+1009:  BSF    03.5
+100A:  MOVWF  19
+100B:  MOVLW  22
+100C:  MOVWF  18
+100D:  MOVLW  90
+100E:  BCF    03.5
+100F:  MOVWF  18
+1010:  BSF    29.0
+1011:  CLRF   2A
+1012:  CLRF   2B
+1013:  CLRF   2C
+1014:  BCF    29.1
+1015:  BCF    29.2
+1016:  MOVLW  FF
+1017:  MOVWF  2D
+1018:  CLRF   32
+1019:  BSF    29.3
+101A:  BCF    29.4
+101B:  BCF    29.5
+101C:  BCF    29.6
+101D:  BCF    29.7
+101E:  MOVLW  09
+101F:  BSF    03.5
+1020:  MOVWF  19
+1021:  MOVLW  22
+1022:  MOVWF  18
+1023:  MOVLW  90
+1024:  BCF    03.5
+1025:  MOVWF  18
+1026:  BCF    2D.5
+1027:  MOVF   2D,W
+1028:  BSF    03.5
+1029:  MOVWF  07
+102A:  BCF    03.5
+102B:  BSF    07.5
+102C:  CLRF   65
+102D:  CLRF   66
+102E:  CLRF   7E
+102F:  BSF    03.5
+1030:  CLRF   24
+1031:  BCF    03.5
+1032:  BCF    42.1
+1033:  BCF    42.2
+1034:  BCF    42.3
+1035:  BCF    42.4
+1036:  BSF    03.5
+1037:  CLRF   25
+1038:  CLRF   26
+1039:  BCF    03.5
+103A:  BCF    42.5
+103B:  BCF    42.6
+....................  
+.................... 	ResetController (); 
+....................  
+....................    do { 
+....................       delay_time++; // increment this number as we may need to delay a resend in case of synchronisation lockup 
+*
+1377:  BSF    03.5
+1378:  INCF   28,F
+....................  
+....................      
+....................       //ProcessAnalogueIn(); 
+.................... 	    //ProcessDigitalInputs(true); 
+....................  
+.................... 			restart_wdt(); 
+1379:  CLRWDT
+....................       BlinkWatchdog(); 
+137A:  BCF    03.5
+137B:  BCF    0A.4
+137C:  BSF    0A.3
+137D:  GOTO   45D
+137E:  BSF    0A.4
+137F:  BCF    0A.3
+....................  
+....................       ProcessPlaInputStream(); 
+1380:  BCF    0A.4
+1381:  BSF    0A.3
+1382:  CALL   02A
+1383:  BSF    0A.4
+1384:  BCF    0A.3
+....................  
+.................... #ifndef _SIMULATE 
+....................       delay_ms(2); 
+1385:  MOVLW  02
+1386:  BSF    03.5
+1387:  MOVWF  4F
+1388:  BCF    03.5
+1389:  BCF    0A.4
+138A:  CALL   0AB
+138B:  BSF    0A.4
+.................... #endif  
+....................  
+....................       if (message_lost) 
+138C:  BTFSS  29.6
+138D:  GOTO   3E0
+.................... 				{ 
+.................... 					if (!PlaTxReady() || awaiting_response) // we have lost sync here 
+*
+1392:  MOVF   78,F
+1393:  BTFSC  03.2
+1394:  GOTO   397
+1395:  BTFSS  29.5
+1396:  GOTO   3C7
+.................... 						{ 
+....................  
+.................... 							  if (wait_cycles == MAX_RESENDS) 
+1397:  BSF    03.5
+1398:  MOVF   27,W
+1399:  SUBLW  02
+139A:  BTFSC  03.2
+139B:  GOTO   39E
+139C:  BCF    03.5
+139D:  GOTO   3B7
+139E:  BCF    03.5
+.................... 								  { 
+....................                     output_low(IO_INTERUPT_OUT_DATA); // PREPARE THE iNTERRUPT PIN 
+139F:  BCF    09.1
+....................                     output_low(IO_INTERUPT_OUT_MIDI); // PREPARE THE iNTERRUPT PIN 
+13A0:  BCF    09.2
+.................... 									  InitialisePlaIn(); 
+13A1:  BCF    0A.4
+13A2:  CALL   6EE
+13A3:  BSF    0A.4
+.................... 									  //delay some random amount 
+.................... 										delay_us(255);       
+13A4:  MOVLW  FF
+13A5:  BSF    03.5
+13A6:  MOVWF  2A
+13A7:  BCF    03.5
+13A8:  BCF    0A.4
+13A9:  GOTO   7F3
+13AA:  BSF    0A.4
+.................... 									 
+.................... 									  RequestNumRxBytes(); 
+.................... 									  wait_cycles = 0; 
+*
+13B3:  BSF    03.5
+13B4:  CLRF   27
+.................... 								  } 
+.................... 							  else 
+13B5:  BCF    03.5
+13B6:  GOTO   3C6
+.................... 								  { 
+.................... 									  //delay  
+....................                     output_low(IO_INTERUPT_OUT_DATA); // PREPARE THE iNTERRUPT PIN 
+13B7:  BCF    09.1
+....................                     output_low(IO_INTERUPT_OUT_MIDI); // PREPARE THE iNTERRUPT PIN 
+13B8:  BCF    09.2
+.................... 									 
+....................                   	delay_us(10);       
+13B9:  MOVLW  10
+13BA:  MOVWF  77
+13BB:  DECFSZ 77,F
+13BC:  GOTO   3BB
+13BD:  NOP
+.................... 									 
+....................                     if (midi_tx) 
+13BE:  BTFSS  29.7
+13BF:  GOTO   3C2
+....................                       output_high(IO_INTERUPT_OUT_MIDI); 
+13C0:  BSF    09.2
+....................                     else   
+13C1:  GOTO   3C3
+....................                       output_high(IO_INTERUPT_OUT_DATA); 
+13C2:  BSF    09.1
+.................... 										 
+.................... 									  wait_cycles++; 
+13C3:  BSF    03.5
+13C4:  INCF   27,F
+13C5:  BCF    03.5
+.................... 								  } 
+....................  
+.................... 						} 
+.................... 					else // We have not received anything in the last cycle 
+13C6:  GOTO   3DF
+.................... 						{ 
+.................... 							quiet_cycles--; 
+13C7:  MOVF   2B,W
+13C8:  BTFSC  03.2
+13C9:  DECF   2C,F
+13CA:  DECF   2B,F
+.................... 							if (!quiet_cycles) // we have cycled back to zero 
+13CB:  MOVF   2B,W
+13CC:  IORWF  2C,W
+13CD:  BTFSS  03.2
+13CE:  GOTO   3DF
+.................... 								{ 
+.................... 									InitialisePlaIn(); 
+13CF:  BCF    0A.4
+13D0:  CALL   6EE
+13D1:  BSF    0A.4
+.................... 									RequestNumRxBytes(); 
+....................                    
+....................                   proc_pla_eeprom_read = true; 
+*
+13DA:  BSF    42.2
+....................                   quiet_cycles = MAX_QUIET_CYCLES; 
+13DB:  MOVLW  13
+13DC:  MOVWF  2C
+13DD:  MOVLW  88
+13DE:  MOVWF  2B
+.................... 								} 
+.................... 						} 
+.................... 			 
+.................... 				} 
+....................       else 
+13DF:  GOTO   3E7
+.................... 				{ 
+.................... 					wait_cycles = 0; 
+13E0:  BSF    03.5
+13E1:  CLRF   27
+.................... 					quiet_cycles = MAX_QUIET_CYCLES; 
+13E2:  MOVLW  13
+13E3:  BCF    03.5
+13E4:  MOVWF  2C
+13E5:  MOVLW  88
+13E6:  MOVWF  2B
+.................... 				} 
+....................        
+....................       message_lost  = true; // this will get cleared every Send and Interrupt receive 
+13E7:  BSF    29.6
+....................  
+....................    } while (TRUE); 
+13E8:  GOTO   377
+....................  
+.................... } 
+....................  
+13E9:  SLEEP
+....................  
+....................  
+.................... 

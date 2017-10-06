@@ -1,0 +1,243 @@
+#! /bin/sh
+#
+#  Simple shell script to configure and build binutils, gcc, and
+#  newlib for RTEMS.  binutils is built and installed first followed
+#  by gcc and newlib together.
+#
+#  build-${CPU}-tools is created as the build tree
+#
+#  NOTE:  Adding -g to the CFLAGS is necessary to debug the tools
+#         but greatly increases the installed size.
+#
+#  $Id: bit,v 1.1 2003/03/05 04:30:20 angelo Exp $
+#
+
+do_build=yes
+
+#
+#  Prints the usage for this script.
+#
+usage()
+{
+  echo "usage: $0 CPU"
+  print_rtems_cpus
+}
+
+#
+#  Common exit routine for this script so we can print the starting
+#  and ending times.
+#
+my_exit()
+{
+  stop=`date`
+
+  if [ "x${BUILDDIR}" = "x" ] ; then
+    exit 1
+  fi
+  echo
+  echo "Started:  " $start
+  echo "Finished: " $stop
+
+  cd ${TOOLSDIR}
+  echo
+  echo "Directory size information:"
+  du -s -k ${BUILDDIR}
+  du -s -k ${INSTALL_POINT}
+  echo
+  if [ $1 -eq 0 ] ; then
+    echo "The ${BUILDDIR} subdirectory is now being removed."
+    echo "The src subdirectory has NOT been removed."
+    rm -rf ${BUILDDIR}
+  else
+    echo "The src and ${BUILDDIR} subdirectory have NOT been removed."
+  fi
+  echo
+  exit $1
+}
+
+if [ $# -ne 1 ]; then
+  # usage is not defined yet
+  echo "usage: ${0} CPU"
+  exit 1
+fi
+
+CPU=$1
+BUILD_PIECE=tools
+
+start=`date`
+
+# Include shared setup
+if [ ! -r ./common.sh ] ; then
+  echo "Cannot find shared shell script support (common.sh)"
+  exit 1
+fi
+. `echo $0 | sed -e 's/bit/common.sh/'`
+
+
+# Include user configurable information
+test -r ./user.cfg || \
+  check_fatal 1 "Cannot find user configuration (user.cfg)"
+. ./user.cfg
+
+#
+#  Test for makeinfo
+#
+
+makeinfo_test
+
+#
+#  Get the "tools" directory
+#
+
+TOOLSDIR=`pwd`
+
+#
+#  If the specified tools are not available, then abort.
+#
+    test -d ${BINUTILS} || check_fatal 1 "Cannot find BINUTILS (${BINUTILS})"
+    test -d ${GCC}      || check_fatal 1 "Cannot find GCC (${GCC})"
+    test -d ${NEWLIB}   || check_fatal 1 "Cannot find NEWLIB (${NEWLIB})"
+
+#
+#  Print some information for the user
+#
+    echo
+    echo "Building a cross GNU C/C++ toolset with the following configuration:"
+    echo "    BINUTILS      --> " $BINUTILS
+    echo "    GCC           --> " $GCC
+    echo "    NEWLIB        --> " $NEWLIB
+    echo "    TARGET        --> " $target
+    echo "    INSTALL POINT --> " $INSTALL_POINT
+    echo "    BUILD DOCS    --> " $BUILD_DOCS
+    echo
+
+#  The block of code in make_one_tree is the functional equivalent of
+#  the "one-tree.sh" script discussed in the CrossGCC FAQ available at 
+#  ftp.cygnus.com:/pub/embedded/crossgcc.
+
+    if [ x${SKIP_ONE_TREE} = xyes ] ; then
+      echo "Skipping one tree build at user request"
+      test -d src || check_fatal 1 "Cannot find prebuilt src directory"
+    else
+      # make_one_tree
+      rm -f ${GCC}/newlib
+      cd ${GCC}
+      ln -s ../${NEWLIB}/newlib .
+      cd ..
+    fi
+
+    if [ x${BUILD_DOCS} = xyes ] ; then
+      MAKE_DOCS=info
+    fi
+
+#  If the install point does not exist, then create it.
+    if [ ! -d ${INSTALL_POINT} ] ; then
+      echo "Making directory for install point (${INSTALL_POINT}) ..."
+      mkdir -p ${INSTALL_POINT}
+      check_fatal $?  "**** FAILED **** unable to make install point"
+    else
+      echo
+      echo "Warning!!! Installing over an existing installation."
+      echo 
+    fi 
+
+#  The following removes the build tree and creates another.
+    echo
+    echo "Compilation of binutils will occur in ${BUILDDIR}."
+    echo
+
+    rm -rf ${BUILDDIR}
+    mkdir ${BUILDDIR}
+    check_fatal $?  "**** FAILED **** unable to make build tree"
+    cd ${BUILDDIR}
+
+    echo BIT: Running in `pwd`:
+    ( set -x
+
+    ../${BINUTILS}/configure --target=${target} \
+      --verbose \
+      --prefix=${INSTALL_POINT}
+    ) 
+    check_fatal $?  "**** FAILED **** unable to configure binutils"
+
+
+    if [ ${do_build} = no ] ; then
+      echo "**** SKIPPING BUILD OF BINUTILS  ****"
+    else
+      echo BIT: Running in `pwd`:
+      ( set -x
+
+      ${MAKE} all ${MAKE_DOCS} install
+
+      )
+      check_fatal $?  "**** FAILED **** unable to build binutils"
+    fi
+
+    cd ..
+
+#  The following removes the build tree and creates another.
+    echo
+    echo "Compilation of gcc and newlib will occur in ${BUILDDIR}."
+    echo
+
+    rm -rf ${BUILDDIR}
+    mkdir ${BUILDDIR}
+    check_fatal $?  "**** FAILED **** unable to make build tree"
+    cd ${BUILDDIR}
+
+#  make installed binutils available on PATH
+    PATH=${INSTALL_POINT}/bin:{$PATH}
+    export PATH
+
+    if [ x${BUILD_OTHER_LANGUAGES} = xno ] ; then
+      LANGUAGE_OPTION=--enable-languages=c,c++
+    fi
+
+
+#  Configure to build the target requested
+    echo BIT: Running in `pwd`:
+    ( set -x
+ 
+    ../${GCC}/configure --target=${target} \
+      --with-gnu-as --with-gnu-ld --with-newlib --verbose \
+      ${LANGUAGE_OPTION} --prefix=${INSTALL_POINT}
+    )
+
+    if [ ${do_build} = no ] ; then
+      echo "**** SKIPPING BUILD OF GCC AND NEWLIB ****"
+      my_exit 0
+    fi
+
+#  Build the tools
+    if [ x${GCC_ARG} = x ] ; then
+      GCC_ARG=gcc
+    fi
+    if [ x${CFLAGS_ARG} = x ] ; then
+      CFLAGS_ARG="-O2 -g"
+    fi
+
+    echo "BIT: starting base build (step 1) in `pwd`:"
+    ( set -x
+
+    ${MAKE} CC=${GCC_ARG} CFLAGS="${CFLAGS_ARG}" all ${MAKE_DOCS} install
+    )
+    check_fatal $?  "**** FAILED **** base build (step 1)"
+    echo "BIT: completed base build (step 1)"
+
+  
+#################### Version file from here down ###################
+
+    VERSION_FILE=${INSTALL_POINT}/VERSIONS
+
+    # USERCHANGE -- Localize the version information if you want to
+    #               put specific information about patches.
+    echo "GCC      - " ${GCC}                         >>${VERSION_FILE}
+    echo "BINUTILS - " ${BINUTILS}                    >>${VERSION_FILE}
+    echo "NEWLIB   - " ${NEWLIB}                      >>${VERSION_FILE}
+    echo "TARGET   - " ${target}                      >>${VERSION_FILE}
+    echo "INSTALL POINT - " ${INSTALL_POINT}          >>${VERSION_FILE}
+    echo                                              >>${VERSION_FILE}
+    echo "Patches may be installed"                   >>${VERSION_FILE}
+
+my_exit 0
+

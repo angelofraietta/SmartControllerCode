@@ -1,0 +1,128 @@
+
+(object Petal
+    version    	42
+    _written   	"Rose 4.5.8163.3"
+    charSet    	0)
+
+(object Parameterized_Class "e_static_queue"
+    quid       	"3C58B9600350"
+    documentation 	"queue template based upon pre-allocated memory"
+    operations 	(list Operations
+	(object Operation "push"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"cg_style"
+		    value      	"Inline"))
+	    quid       	"3C58B9C2012A"
+	    documentation 	"pushes an item onto the queue"
+	    parameters 	(list Parameters
+		(object Parameter "item"
+		    documentation 	"Adds an Item into the priority queue"
+		    type       	"T"))
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1012442864)
+	(object Operation "pop"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"cg_style"
+		    value      	"Inline"))
+	    quid       	"3C58B9C20134"
+	    documentation 	"pops Item from front of queue"
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1012442865)
+	(object Operation "top"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"cg_style"
+		    value      	"Inline"))
+	    quid       	"3C58B9C2013E"
+	    documentation 	"Gets Item at top of queue"
+	    result     	"T&"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1012442866)
+	(object Operation "e_static_queue"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE))
+	    quid       	"3C58BA55028A"
+	    documentation 	"Constructor, defining the maximum size"
+	    parameters 	(list Parameters
+		(object Parameter "size"
+		    type       	"int"))
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1012442863)
+	(object Operation "full"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationIsConst"
+		    value      	TRUE))
+	    quid       	"3C58C2210262"
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1012442868)
+	(object Operation "empty"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationIsConst"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE))
+	    quid       	"3ECBFF85022D"
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1053556398))
+    class_attributes 	(list class_attribute_list
+	(object ClassAttribute "_max_index"
+	    quid       	"3C58BA2001CF"
+	    type       	"int"
+	    initv      	"size -1")
+	(object ClassAttribute "_head"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"DataMemberIsVolatile"
+		    value      	TRUE))
+	    quid       	"3C58BAA102D9"
+	    type       	"int"
+	    initv      	"0")
+	(object ClassAttribute "_tail"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"DataMemberIsVolatile"
+		    value      	TRUE))
+	    quid       	"3C58BACC0000"
+	    type       	"int"
+	    initv      	"0")
+	(object ClassAttribute "_data"
+	    quid       	"3C58BF7E006D"
+	    type       	"T*"
+	    initv      	"NULL"))
+    module     	"Component View::e_queue"
+    quidu      	"3A92BB58014B"
+    language   	"C++"
+    parameters 	(list Parameters
+	(object Parameter "T"
+	    documentation 	"The Type Of Object In the priority Queue. Class T objects Greater Than (<) have greater priority."
+	    type       	"class")))

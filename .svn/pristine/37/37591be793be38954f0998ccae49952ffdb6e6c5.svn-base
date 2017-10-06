@@ -1,0 +1,79 @@
+008     PSP_DATA
+015-016 CCP_1
+015     CCP_1_LOW
+016     CCP_1_HIGH
+01B-01C CCP_2
+01B     CCP_2_LOW
+01C     CCP_2_HIGH
+020     @TRIS_C
+021-023 LC_256_device_info
+024.0   success
+024.1   watchdog_led
+025-026 watchdog_flash_count
+027     main.i
+028-02B main.num_eeprom_bytes
+02C     main.read_byte
+02D.0   main.fail
+02E     InitialiseWatchdog.i
+02E     ReadEEprom.ret_byte
+02E     BlinkWatchdog.@SCRATCH
+02F-030 FlashWatchdog.ms_time
+02F     SetWatchdogLed.value
+02F.0   ReadEEprom.ret
+030.0   SetEEpromMemoryAddress.ret
+030     ReadEEprom.@SCRATCH
+031     @I2C_READ_1_54_55.P1
+031     InitialiseReadExtEEProm.port_num
+031     InitialiseWriteExtEEPROM.port_num
+031     SetEEpromMemoryAddress.@SCRATCH
+032.0   WriteEEpromAddress.ret
+032.0   InitialiseReadExtEEProm.ret
+032.0   InitialiseWriteExtEEPROM.ret
+032     @I2C_READ_1_54_55.@SCRATCH
+033     InitialiseReadExtEEProm.device_address
+033     InitialiseWriteExtEEPROM.device_address
+033     @I2C_READ_1_54_55.@SCRATCH
+033     WriteEEpromAddress.@SCRATCH
+034     GenerateSlaveNum.device_num
+034     PollSlave.device_address
+034     InitialiseReadExtEEProm.@SCRATCH
+035     PollSlave.stop
+036.0   PollSlave.ret
+037     delay_ms.P1
+037     @I2C_WRITE_1_54_55.P2
+077     @SCRATCH
+078     @SCRATCH
+078     _RETURN_
+079     @SCRATCH
+07A     @SCRATCH
+07B     @SCRATCH
+07F     @INTERRUPT_AREA
+0FF     @INTERRUPT_AREA
+17F     @INTERRUPT_AREA
+1FF     @INTERRUPT_AREA
+27F     @INTERRUPT_AREA
+2FF     @INTERRUPT_AREA
+37F     @INTERRUPT_AREA
+3FF     @INTERRUPT_AREA
+        delay_us.P1
+        WriteEEProm.tx_byte
+        WriteConfigByte.index
+        WriteConfigByte.config_byte
+        ReadConfigByte.index
+
+0004  delay_ms
+0061  @I2C_READ_1_54_55
+00BE  @I2C_WRITE_1_54_55
+0017  InitialiseWatchdog
+00A5  ResyncEEprom
+0255  ResetEEPROM
+0107  ReadEEprom
+003A  BlinkWatchdog
+025F  main
+
+Project Files:
+C:\DEVELOP\MIDICO~3\MIDICO~1\CODE\TESTPROM.C
+C:\PROGRA~1\PICC\devices\16f877.h
+C:\DEVELOP\MIDICO~3\MIDICO~1\CODE\watchdog.h
+C:\DEVELOP\MIDICO~3\MIDICO~1\CODE\24lc256.h
+C:\DEVELOP\MIDICO~3\MIDICO~1\CODE\cfgram.h

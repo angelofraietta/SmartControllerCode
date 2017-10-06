@@ -1,0 +1,719 @@
+
+(object Petal
+    version    	42
+    _written   	"Rose 4.5.8163.3"
+    charSet    	0)
+
+(object Class "MidiDriver"
+    attributes 	(list Attribute_Set
+	(object Attribute
+	    tool       	"cg"
+	    name       	"DestructorKind"
+	    value      	("ThreeKindSet" 201))
+	(object Attribute
+	    tool       	"cg"
+	    name       	"InlineDestructor"
+	    value      	TRUE)
+	(object Attribute
+	    tool       	"Traversal"
+	    name       	"CodeFile"
+	    value      	"c:\\develop\\MidicontrollerPatchEditor\\mididriver\\mididriver.h")
+	(object Attribute
+	    tool       	"Traversal"
+	    name       	"BodyFile"
+	    value      	"c:\\develop\\MidicontrollerPatchEditor\\mididriver\\mididriver.cpp"))
+    quid       	"3C5F56DE030D"
+    operations 	(list Operations
+	(object Operation "MidiDriver"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE))
+	    quid       	"3C5F571B02ED"
+	    documentation 	"Constructor which defines queue size"
+	    parameters 	(list Parameters
+		(object Parameter "queue_size"
+		    type       	"int"))
+	    concurrency 	"Sequential"
+	    opExportControl 	"Protected"
+	    uid        	1012864652)
+	(object Operation "DequeData"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE))
+	    quid       	"3C5E0C240127"
+	    documentation 	"Removes and retrieves item from Queue"
+	    parameters 	(list Parameters
+		(object Parameter "item"
+		    type       	"IOData*"))
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Protected"
+	    uid        	1012859308)
+	(object Operation "EnqueData"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE))
+	    quid       	"3C5E0C24011D"
+	    documentation 	"Adds data item to queue"
+	    parameters 	(list Parameters
+		(object Parameter "item"
+		    type       	"IOData"))
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Protected"
+	    uid        	1012859307)
+	(object Operation "close"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 202)))
+	    quid       	"3C5F240401CE"
+	    documentation 	"closes device"
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1012864645)
+	(object Operation "open"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 202)))
+	    quid       	"3C5F23DB00E8"
+	    documentation 	"opens device."
+	    parameters 	(list Parameters
+		(object Parameter "device_num"
+		    documentation 	"The device number required by hardware. This value is the the device number in the hardware"
+		    type       	"int")
+		(object Parameter "device_id"
+		    documentation 	"Index that the device will be identified as the driver. -1 signifies that the device_num is used"
+		    type       	"int"
+		    initv      	"-1"))
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1012864644)
+	(object Operation "isEmpty"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationIsConst"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"EntryCode"
+		    value      	(value Text "return pData.empty();"))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"GenerateEmptyRegions"
+		    value      	("GenerateEmptyRegionSet" 3)))
+	    quid       	"3C79573D0031"
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1014585200)
+	(object Operation "GetDeviceNum"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationIsConst"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"EntryCode"
+		    value      	(value Text "return _device_num;")))
+	    quid       	"3CB6208C0102"
+	    documentation 	"Rteurns the Device Number"
+	    result     	"int"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1018564232))
+    class_attributes 	(list class_attribute_list
+	(object ClassAttribute "_device_num"
+	    quid       	"3C6345DB0061"
+	    documentation 	"Handle obtained during Open Function"
+	    type       	"int"
+	    initv      	"-1"
+	    exportControl 	"Protected"))
+    language   	"C++"
+    abstract   	TRUE)
+
+(object Class "MidiInputDriver"
+    attributes 	(list Attribute_Set
+	(object Attribute
+	    tool       	"cg"
+	    name       	"DestructorKind"
+	    value      	("ThreeKindSet" 201)))
+    quid       	"3C588B9601D9"
+    documentation 	"Class that runs in two threads-- one in context of ISR and the other in context of normal task"
+    superclasses 	(list inheritance_relationship_list
+	(object Inheritance_Relationship
+	    quid       	"3C5F573D016F"
+	    supplier   	"Logical View::MidiDriver::MidiDriver"
+	    quidu      	"3C5F56DE030D"))
+    operations 	(list Operations
+	(object Operation "DataReady"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 202)))
+	    quid       	"3C58AFB50184"
+	    documentation 	"Function called by ISR when data is ready at input"
+	    parameters 	(list Parameters
+		(object Parameter "data"
+		    type       	"IOData"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1012451964)
+	(object Operation "ProcessInputData"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 200))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	FALSE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"EntryCode"
+		    value      	(value Text 
+|if (pThread)
+| pThread->resume();
+		    )))
+	    quid       	"3C58B62702B3"
+	    documentation 	"Processes the enqued data until finished. This is done in the context of the InputSync task"
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1012451967)
+	(object Operation "MidiInputDriver"
+	    quid       	"3C5E07A6028B"
+	    documentation 	"Constructor which defines queue size"
+	    parameters 	(list Parameters
+		(object Parameter "queue_size"
+		    type       	"int")
+		(object Parameter "driver"
+		    type       	"MidiInputSync*"))
+	    concurrency 	"Sequential"
+	    opExportControl 	"Protected"
+	    uid        	1012859309)
+	(object Operation "create"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 203)))
+	    quid       	"3C5F210800D5"
+	    documentation 	"Constructor which defines queue size"
+	    parameters 	(list Parameters
+		(object Parameter "queue_size"
+		    type       	"int")
+		(object Parameter "driver"
+		    type       	"MidiInputSync*"
+		    initv      	"NULL"))
+	    result     	"MidiInputDriver*"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1012864642)
+	(object Operation "ReadData"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 202)))
+	    quid       	"3C60310802BB"
+	    documentation 	"Removes and retrieves item from Queue. Rteuns true if successful. Is abstract so each subclass can protect its critical sections"
+	    parameters 	(list Parameters
+		(object Parameter "item"
+		    type       	"IOData*"))
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1012937116)
+	(object Operation "PreProcesData"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 201))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE))
+	    quid       	"3C698770034C"
+	    documentation 	"Function for processing data within context of thread. Overloaded for specific hal implimenttaion"
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1013549217)
+	(object Operation "PostProcesData"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 201))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE))
+	    quid       	"3C6987E40230"
+	    documentation 	"Function for processing data within context of thread. Overloaded for specific hal implimenttaion"
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1013549218)
+	(object Operation "ExtDataInput"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 203)))
+	    quid       	"3D825CC7019B"
+	    documentation 	"External function that can be used to receive IO Data"
+	    parameters 	(list Parameters
+		(object Parameter "data"
+		    type       	"IOData"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1031953702)
+	(object Operation "NumDevices"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 203)))
+	    quid       	"3E93BAFA019B"
+	    documentation 	"Returns the number of devices"
+	    result     	"unsigned"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1049869257)
+	(object Operation "GetDeviceName"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 203)))
+	    quid       	"3E93BB3603BE"
+	    documentation 	
+|Returns the Name of a  device given a device index.
+|Returns true if successful
+	    
+	    parameters 	(list Parameters
+		(object Parameter "index"
+		    type       	"unsigned")
+		(object Parameter "ret_buf"
+		    type       	"char*")
+		(object Parameter "buf_len"
+		    type       	"unsigned"))
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1049869258))
+    module     	"Component View::MidiDriver::MidiInputDriver (module spec)"
+    quidu      	"3C5F00A902F5"
+    module     	"Component View::MidiDriver::hal_rtems::RtemsMidiInputDriver (module body)"
+    quidu      	"3C5F00CA0018"
+    module     	"Component View::MidiDriver::hal_windows::WindowsMidiInputDriver (module body)"
+    quidu      	"3C5F00F80349"
+    module     	"Component View::MidiDriver::hal_mac::MacMidiInputDriver (module body)"
+    quidu      	"3D6AB50500C8"
+    language   	"C++"
+    abstract   	TRUE)
+
+(object Class "MidiOutputDriver"
+    attributes 	(list Attribute_Set
+	(object Attribute
+	    tool       	"cg"
+	    name       	"DestructorKind"
+	    value      	("ThreeKindSet" 201)))
+    quid       	"3C5E05CA01BF"
+    superclasses 	(list inheritance_relationship_list
+	(object Inheritance_Relationship
+	    quid       	"3C5F57A0003B"
+	    supplier   	"Logical View::MidiDriver::MidiDriver"
+	    quidu      	"3C5F56DE030D"))
+    used_nodes 	(list uses_relationship_list
+	(object Uses_Relationship
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"IDL"
+		    name       	"GenerateForwardReference"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"ForwardReferenceOnly"
+		    value      	FALSE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"GenerateForwardReference"
+		    value      	FALSE))
+	    quid       	"3C5F3FAD02B6"
+	    supplier   	"Logical View::MidiDriver::MidiUtilities"
+	    quidu      	"3C5F3F20005A")
+	(object Uses_Relationship
+	    quid       	"3D8241990287"
+	    supplier   	"Logical View::MidiDriver::FileDriver"
+	    quidu      	"3D823D930073")
+	(object Uses_Relationship
+	    quid       	"3D825D2201C4"
+	    supplier   	"Logical View::MidiDriver::MidiInputDriver"
+	    quidu      	"3C588B9601D9"))
+    operations 	(list Operations
+	(object Operation "MidiOutputDriver"
+	    quid       	"3C5E0778019F"
+	    documentation 	"Constructor which defines queue size"
+	    parameters 	(list Parameters
+		(object Parameter "queue_size"
+		    type       	"int"))
+	    concurrency 	"Sequential"
+	    opExportControl 	"Protected"
+	    uid        	1012859302)
+	(object Operation "TransmitMidiByte"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 202)))
+	    quid       	"3C5E09A301E3"
+	    documentation 	"Transmits Midi Byte to an output"
+	    parameters 	(list Parameters
+		(object Parameter "data"
+		    documentation 	"The Midi byte to transmit"
+		    type       	"unsigned char")
+		(object Parameter "output_num"
+		    documentation 	"The Midi Output to go to"
+		    type       	"int"
+		    initv      	"0"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Protected"
+	    uid        	1012859303)
+	(object Operation "TransmitCV"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 202)))
+	    quid       	"3C5E09C30167"
+	    documentation 	"Transmits a variable cv to output"
+	    parameters 	(list Parameters
+		(object Parameter "data_val"
+		    type       	"unsigned char")
+		(object Parameter "output_num"
+		    type       	"int"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Protected"
+	    uid        	1012859304)
+	(object Operation "TransmitDigital"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 202)))
+	    quid       	"3C5E0A6603CE"
+	    documentation 	"transmits digital CV outputs"
+	    parameters 	(list Parameters
+		(object Parameter "data_val"
+		    type       	"unsigned char")
+		(object Parameter "output_num"
+		    type       	"int"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Protected"
+	    uid        	1012859305)
+	(object Operation "TxDataReady"
+	    quid       	"3C5E0B4C0389"
+	    documentation 	"Function called by IO device to inform driver that it is ready to receive data. If data is ready, the driver returns true and places the data that is to be transmitted into the IOData parameter"
+	    parameters 	(list Parameters
+		(object Parameter "io_data"
+		    type       	"IOData*"
+		    initv      	"NULL"))
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    post_condition 	(object Semantic_Info
+		PDL        	"rxData contains the value of the received data")
+	    opExportControl 	"Public"
+	    uid        	1012859306)
+	(object Operation "create"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 203)))
+	    quid       	"3C5F1F50028B"
+	    documentation 	"Constructor which defines queue size"
+	    parameters 	(list Parameters
+		(object Parameter "queue_size"
+		    type       	"int"))
+	    result     	"MidiOutputDriver*"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1012864640)
+	(object Operation "TransmitMidiData"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 200))
+		(object Attribute
+		    tool       	"cg"
+		    name       	"ExitCode"
+		    value      	(value Text 
+|int tx_bytes =  MidiUtilities::num_bytes((char) midi_data.status);
+|  
+|TransmitMidiByte (midi_data.status,output_num);
+|  
+|if (tx_bytes > 1)
+|  {
+|    TransmitMidiByte (midi_data.data1, output_num);
+|  }
+|  
+|if (tx_bytes > 2)
+|  {
+|    TransmitMidiByte (midi_data.data2, output_num);
+|   }
+		    )))
+	    quid       	"3C689CA30105"
+	    parameters 	(list Parameters
+		(object Parameter "midi_data"
+		    type       	"const MidiData&")
+		(object Parameter "output_num"
+		    documentation 	"The Midi Output to go to"
+		    type       	"int"
+		    initv      	"0"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1013488868)
+	(object Operation "SetTxReady"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"Inline"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"EntryCode"
+		    value      	(value Text "_tx_ready = ready;")))
+	    quid       	"3CA8FBD902D5"
+	    documentation 	"Sets the _tx_ready flag to the value stated"
+	    parameters 	(list Parameters
+		(object Parameter "ready"
+		    type       	"bool"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1017707552)
+	(object Operation "TransmitMidiMessageByte"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 203)))
+	    quid       	"3CB239A602BA"
+	    documentation 	"Transmits Midi Byte to an output"
+	    parameters 	(list Parameters
+		(object Parameter "data"
+		    documentation 	"The Midi byte to transmit"
+		    type       	"unsigned char")
+		(object Parameter "output_num"
+		    documentation 	"The Midi Output to go to"
+		    type       	"int"
+		    initv      	"0")
+		(object Parameter "device"
+		    type       	"unsigned"
+		    initv      	"0"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1018308378)
+	(object Operation "TransmitControlVoltage"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 203)))
+	    quid       	"3CB239A602CE"
+	    documentation 	"Transmits a variable cv to output"
+	    parameters 	(list Parameters
+		(object Parameter "data_val"
+		    type       	"unsigned char")
+		(object Parameter "output_num"
+		    type       	"int")
+		(object Parameter "device"
+		    type       	"unsigned"
+		    initv      	"0"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1018308379)
+	(object Operation "TransmitDigitalVoltage"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 203)))
+	    quid       	"3CB239A602E2"
+	    documentation 	"transmits digital CV outputs"
+	    parameters 	(list Parameters
+		(object Parameter "data_val"
+		    type       	"unsigned char")
+		(object Parameter "output_num"
+		    type       	"int")
+		(object Parameter "device"
+		    type       	"unsigned"
+		    initv      	"0"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1018308380)
+	(object Operation "TransmitMidiDataMessage"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 203)))
+	    quid       	"3CB239A602EC"
+	    parameters 	(list Parameters
+		(object Parameter "midi_data"
+		    type       	"const MidiData&")
+		(object Parameter "output_num"
+		    documentation 	"The Midi Output to go to"
+		    type       	"int"
+		    initv      	"0")
+		(object Parameter "device"
+		    type       	"unsigned"
+		    initv      	"0"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1018308381)
+	(object Operation "TransmitIoData"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 203)))
+	    quid       	"3D82452801A0"
+	    documentation 	"Transmits DataIO to an output"
+	    parameters 	(list Parameters
+		(object Parameter "io_data"
+		    documentation 	"The Midi byte to transmit"
+		    type       	"IOData")
+		(object Parameter "output_num"
+		    documentation 	"The Midi Output to go to"
+		    type       	"int"
+		    initv      	"0")
+		(object Parameter "device"
+		    type       	"unsigned"
+		    initv      	"0"))
+	    result     	"void"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1031946742)
+	(object Operation "NumDevices"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 203)))
+	    quid       	"3CB248680317"
+	    documentation 	"Returns the Number of Output Devices"
+	    result     	"unsigned"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1018316747)
+	(object Operation "GetDeviceName"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"OperationKind"
+		    value      	("OperationKindSet" 203)))
+	    quid       	"3E93BB8A0206"
+	    documentation 	
+|Returns the Name of a  device given a device index.
+|Returns true if successful
+	    
+	    parameters 	(list Parameters
+		(object Parameter "index"
+		    type       	"unsigned")
+		(object Parameter "ret_buf"
+		    type       	"char*")
+		(object Parameter "buf_len"
+		    type       	"unsigned"))
+	    result     	"bool"
+	    concurrency 	"Sequential"
+	    opExportControl 	"Public"
+	    uid        	1049869260))
+    class_attributes 	(list class_attribute_list
+	(object ClassAttribute "_tx_ready"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"cg"
+		    name       	"DataMemberIsVolatile"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"GenerateGetOperation"
+		    value      	FALSE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"GenerateSetOperation"
+		    value      	FALSE)
+		(object Attribute
+		    tool       	"cg"
+		    name       	"DataMemberVisibility"
+		    value      	("DataMemberVisibilitySet" 211)))
+	    quid       	"3C5E08E80126"
+	    documentation 	"Flag indicating that the IO device driver is ready to accept Data immediately. Is set upon return interrupt or initial open"
+	    type       	"bool"
+	    initv      	"false"
+	    exportControl 	"Protected")
+	(object ClassAttribute "_max_devices"
+	    attributes 	(list Attribute_Set
+		(object Attribute
+		    tool       	"IDL"
+		    name       	"IsReadOnly"
+		    value      	TRUE)
+		(object Attribute
+		    tool       	"IDL"
+		    name       	"IsConst"
+		    value      	TRUE))
+	    quid       	"3CB2310200A6"
+	    type       	"int"
+	    initv      	"6"
+	    exportControl 	"Protected"
+	    Containment 	"By Value"
+	    static     	TRUE))
+    module     	"Component View::MidiDriver::MidiOutputDriver (module spec)"
+    quidu      	"3C5F01180038"
+    module     	"Component View::MidiDriver::hal_rtems::RtemsMidiOutputDriver (module body)"
+    quidu      	"3C5F01310106"
+    module     	"Component View::MidiDriver::hal_windows::WindowsMidiOutputDriver (module body)"
+    quidu      	"3C5F014002FC"
+    module     	"Component View::MidiDriver::hal_mac::MacMidiOutputDriver (module body)"
+    quidu      	"3D6AB5580013"
+    language   	"C++"
+    abstract   	TRUE)

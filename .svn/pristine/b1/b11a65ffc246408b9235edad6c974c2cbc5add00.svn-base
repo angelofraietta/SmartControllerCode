@@ -1,0 +1,312 @@
+# ---------------------------------------------------------------------------
+!if !$d(BCB)
+BCB = $(MAKEDIR)\..
+!endif
+
+# ---------------------------------------------------------------------------
+# IDE SECTION
+# ---------------------------------------------------------------------------
+# The following section of the project makefile is managed by the BCB IDE.
+# It is recommended to use the IDE to change any of the values in this
+# section.
+# ---------------------------------------------------------------------------
+
+VERSION = BCB.04.04
+# ---------------------------------------------------------------------------
+PROJECT = SmartController.exe
+OBJFILES = debug\intermediate\SmartController.obj debug\intermediate\About.obj \
+  debug\intermediate\BaseShellsUnit.obj debug\intermediate\ConnectorEditUnit.obj \
+  debug\intermediate\ConnectorLine.obj debug\intermediate\CursorsUnit.obj \
+  debug\intermediate\DragConnector.obj debug\intermediate\EditPatchUnit.obj \
+  debug\intermediate\ErrorUnit.obj debug\intermediate\FormRefresh.obj \
+  debug\intermediate\IdentityHook.obj debug\intermediate\Main.obj \
+  debug\intermediate\NewObjectsList.obj debug\intermediate\ObjectBox.obj \
+  debug\intermediate\ObjectSocket.obj debug\intermediate\PatchUnit.obj \
+  debug\intermediate\PerformanceView.obj debug\intermediate\ShellDisplayParam.obj \
+  debug\intermediate\TreeNodeFlasher.obj debug\intermediate\TypeElementUnit.obj \
+  debug\intermediate\VariableSizeBox.obj debug\intermediate\VCLGLOBFUNC.obj \
+  debug\intermediate\ViewFormUnit.obj debug\intermediate\ViewRefresh.obj \
+  debug\intermediate\GraphicShape.obj debug\intermediate\DragLine.obj \
+  debug\intermediate\GraphicBoxFollow.obj debug\intermediate\GraphicBoxUnit.obj \
+  debug\intermediate\GraphicLine.obj debug\intermediate\GraphicLineFollow.obj \
+  debug\intermediate\CommonFunctions.obj debug\intermediate\SaveChanged.obj \
+  debug\intermediate\TComment.obj debug\intermediate\CommentFormUnit.obj \
+  debug\intermediate\KillerUnit.obj debug\intermediate\patchquestion.obj \
+  debug\intermediate\baseshellquestion.obj \
+  debug\intermediate\connectorquestion.obj debug\intermediate\eventquestion.obj \
+  debug\intermediate\identityquestion.obj \
+  debug\intermediate\presentationquestion.obj debug\intermediate\smutility.obj \
+  debug\intermediate\ToggleBox.obj debug\intermediate\sessionquestion.obj \
+  debug\intermediate\ComSetupUnit.obj debug\intermediate\linkprotocol.obj \
+  debug\intermediate\linklayer.obj debug\intermediate\windowscommstream.obj \
+  debug\intermediate\windowscommport.obj debug\intermediate\crc32.obj \
+  debug\intermediate\filequestion.obj debug\intermediate\sysexfilequestion.obj \
+  debug\intermediate\QUESTIONTASK.obj debug\intermediate\activeobject.obj \
+  debug\intermediate\windowsevent.obj debug\intermediate\windowsthread.obj \
+  debug\intermediate\numberboxwindowunit.obj debug\intermediate\NumberBox.obj \
+  debug\intermediate\viewquestion.obj debug\intermediate\MidiSetupUnit.obj \
+  debug\intermediate\UDPPORT.obj debug\intermediate\networklayer.obj
+RESFILES = SmartController.res ComposerCursors.res
+RESDEPEN = $(RESFILES) About.dfm BaseShellsUnit.dfm ConnectorEditUnit.dfm \
+  EditPatchUnit.dfm ErrorUnit.dfm Main.dfm NewObjectsList.dfm PatchUnit.dfm \
+  ViewFormUnit.dfm SaveChanged.dfm CommentFormUnit.dfm ComSetupUnit.dfm \
+  MidiSetupUnit.dfm
+LIBFILES = ..\controller\source\hal_windows\smartcontrol.lib
+LIBRARIES = Vclx40.lib Vcl40.lib
+SPARELIBS = Vcl40.lib Vclx40.lib
+PACKAGES = Vcl40.bpi Vclx40.bpi vcljpg40.bpi
+DEFFILE =
+# ---------------------------------------------------------------------------
+PATHCPP = .;graphics;..\controller\source\engineinterface;..\controller\source\link_driver;..\controller\source\link_driver\hal_windows;..\threads\source;..\threads\source\hal_windows
+PATHPAS = .;
+PATHASM = .;
+PATHRC = .;
+DEBUGLIBPATH = $(BCB)\lib\debug
+RELEASELIBPATH = $(BCB)\lib\release
+USERDEFINES = WIN32;BUILDER
+SYSDEFINES = NO_STRICT
+# ---------------------------------------------------------------------------
+CFLAG1 = -I..\threads\source\hal_windows;..\controller\source\link_driver\hal_windows;..\controller\source\link_driver;..\controller\source\link_driver\hal_windows\windows_driver;"..\..\..\Program Files\Borland\CBuilder4\Projects";bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;graphics;..\controller\source\engineinterface;..\controller\source\hal_include;..\controller\source\engine;..\mididriver;..\threads\source \
+  -Od -Hc -H=$(BCB)\lib\vcl40.csm -w -Ve -r- -a4 -k -y -v -vi- -c -b- -w-par \
+  -w-inl -Vx -tW -tWM -D$(SYSDEFINES);$(USERDEFINES)
+PFLAGS = -U..\threads\source\hal_windows;..\threads\source;..\controller\source\link_driver\hal_windows;..\controller\source\link_driver;..\controller\source\engineinterface;"..\..\..\Program Files\Borland\CBuilder4\Projects";graphics;$(BCB)\lib\obj;$(BCB)\lib;..\controller\source\hal_windows;$(RELEASELIBPATH) \
+  -I..\threads\source\hal_windows;..\controller\source\link_driver\hal_windows;..\controller\source\link_driver;..\controller\source\link_driver\hal_windows\windows_driver;"..\..\..\Program Files\Borland\CBuilder4\Projects";bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;graphics;..\controller\source\engineinterface;..\controller\source\hal_include;..\controller\source\engine;..\mididriver;..\threads\source \
+  -N2debug\intermediate -N0debug\intermediate -DWIN32;BUILDER -$YD -$W -$O- -v \
+  -JPHNE -M
+RFLAGS = -i..\threads\source\hal_windows;..\controller\source\link_driver\hal_windows;..\controller\source\link_driver;..\controller\source\link_driver\hal_windows\windows_driver;"..\..\..\Program Files\Borland\CBuilder4\Projects";bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;graphics;..\controller\source\engineinterface;..\controller\source\hal_include;..\controller\source\engine;..\mididriver;..\threads\source \
+  -DWIN32;BUILDER
+AFLAGS = /i..\threads\source\hal_windows /i..\controller\source\link_driver\hal_windows \
+  /i..\controller\source\link_driver \
+  /i..\controller\source\link_driver\hal_windows\windows_driver \
+  /i"..\..\..\Program Files\Borland\CBuilder4\Projects" /ibridge /i$(BCB)\include \
+  /i$(BCB)\include\vcl /i..\cursors /igraphics \
+  /i..\controller\source\engineinterface /i..\controller\source\hal_include \
+  /i..\controller\source\engine /i..\mididriver /i..\threads\source /dWIN32 \
+  /dBUILDER /mx /w2 /zi
+LFLAGS = -L..\threads\source\hal_windows;..\threads\source;..\controller\source\link_driver\hal_windows;..\controller\source\link_driver;..\controller\source\engineinterface;"..\..\..\Program Files\Borland\CBuilder4\Projects";graphics;$(BCB)\lib\obj;$(BCB)\lib;..\controller\source\hal_windows;$(RELEASELIBPATH) \
+  -aa -Tpe -x -Gn -v
+# ---------------------------------------------------------------------------
+ALLOBJ = c0w32.obj sysinit.obj $(OBJFILES)
+ALLRES = $(RESFILES)
+ALLLIB = $(LIBFILES) $(LIBRARIES) import32.lib cp32mt.lib
+# ---------------------------------------------------------------------------
+!ifdef IDEOPTIONS
+
+[Version Info]
+IncludeVerInfo=1
+AutoIncBuild=0
+MajorVer=1
+MinorVer=9
+Release=5
+Build=1
+Debug=0
+PreRelease=1
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=Angelo Fraietta
+FileDescription=Smart Controller
+FileVersion=1.9.5.1
+InternalName=Smart Controller.exe
+LegalCopyright=Angelo Fraietta
+LegalTrademarks=
+OriginalFilename=
+ProductName=SmartController
+ProductVersion=1
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=23
+Item0=..\threads\source\hal_windows;..\controller\source\link_driver\hal_windows;..\controller\source\link_driver;..\controller\source\link_driver\hal_windows\windows_driver;..\..\..\Program Files\Borland\CBuilder4\Projects;bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;graphics;..\controller\source\engineinterface;..\controller\source\hal_include;..\controller\source\engine;..\mididriver;..\threads\source
+Item1=..\controller\source\link_driver\hal_windows;..\controller\source\link_driver;..\controller\source\link_driver\hal_windows\windows_driver;..\..\..\Program Files\Borland\CBuilder4\Projects;bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;graphics;..\controller\source\engineinterface;..\controller\source\hal_include;..\controller\source\engine;..\mididriver;..\threads\source
+Item2=..\controller\source\link_driver\hal_windows;..\controller\source\link_driver;..\controller\source\link_driver\hal_windows\windows_driver;..\..\..\Program Files\Borland\CBuilder4\Projects;bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;graphics;..\controller\source\engineinterface;..\controller\source\hal_include;..\controller\source\engine;..\mididriver; ..]threads\source
+Item3=..\controller\source\link_driver\hal_windows;..\controller\source\link_driver;..\controller\source\link_driver\hal_windows\windows_driver;..\..\..\Program Files\Borland\CBuilder4\Projects;bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;graphics;..\controller\source\engineinterface;..\controller\source\hal_include;..\controller\source\engine; ..\mididriver
+Item4=..\controller\source\link_driver\hal_windows;..\controller\source\link_driver;..\controller\source\link_driver\hal_windows\windows_driver;..\..\..\Program Files\Borland\CBuilder4\Projects;bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;graphics;..\controller\source\engineinterface;..\controller\source\hal_include;..\controller\source\engine
+Item5=..\controller\source\link_driver\hal_windows\windows_driver;C:\Program Files\Borland\CBuilder4\Projects\;bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;graphics; ..\controller\source\engineinterface; ..\controller\source\hal_include; ..\controller\source\engine
+Item6=C:\Program Files\Borland\CBuilder4\Projects\;bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;graphics; ..\controller\source\engineinterface; ..\controller\source\hal_include; ..\controller\source\engine;..\controller\source\link_driver\hal_windows\windows_driver
+Item7=C:\Program Files\Borland\CBuilder4\Projects\;bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;graphics; ..\controller\source\engineinterface; ..\controller\source\hal_include; ..\controller\source\engine;..\controller\source\link_driver
+Item8=..\controller\source\link_driver\hal_windows;..\..\..\Program Files\Borland\CBuilder4\Projects;bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;graphics;..\controller\source\engineinterface;..\controller\source\hal_include;..\controller\source\engine;..\controller\source\link_driver;..\controller\source\link_driver\windows_driver
+Item9=C:\Program Files\Borland\CBuilder4\Projects\;bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;graphics; ..\controller\source\engineinterface; ..\controller\source\hal_include; ..\controller\source\engine
+Item10=C:\Program Files\Borland\CBuilder4\Projects\;bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;graphics; ..\controller\source\engineinterface; ..\controller\source\hal_include
+Item11=C:\Program Files\Borland\CBuilder4\Projects\;bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;graphics; ..\controller\source\engineinterface
+Item12=C:\Program Files\Borland\CBuilder4\Projects\;bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;graphics
+Item13=..\..\..\Program Files\Borland\CBuilder4\Projects;bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;graphics
+Item14=..\..\..\Program Files\Borland\CBuilder4\Projects;bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;patchdll;graphics
+Item15=C:\Program Files\Borland\CBuilder4\Projects\;bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;patchdll;graphics
+Item16=..\..\..\Program Files\Borland\CBuilder4\Projects;..\..\Program Files\Borland\CBuilder4\Projects;bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;patchdll;graphics
+Item17=C:\Program Files\Borland\CBuilder4\Projects;C:\Program Files\Borland\CBuilder4\Projects\;bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;patchdll;graphics
+Item18=C:\Program Files\Borland\CBuilder4\Projects;bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;patchdll;graphics
+Item19=bridge;$(BCB)\include;$(BCB)\include\vcl;..\cursors;patchdll;graphics
+Item20=D:\MainProgram;$(BCB)\include;$(BCB)\include\vcl;..\cursors
+Item21=$(BCB)\include;$(BCB)\include\vcl;..\cursors
+Item22=$(BCB)\include;$(BCB)\include\vcl;..[HistoryLists\hlLibraryPath]
+
+[HistoryLists\hlLibraryPath]
+Count=12
+Item0=..\threads\source\hal_windows;..\threads\source;..\controller\source\link_driver\hal_windows;..\controller\source\link_driver;..\controller\source\engineinterface;..\..\..\Program Files\Borland\CBuilder4\Projects;graphics;$(BCB)\lib\obj;$(BCB)\lib;..\controller\source\hal_windows
+Item1=..\controller\source\link_driver\hal_windows;..\controller\source\link_driver;..\controller\source\engineinterface;..\..\..\Program Files\Borland\CBuilder4\Projects;graphics;$(BCB)\lib\obj;$(BCB)\lib;..\controller\source\hal_windows
+Item2=..\controller\source\link_driver\hal_windows;..\controller\source\link_driver;..\controller\source\engineinterface;..\..\..\Program Files\Borland\CBuilder4\Projects;graphics;$(BCB)\lib\obj;$(BCB)\lib; ..\controller\source\hal_windows
+Item3=..\controller\source\link_driver\hal_windows;..\controller\source\link_driver;..\controller\source\engineinterface;..\..\..\Program Files\Borland\CBuilder4\Projects;graphics;$(BCB)\lib\obj;$(BCB)\lib
+Item4=C:\Program Files\Borland\CBuilder4\Projects\;graphics;$(BCB)\lib\obj;$(BCB)\lib
+Item5=..\..\..\Program Files\Borland\CBuilder4\Projects;graphics;$(BCB)\lib\obj;$(BCB)\lib
+Item6=..\..\..\Program Files\Borland\CBuilder4\Projects;..\..\Program Files\Borland\CBuilder4\Projects;graphics;$(BCB)\lib\obj;$(BCB)\lib
+Item7=C:\Program Files\Borland\CBuilder4\Projects;C:\Program Files\Borland\CBuilder4\Projects\;graphics;$(BCB)\lib\obj;$(BCB)\lib
+Item8=C:\Program Files\Borland\CBuilder4\Projects;graphics;$(BCB)\lib\obj;$(BCB)\lib
+Item9=graphics;$(BCB)\lib\obj;$(BCB)\lib
+Item10=$(BCB)\lib\obj;$(BCB)\lib
+Item11=D:\MainProgram;$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=3
+Item0=$(BCB)\source\vcl; ..\controller\source\engineinterface; ..\controller\source\hal_include; ..\controller\source\engine; ..\controller\source\engineinterface
+Item1=$(BCB)\source\vcl; ..\controller\source\engineinterface; ..\controller\source\hal_include; ..\controller\source\engine
+Item2=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=2
+Item0=WIN32;BUILDER
+Item1=WIN32
+
+[HistoryLists\hlIntOutputDir]
+Count=2
+Item0=debug\intermediate
+Item1=intermediate
+
+[HistoryLists\hlFinalOutputDir]
+Count=30
+Item0=..\controller\source\hal_windowsItem1=..\controller\source\hal_windowsItem1=..\controller\source\hal_windows
+Item1=
+Item2=
+Item3=..\controller\source\hal_windowsItem1=..\controller\source\hal_windowsItem1=..\controller\source\hal_windowsItem1=..\controller\source\hal_windowsItem1=..\controller\source\hal_windowsItem1=..\controller\source\hal_windowsItem1=..\controller\source\hal_windowsItem1=..\controller\source\hal_windows
+Item4=
+Item5=
+Item6=
+Item7=
+Item8=
+Item9=
+Item10=
+Item11=patchdll\finalItem1=patchdll\finalItem1=patchdll\finalItem1=patchdll\finalItem1=patchdll\finalItem1=patchdll\finalItem1=patchdll\final
+Item12=
+Item13=
+Item14=
+Item15=
+Item16=
+Item17=
+Item18=patchdll\finalItem1=patchdll\final
+Item19=
+Item20=patchdll\finalItem1=patchdll\finalItem1=.\patchdll\finalItem1=patchdll\final
+Item21=
+Item22=
+Item23=
+Item24=patchdll\finalItem1=patchdll\finalItem1=patchdll\finalItem1=patchdll\finalItem1=patchdll\finalItem1=patchdll\finalItem1=patchdll\finalItem1=patchdll\finalItem1=patchdll\finalItem1=patchdll\finalItem1=patchdll\finalItem1=patchdll\finalItem1=patchdll\finalItem1=patchdll\finalItem1=patchdll\finalItem1=patchdll\finalItem1=d:\MainProgram\patchdll\final
+Item25=
+Item26=
+Item27=
+Item28=
+Item29=
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl; ..\controller\source\engineinterface; ..\controller\source\hal_include; ..\controller\source\engine; ..\controller\source\engineinterface
+
+[Parameters]
+RunParams=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+InMemoryExe=0
+ShowInfoMsgs=0
+
+!endif
+
+# ---------------------------------------------------------------------------
+# MAKE SECTION
+# ---------------------------------------------------------------------------
+# This section of the project file is not used by the BCB IDE.  It is for
+# the benefit of building from the command-line using the MAKE utility.
+# ---------------------------------------------------------------------------
+
+.autodepend
+# ---------------------------------------------------------------------------
+!if !$d(BCC32)
+BCC32 = bcc32
+!endif
+
+!if !$d(CPP32)
+CPP32 = cpp32
+!endif
+
+!if !$d(DCC32)
+DCC32 = dcc32
+!endif
+
+!if !$d(TASM32)
+TASM32 = tasm32
+!endif
+
+!if !$d(LINKER)
+LINKER = ilink32
+!endif
+
+!if !$d(BRCC32)
+BRCC32 = brcc32
+!endif
+
+# ---------------------------------------------------------------------------
+!if $d(PATHCPP)
+.PATH.CPP = $(PATHCPP)
+.PATH.C   = $(PATHCPP)
+!endif
+
+!if $d(PATHPAS)
+.PATH.PAS = $(PATHPAS)
+!endif
+
+!if $d(PATHASM)
+.PATH.ASM = $(PATHASM)
+!endif
+
+!if $d(PATHRC)
+.PATH.RC  = $(PATHRC)
+!endif
+# ---------------------------------------------------------------------------
+$(PROJECT): $(OBJFILES) $(RESDEPEN) $(DEFFILE)
+    $(BCB)\BIN\$(LINKER) @&&!
+    $(LFLAGS) +
+    $(ALLOBJ), +
+    $(PROJECT),, +
+    $(ALLLIB), +
+    $(DEFFILE), +
+    $(ALLRES)
+!
+# ---------------------------------------------------------------------------
+.pas.hpp:
+    $(BCB)\BIN\$(DCC32) $(PFLAGS) {$< }
+
+.pas.obj:
+    $(BCB)\BIN\$(DCC32) $(PFLAGS) {$< }
+
+.cpp.obj:
+    $(BCB)\BIN\$(BCC32) $(CFLAG1) -n$(@D) {$< }
+
+.c.obj:
+    $(BCB)\BIN\$(BCC32) $(CFLAG1) -n$(@D) {$< }
+
+.c.i:
+    $(BCB)\BIN\$(CPP32) $(CFLAG1) -n. {$< }
+
+.cpp.i:
+    $(BCB)\BIN\$(CPP32) $(CFLAG1) -n. {$< }
+
+.asm.obj:
+    $(BCB)\BIN\$(TASM32) $(AFLAGS) $<, $@
+
+.rc.res:
+    $(BCB)\BIN\$(BRCC32) $(RFLAGS) -fo$@ $<
+# ---------------------------------------------------------------------------

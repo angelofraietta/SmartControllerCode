@@ -1,0 +1,309 @@
+/*******************************************************
+Module for Diagnostic Task
+*******************************************************/
+ 
+#include <stdio.h>
+
+//#include <tmacros.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <ctype.h>
+#include <dirent.h>
+
+#include <assert.h>
+#include <rtems.h>
+#include <rtems/libio.h>
+#include <rtems/error.h>
+#include <bsp.h>
+
+#ifdef RTEMS_BSP_HAS_IDE_DRIVER
+
+#include <dosfs.h>
+#include <rtems/ide_part_table.h>
+#include <rtems/libcsupport.h>
+#include <rtems/fsmount.h>
+
+#endif
+
+#include "crc32.h"
+
+#define READ_BUFF_SIZE 80
+#define USE_IDE_NVRAM
+void IMFS_dump( void );
+
+
+static char test_chars [] = {'h', 'e', 'l', 'l', 'o'};
+static const char* source_dir = "/patch/";
+static const char* hard_drive = "/mnt/hda/";
+
+static const char* nvram_file = "/mnt/hda/NVRAM.DAT";
+static const char* patches_file = "/mnt/hda/DUMMY.DAT";
+
+
+// declare functions
+void DisplayDiags(const char* message);
+int StartDiagTask();
+void RestoreNVRAM();
+void SendUDPDiag (const char* message);
+void SendIOReboot();
+
+const char* GetNVRAMFilename()
+{
+	return nvram_file;
+}
+
+void SyncNVRAM(void)
+{
+  DIR *dir;
+  struct dirent *ent;
+  char dir_buffer [100];
+
+  strcpy (dir_buffer, hard_drive ) ;
+
+	
+	if ((dir = opendir(dir_buffer)) == NULL)
+		{
+			printf ("\r\nUnable to open directory");
+		}
+	else
+		{
+			printf ("\r\nSynching Directory %s\r\n", dir_buffer);
+			while ((ent = readdir(dir)) != NULL)
+				{
+
+				}
+			if (closedir(dir) != 0)
+				{
+					printf("\r\nUnable to close directory");
+				}
+		}
+
+}
+
+
+/*
+ * Table of FAT file systems that will be mounted
+ * with the "fsmount" function.
+ * See cpukit/libmisc/fsmount for definition of fields
+ */
+
+#ifdef RTEMS_BSP_HAS_IDE_DRIVER
+fstab_t fs_table[] = {
+  {
+    "/dev/hda1","/mnt/hda",
+    &msdos_ops, RTEMS_FILESYSTEM_READ_WRITE,
+    FSMOUNT_MNT_OK | FSMOUNT_MNTPNT_CRTERR | FSMOUNT_MNT_FAILED,
+    0
+  },
+ {
+    "/dev/hda2","/mnt/hda",
+    &msdos_ops, RTEMS_FILESYSTEM_READ_WRITE,
+    FSMOUNT_MNT_OK | FSMOUNT_MNTPNT_CRTERR | FSMOUNT_MNT_FAILED,
+    0
+  },
+  {
+    "/dev/hda3","/mnt/hda",
+    &msdos_ops, RTEMS_FILESYSTEM_READ_WRITE,
+    FSMOUNT_MNT_OK | FSMOUNT_MNTPNT_CRTERR | FSMOUNT_MNT_FAILED,
+    0
+  },
+  {
+    "/dev/hda4","/mnt/hda",
+    &msdos_ops, RTEMS_FILESYSTEM_READ_WRITE,
+    FSMOUNT_MNT_OK | FSMOUNT_MNTPNT_CRTERR | FSMOUNT_MNT_FAILED,
+    0
+  }
+  
+};
+
+#ifndef MIN
+#define MIN(a,b) (((a) > (b)) ? (b) : (a))
+#endif
+
+
+void fileio_print_free_heap(void)
+{
+  printf("--- unused dynamic memory: %lu bytes ---\n",
+	 (unsigned long) malloc_free_space());
+}
+
+
+void fileio_part_table_initialize(void)
+{
+  char devname[64];
+  rtems_status_code rc;
+
+  printf(" =========================\n");
+  printf(" Initialize partition table\n");
+  printf(" =========================\n");
+  fileio_print_free_heap();
+  printf("initialize /dev/hda\r\n");
+  strcpy(devname,"/dev/hda");
+
+  /*
+   * call function
+   */
+  rc = rtems_ide_part_table_initialize(devname);
+  printf("result = %d\n",rc);
+  fileio_print_free_heap();
+}
+
+void fileio_fsmount(void)
+{
+  rtems_status_code rc;
+
+  printf(" =========================\n");
+  printf(" Process fsmount table\n");
+  printf(" =========================\n");
+  fileio_print_free_heap();
+  /*
+   * call function
+   */
+  rc = rtems_fsmount( fs_table,
+		      sizeof(fs_table)/sizeof(fs_table[0]),
+		      NULL);
+  printf("result = %d\n",rc);
+  fileio_print_free_heap();
+}
+
+#endif
+
+void ListDir(void)
+{
+  DIR *dir;
+  struct dirent *ent;
+  char dir_buffer [100];
+
+  strcpy (dir_buffer, hard_drive ) ;
+
+	
+	if ((dir = opendir(dir_buffer)) == NULL)
+		{
+			printf ("\r\nUnable to open directory");
+		}
+	else
+		{
+			printf ("\r\nListing Directory %s", dir_buffer);
+			while ((ent = readdir(dir)) != NULL)
+				{
+					printf ("\r\n%s", ent->d_name);
+				}
+			if (closedir(dir) != 0)
+				{
+					printf("\r\nUnable to close directory");
+				}
+		}
+
+}
+
+
+
+void DiagTask(void)
+{
+	FILE* fp;
+	int status;
+	char* buf_ptr;
+
+  //StartDiagTask();
+	printf ("\r\nDiagTask\r\n");
+	status = mkdir (source_dir, S_IRWXU);
+
+#ifdef USE_IDE_NVRAM
+#ifdef RTEMS_BSP_HAS_IDE_DRIVER
+	fileio_part_table_initialize ();			
+	fileio_fsmount();
+#endif
+#endif
+
+	RestoreNVRAM();
+
+	while (1)
+		{
+			/*ListDir(); */
+			printf ("\r\nFree Space %u", malloc_free_space());
+			printf("\r\nMax Filesystem Size %u", IMFS_memfile_maximum_size());
+			rtems_task_wake_after (100000);
+		}
+		
+}
+
+
+void Restart()
+{
+	DisplayDiags("Reboot\r\n");
+	SendUDPDiag ("Smart Controller Rebooting");
+	rtems_task_wake_after (900);
+	
+	SendIOReboot();
+	rtems_task_wake_after (100);
+	rtemsReboot();
+}
+
+void SaveFileToIde (const char* source_file, const char* target_file, unsigned long CRC)
+{
+	printf("Save NVRAM to DISK\r\n");
+	SendUDPDiag ("Smart Controller Save file to IDE");
+	unsigned long source_crc;
+	source_crc = crc_file(source_file);
+	int success = 0;
+
+	if (source_crc == CRC)
+		{
+			char buf [256];
+			char diag_message[256];
+			FILE* rfp;
+			FILE* wfp;
+			strcpy (buf, hard_drive);
+			strcat (buf, target_file);
+
+			DisplayDiags ("CRC match \r\n");
+			SendUDPDiag ("Smart Controller CRC Match");
+			rfp = fopen (source_file, "r+b");
+			if (rfp)
+				{
+					wfp = fopen (buf, "w+b");
+					if (wfp)
+						{
+							char c;
+							while (fread (&c, 1, 1, rfp))
+							{
+								fwrite (&c, 1, 1, wfp);
+							}
+					
+							fflush(wfp);
+							fsync(fileno(wfp));
+							fclose (wfp);
+							SyncNVRAM();
+							printf ("List Dir\r\n");  
+							ListDir(); 
+							success = 1;
+						}
+					else
+						{
+
+							sprintf (diag_message, "Unable to open %s\r\n", buf);
+							DisplayDiags(diag_message);
+							SendUDPDiag ("Smart Controller diag_message");
+						}
+
+					fclose (rfp);
+
+					if (success)
+						{
+							Restart();
+						}
+				}
+		}
+	else
+		{
+			printf("CRC did not match\r\n");
+			DisplayDiags ("CRC did not match\r\n");
+			SendUDPDiag ("Smart Controller CRC did not match");
+		}
+}
+
+

@@ -1,0 +1,464 @@
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <ctype.h>
+#include <dirent.h>
+
+#include <assert.h>
+#include <rtems.h>
+#include <rtems/libio.h>
+#include <rtems/error.h>
+#include <bsp.h>
+
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+
+#include <rtems.h>
+#include <rtems/error.h>
+#include <rtems/rtems_bsdnet.h>
+#include <sys/utsname.h>
+
+#include "bsp-cs8900.h"
+
+static char     es_host[32];
+static int      fd = -1;
+static rtems_id reader_id;
+static   struct sockaddr_in es;
+
+#define ETHERNET_IO_BASE   0x300
+#define ETHERNET_MEM_BASE  0
+#define ETHERNET_IRQ_LEVEL 5
+
+#define ECHO_PORT_NUM  1113
+
+#define MAX_LEN 32
+
+extern void SetMaxPatchViewDepth (unsigned new_depth);
+extern unsigned GetMaxPatchViewDepth();
+extern const char* GetDefaultPatchPath();
+extern unsigned GetNumberLoadedPatches();
+extern unsigned GetLoadedPatchFilename(unsigned index, char* buf, unsigned buf_len);
+void SendIOReboot();
+
+static const char* id_file = "/mnt/hda/WHOAMI.TXT";
+static const char* ip_config = "/mnt/hda/IPCFG.TXT";
+
+static const char* probe_question = "Who Are You";
+static const char* memory_question = "Memory";
+static const char* file_list = "File list";
+static const char* reboot_command = "Reboot";
+static const char* list_patch_command = "List Patches";
+
+
+static const char* boot_p = "bootp";
+
+static unsigned answer_port = 2029;
+
+static char name_buf [256];
+
+
+static char ip [MAX_LEN];
+static char net_mask [MAX_LEN];
+static char gateway [MAX_LEN];
+
+static const char* name_prefix = "SmartController ";
+
+void StartUPDTask (unsigned port_number);
+
+static void ListLoadedPatches()
+{
+    unsigned i;
+    char buf [128];
+
+
+    sprintf (buf, "Number Loaded Patches: %u", GetNumberLoadedPatches());
+    if (sendto (fd, buf, strlen(buf), 0,
+                (const struct sockaddr*) &es, sizeof es) < 0)
+      printf ("udp-echo: error writing to the udp socket: (%d) %s\n",
+              errno, strerror (errno));
+
+    }
+
+    for (i = 0; i < GetNumberLoadedPatches(); i++)
+    {
+      char name_buf [128];
+      if (GetLoadedPatchFilename(i, name_buf, sizeof (name_buf)))
+      {
+        sprintf (buf, "%s loaded", name_buf);
+
+      if (sendto (fd, buf, strlen(buf), 0,
+                  (const struct sockaddr*) &es, sizeof es) < 0)
+        printf ("udp-echo: error writing to the udp socket: (%d) %s\n",
+                errno, strerror (errno));
+
+      }
+    }
+
+}
+
+static void DisplayFreeMemory()
+{
+  char buf [128];
+
+  sprintf (buf, "Free Memory :%u", malloc_free_space());
+  if (sendto (fd, buf, strlen(buf), 0,
+              (const struct sockaddr*) &es, sizeof es) < 0)
+    printf ("udp-echo: error writing to the udp socket: (%d) %s\n",
+            errno, strerror (errno));
+
+}
+
+static void ListDirFiles(const char* path)
+{
+  char buf [256];
+
+  sprintf (buf, "File Listing %s", path);
+
+  if (sendto (fd, buf, strlen(buf), 0,
+                  (const struct sockaddr*) &es, sizeof es) < 0)
+        printf ("udp-echo: error writing to the udp socket: (%d) %s\n",
+                errno, strerror (errno));
+
+  DIR *dir;
+  struct dirent *ent;
+  char dir_buffer [100];
+
+  strcpy (dir_buffer, path ) ;
+
+
+	if ((dir = opendir(dir_buffer)) == NULL)
+		{
+			sprintf (buf, "Unable to open directory %s", path);
+
+      if (sendto (fd, buf, strlen(buf), 0,
+                      (const struct sockaddr*) &es, sizeof es) < 0)
+            printf ("udp-echo: error writing to the udp socket: (%d) %s\n",
+                    errno, strerror (errno));
+        }
+	else
+		{
+			sprintf (buf, "Listing Directory %s", dir_buffer);
+
+      if (sendto (fd, buf, strlen(buf), 0,
+                      (const struct sockaddr*) &es, sizeof es) < 0)
+            printf ("udp-echo: error writing to the udp socket: (%d) %s\n",
+                    errno, strerror (errno));
+
+			while ((ent = readdir(dir)) != NULL)
+				{
+					sprintf (buf, "File: %s", ent->d_name);
+
+          if (sendto (fd, buf, strlen(buf), 0,
+                          (const struct sockaddr*) &es, sizeof es) < 0)
+                printf ("udp-echo: error writing to the udp socket: (%d) %s\n",
+                        errno, strerror (errno));
+				}
+			if (closedir(dir) != 0)
+				{
+					sprintf(buf, "Unable to close directory");
+
+          if (sendto (fd, buf, strlen(buf), 0,
+                          (const struct sockaddr*) &es, sizeof es) < 0)
+                printf ("udp-echo: error writing to the udp socket: (%d) %s\n",
+                        errno, strerror (errno));
+				}
+		}
+
+}
+
+static rtems_task
+reader (rtems_task_argument host)
+{
+  char buf[128];
+	int port;
+
+	struct utsname myuname;
+
+
+  memset (&es, 0, sizeof es);
+  es.sin_len         = sizeof (es);
+  es.sin_family      = AF_INET;
+  es.sin_port        = htons(ECHO_PORT_NUM);
+
+	uname (&myuname);
+
+	printf ("Rtems Version %s %s", myuname.release, __DATE__);
+
+
+
+	FILE* f_name = fopen(id_file, "r");
+	if (f_name)
+		{
+			char buf [128];
+			int num_fields = fscanf (f_name, "%s%u", buf, &port);
+
+			if (num_fields < 1)
+				{
+					strcpy(buf, "Error In Name");
+				}
+
+			strcat(name_buf, buf);
+
+			if (num_fields > 1)
+        {
+          printf("Port Found :%u\r\n", port);
+			    answer_port = port;
+		    }
+
+	   fclose(f_name);
+    }
+  else
+		{
+			strcat(name_buf, "Annon");
+		}
+
+	sprintf (buf, "%s %u", name_buf, answer_port);
+
+	strcpy(name_buf, buf);
+
+	printf ("Start Reader Task %s on Port %u\n", name_buf, ECHO_PORT_NUM);
+
+	StartUPDTask (answer_port);
+
+  while (1)
+  {
+    struct sockaddr_in from;
+    int flen = sizeof (from);
+    int r;
+
+    if (fd == -1)
+    {
+      rtems_task_wake_after(5000);
+      continue;
+    }
+
+    memset (buf, 0, sizeof (buf));
+		printf ("Wait Read Task\r\n");
+    r = recvfrom (fd, buf, sizeof (buf), 0, (struct sockaddr*) &from, &flen);
+
+    if (r < 0)
+    {
+      printf ("udp-echo: error reading from udp socket: (%d) %s\n",
+              errno, strerror (errno));
+      continue;
+    }
+
+    printf ("udp-echo:%s: %d: %s\n", inet_ntoa (from.sin_addr), r, buf);
+
+    // see if they have asked the correct question
+    if (!strcmp(probe_question, buf))
+    {
+      es.sin_addr = from.sin_addr;
+
+      if (sendto (fd, name_buf, strlen(name_buf), 0,
+                  (const struct sockaddr*) &es, sizeof es) < 0)
+        printf ("udp-echo: error writing to the udp socket: (%d) %s\n",
+                errno, strerror (errno));
+
+      sprintf (buf, "Rtems Version %s %s", myuname.release, __DATE__);
+      if (sendto (fd, buf, strlen(buf), 0,
+                  (const struct sockaddr*) &es, sizeof es) < 0)
+        printf ("udp-echo: error writing to the udp socket: (%d) %s\n",
+                errno, strerror (errno));
+
+      // send how much free space
+      DisplayFreeMemory();
+      ListDirFiles(GetDefaultPatchPath());
+
+      // list patches
+      ListLoadedPatches();
+
+    }
+    else if (!strcmp(memory_question, buf))
+    {
+      es.sin_addr = from.sin_addr;
+      DisplayFreeMemory();
+
+    }
+    else  if (!strcmp(file_list, buf))
+    {
+      es.sin_addr = from.sin_addr;
+      ListDirFiles(GetDefaultPatchPath());
+
+    }
+
+    else  if (!strcmp(reboot_command, buf))
+    {
+      es.sin_addr = from.sin_addr;
+
+      sprintf (buf, "Rebooting %s", name_buf);
+
+      if (sendto (fd, buf, strlen(buf), 0,
+                  (const struct sockaddr*) &es, sizeof es) < 0)
+        printf ("udp-echo: error writing to the udp socket: (%d) %s\n",
+                errno, strerror (errno));
+
+      SendIOReboot();
+      rtems_task_wake_after (100);
+      rtemsReboot();
+    }
+    else  if (!strcmp(list_patch_command, buf))
+    {
+      es.sin_addr = from.sin_addr;
+      ListLoadedPatches();
+
+    }
+
+
+
+	}
+
+
+}
+
+void SendUDPDiag (const char* message)
+{
+		if (sendto (fd, message, strlen(message) +1, 0,
+								(const struct sockaddr*) &es, sizeof es) < 0)
+			printf ("udp-echo: error writing to the udp socket: (%d) %s\n",
+							errno, strerror (errno));
+
+}
+
+void StartEcho()
+{
+  struct sockaddr_in me;
+  rtems_name         name;
+  rtems_status_code  sc;
+
+  printf ("UDP echo server: %u\n", ECHO_PORT_NUM);
+  memset (name_buf, 0, sizeof name_buf);
+	strcpy (name_buf, name_prefix);
+
+  memset (&me, 0, sizeof me);
+  me.sin_len         = sizeof me;
+  me.sin_family      = AF_INET;
+  me.sin_port        = htons(ECHO_PORT_NUM);
+	me.sin_addr.s_addr = htonl(INADDR_ANY);
+
+  fd = socket (AF_INET, SOCK_DGRAM, 0);
+
+  if (fd < 0)
+  {
+    printf ("udp-echo: error opening udp socket: (%d) %s\n",
+            errno, strerror (errno));
+    return;
+  }
+
+  if (bind (fd, (struct sockaddr*) &me, sizeof (me)) < 0)
+  {
+    printf ("udp-echo: error binding udp socket: (%d) %s\n",
+            errno, strerror (errno));
+    close (fd);
+    fd = -1;
+    return;
+  }
+
+  name = rtems_build_name ('U', 'E', 'r', '0');
+
+  sc =  rtems_task_create (name, 100, 1024 * 8,
+                           RTEMS_DEFAULT_MODES, RTEMS_DEFAULT_ATTRIBUTES,
+                           &reader_id);
+
+  if (sc != RTEMS_SUCCESSFUL)
+  {
+    printf ("udp-echo: error creating reader task: %s\n",
+            rtems_status_text (sc));
+    close (fd);
+    fd = -1;
+    return;
+  }
+
+
+  sc = rtems_task_start (reader_id, reader, (rtems_task_argument) es_host);
+
+  if (sc != RTEMS_SUCCESSFUL)
+		{
+			printf ("udp-echo: error starting reader task: %s\n",
+							rtems_status_text (sc));
+			rtems_task_delete (reader_id);
+			close (fd);
+			fd = -1;
+			return;
+		}
+	else
+		{
+			printf("Started Echo Task\n");
+		}
+
+
+}
+
+void InitialiseNet()
+{
+
+  /*
+   * Start the BSD TCP/IP stack.
+   */
+
+  printf ("RTEMS Network initialisation.\n");
+
+  rtems_bsdnet_initialize_network ();
+
+	memset(ip, 0, sizeof(ip));
+	memset(net_mask, 0, sizeof(net_mask));
+	memset(gateway, 0, sizeof(gateway));
+
+	FILE* fp = fopen(ip_config, "r");
+	if (fp)
+		{
+			int num_fields;
+			num_fields = fscanf(fp, "%s%s%s", ip, net_mask, gateway);
+			printf ("%s %s %s\r\n", ip, net_mask, gateway);
+
+			if (strcmp(boot_p, ip))
+				{
+					BSP_cs8900_attach (ETHERNET_IO_BASE, ETHERNET_MEM_BASE, ETHERNET_IRQ_LEVEL,
+														 ip, net_mask, gateway);
+				}
+			else
+				{
+					BSP_cs8900_attach (ETHERNET_IO_BASE, ETHERNET_MEM_BASE, ETHERNET_IRQ_LEVEL,
+														 0, 0, 0);
+
+				}
+			fclose(fp);
+		}
+	else
+		{
+
+#if USE_BOOTP
+			BSP_cs8900_attach (ETHERNET_IO_BASE, ETHERNET_MEM_BASE, ETHERNET_IRQ_LEVEL,
+												 0, 0, 0);
+#else
+			BSP_cs8900_attach (ETHERNET_IO_BASE, ETHERNET_MEM_BASE, ETHERNET_IRQ_LEVEL,
+												 "192.168.0.254", "255.255.255.0", "192.168.0.1");
+#endif
+		}
+	StartEcho();
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

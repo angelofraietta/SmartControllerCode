@@ -1,0 +1,416 @@
+//## begin module%3CE19DE0008B.cm preserve=no
+//	  %X% %Q% %Z% %W%
+//## end module%3CE19DE0008B.cm
+
+//## begin module%3CE19DE0008B.cp preserve=no
+//	Angelo Fraietta
+//## end module%3CE19DE0008B.cp
+
+//## Module: FileAnswer%3CE19DE0008B; Pseudo Package body
+//## Subsystem: engineinterface%3A9C858C00CB
+//## Source file: c:\develop\smartcontroller\controller\source\engineinterface\fileanswer.cpp
+
+//## begin module%3CE19DE0008B.additionalIncludes preserve=no
+#include "stdafx.h"
+//## end module%3CE19DE0008B.additionalIncludes
+
+//## begin module%3CE19DE0008B.includes preserve=yes
+#include <string.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include "emap.h"
+#include "control.h"
+#include "nvramstore.h"
+#include "midiflags.h"
+#include "midioutputdriver.h"
+#include "patch.h"
+#ifdef _HAL_WINDOWS
+#include <sys\stat.h>
+#else
+#include <sys/stat.h>
+#endif
+//## end module%3CE19DE0008B.includes
+
+// InterfaceTypes
+#include "interfacetypes.h"
+// SMUtility
+#include "smutility.h"
+// FileAnswer
+#include "fileanswer.h"
+//## begin module%3CE19DE0008B.additionalDeclarations preserve=yes
+extern "C" void SaveFileToIde (const char* source_file, const char* target_file, unsigned long CRC);
+
+class ActiveFileBlock; // forward declaration
+
+using sm_str::map;
+map <unsigned, ActiveFileBlock*> active_file_blocks;
+typedef map<unsigned, ActiveFileBlock*>::value_type map_value_type;
+
+class  ActiveFileBlock
+{
+public:
+	ActiveFileBlock ():_block_num(0){}
+	virtual ~ActiveFileBlock();
+	virtual void WriteBlock(const BYTE* data, unsigned num_bytes, unsigned block_num) {}
+	virtual unsigned ReadBlock (BYTE* ret_data, unsigned num_bytes){return 0;}
+  unsigned FileLength();
+protected:
+	unsigned _block_num;
+	FILE* _fp;
+};
+
+unsigned ActiveFileBlock::FileLength()
+{
+	struct stat statbuf;
+	fstat(fileno(_fp), &statbuf);
+	return statbuf.st_size;
+}
+
+class ActiveFileBlockWriter :public ActiveFileBlock
+{
+public:
+	ActiveFileBlockWriter (const char* filename);
+	void WriteBlock(const BYTE* data, unsigned num_bytes, unsigned block_num);
+
+};
+
+class ActiveFileBlockReader :public ActiveFileBlock
+{
+public:
+	ActiveFileBlockReader (const char* filename);
+	unsigned ReadBlock (BYTE* ret_data, unsigned num_bytes);
+
+private:
+
+};
+
+
+ActiveFileBlockWriter::ActiveFileBlockWriter (const char* filename)
+{
+	_fp = fopen (filename, "w+b");
+}
+
+ActiveFileBlockReader::ActiveFileBlockReader (const char* filename)
+{
+	_fp = fopen (filename, "r+b");
+	if (!_fp)
+		{
+			printf("Unable to open %s\r\n", filename);
+		}
+}
+
+ActiveFileBlock::~ActiveFileBlock()
+{
+	if (_fp)
+  {
+  	fclose(_fp);
+  }
+}
+
+void ActiveFileBlockWriter::WriteBlock(const BYTE* data, unsigned num_bytes, unsigned block_num)
+{
+	if (block_num == _block_num)
+  {
+    fwrite (data, 1, num_bytes, _fp);
+  	_block_num++;
+  }
+	else if (block_num != _block_num -1)
+		{
+			// we have missed a block Somewhere
+			IOData out_data;
+
+			// display error condition
+			out_data = (IOData) ((IO_FLAGS * 0x100) | (IO_ERROR));
+			MidiOutputDriver::TransmitIoData (out_data);
+			Patch::SetError();
+			printf ("Write block missed a block\r\n");
+		}
+}
+unsigned ActiveFileBlockReader::ReadBlock (BYTE* ret_data, unsigned num_bytes)
+{
+	unsigned ret_bytes = 0;
+
+	if (_fp)
+		{
+			ret_bytes = fread(ret_data, 1, num_bytes, _fp);
+		}
+	else
+		{
+			printf("Invalid _fp\r\n");
+		}
+	return ret_bytes;
+}
+//## end module%3CE19DE0008B.additionalDeclarations
+
+
+// Class Utility FileAnswer 
+
+//## begin FileAnswer::pFunc%3CE1A195039C.attr preserve=no  private: static FileAnswer::pfunctype [eMaxFuncIndex] {U} {OpenFileForWrite, OpenFileForRead, WriteBytes, ReadBytes, CloseFile, SaveNVRAM, EraseNVRAM, SaveFileToDisk}
+FileAnswer::pfunctype  FileAnswer::pFunc[eMaxFuncIndex] = {OpenFileForWrite, OpenFileForRead, WriteBytes, ReadBytes, CloseFile, SaveNVRAM, EraseNVRAM, SaveFileToDisk};
+//## end FileAnswer::pFunc%3CE1A195039C.attr
+
+//## begin FileAnswer::default_directory%3CEC5C40008F.attr preserve=no  private: static string {U} 
+string FileAnswer::default_directory;
+//## end FileAnswer::default_directory%3CEC5C40008F.attr
+
+
+//## Other Operations (implementation)
+//## Operation: PerformOperation%1021420312
+//	Public function by which all answers are derived.  The
+//	member function index is the first byte in the question
+//	parameter. After the index is obtained, the appropriate
+//	member function is called.
+unsigned FileAnswer::PerformOperation (const BYTE* question, BYTE* answer, unsigned answer_size)
+{
+  //## begin FileAnswer::PerformOperation%1021420312.body preserve=yes
+	unsigned ret_bytes = 0;
+
+	// deal with the question
+	const BYTE* q_cursor = question;
+	unsigned func_index = (unsigned)SMUtility::BufToTargetFunc (&q_cursor);
+
+
+	if (func_index < eMaxFuncIndex)
+		{
+			ret_bytes += (pFunc[func_index]) (q_cursor, answer, answer_size);
+		}
+	return ret_bytes;
+  
+  //## end FileAnswer::PerformOperation%1021420312.body
+}
+
+//## Operation: OpenFileForWrite%1021420313
+//## Preconditions:
+//	question buf has the parameters as follows
+//	P_IDENTITY
+unsigned FileAnswer::OpenFileForWrite (const BYTE* question, BYTE* answer, unsigned answer_size)
+{
+  //## begin FileAnswer::OpenFileForWrite%1021420313.body preserve=yes
+  unsigned ret = 0;
+  const BYTE* cursor = question;
+
+  unsigned key = SMUtility::BufToInt(&cursor);
+  const char* filename = (const char*)cursor;
+
+	if (!active_file_blocks.count(key))
+  {
+  	char* filepath = new char [strlen (default_directory.c_str()) + strlen (filename) + 1];
+
+    strcpy (filepath, default_directory.c_str());
+    strcat (filepath, filename);
+
+    ActiveFileBlock* fblock = new ActiveFileBlockWriter(filepath);
+    active_file_blocks.insert(map_value_type(key, fblock));
+
+    delete [] filepath;
+	}
+  
+  return ret;
+  //## end FileAnswer::OpenFileForWrite%1021420313.body
+}
+
+//## Operation: OpenFileForRead%1021420314
+//## Preconditions:
+//	question buf has the parameters as follows
+//	P_IDENTITY
+unsigned FileAnswer::OpenFileForRead (const BYTE* question, BYTE* answer, unsigned answer_size)
+{
+  //## begin FileAnswer::OpenFileForRead%1021420314.body preserve=yes
+  if (answer_size < sizeof(short))
+  {
+  	return 0;
+  }
+
+  unsigned ret = sizeof(short);
+  const BYTE* cursor = question;
+
+  unsigned key = SMUtility::BufToInt(&cursor);
+  const char* filename = (const char*)cursor;
+
+	if (!active_file_blocks.count(key))
+  {
+  	char* filepath = new char [strlen (default_directory.c_str()) + strlen (filename) + 1];
+
+    strcpy (filepath, default_directory.c_str());
+    strcat (filepath, filename);
+
+    ActiveFileBlock* fblock = new ActiveFileBlockReader(filepath);
+		unsigned file_length = fblock->FileLength();
+
+		active_file_blocks.insert(map_value_type(key, fblock));
+    
+    SMUtility::IntToBuf((short)file_length, answer);
+
+
+    delete [] filepath;
+	}
+
+  return ret;
+
+  //## end FileAnswer::OpenFileForRead%1021420314.body
+}
+
+//## Operation: WriteBytes%1021420315
+//## Preconditions:
+//	question buf has the parameters as follows
+//	P_IDENTITY
+unsigned FileAnswer::WriteBytes (const BYTE* question, BYTE* answer, unsigned answer_size)
+{
+  //## begin FileAnswer::WriteBytes%1021420315.body preserve=yes
+	unsigned ret = 0;
+  const BYTE* cursor = question;
+  // get the file pointer and move cursor
+
+  unsigned key = SMUtility::BufToInt(&cursor);
+  unsigned block_num = SMUtility::BufToInt(&cursor);
+  unsigned num_bytes = SMUtility::BufToInt(&cursor);
+  const BYTE* data_bytes = cursor;
+
+  if (active_file_blocks.count(key))
+  {
+  	ActiveFileBlock* fblock = active_file_blocks[key];
+    if (fblock)
+    {
+      fblock->WriteBlock (data_bytes, num_bytes, block_num);
+    }
+  }
+
+  return ret;
+
+  //## end FileAnswer::WriteBytes%1021420315.body
+}
+
+//## Operation: ReadBytes%1021420316
+//## Preconditions:
+//	question buf has the parameters as follows
+//	P_IDENTITY
+unsigned FileAnswer::ReadBytes (const BYTE* question, BYTE* answer, unsigned answer_size)
+{
+  //## begin FileAnswer::ReadBytes%1021420316.body preserve=yes
+	unsigned ret = 0;
+  const BYTE* cursor = question;
+  // get the file pointer and move cursor
+
+  unsigned key = SMUtility::BufToInt(&cursor);
+  unsigned num_bytes = SMUtility::BufToInt(&cursor) - sizeof(short);
+  BYTE* data_bytes = answer + sizeof(short);
+
+  if (active_file_blocks.count(key))
+  {
+  	ActiveFileBlock* fblock = active_file_blocks[key];
+    if (fblock)
+    {
+			
+      unsigned bytes_read  = fblock->ReadBlock (data_bytes, num_bytes);
+		printf ("Read %u\r\n", bytes_read);
+		
+		SMUtility::IntToBuf((short)bytes_read, answer);
+		ret = bytes_read + sizeof(short);
+    }
+  }
+
+  return ret;
+
+  //## end FileAnswer::ReadBytes%1021420316.body
+}
+
+//## Operation: CloseFile%1021420317
+//## Preconditions:
+//	question buf has the parameters as follows
+//	P_IDENTITY
+unsigned FileAnswer::CloseFile (const BYTE* question, BYTE* answer, unsigned answer_size)
+{
+  //## begin FileAnswer::CloseFile%1021420317.body preserve=yes
+	unsigned ret = 0;
+  const BYTE* cursor = question;
+  // get the file pointer and move cursor
+
+  unsigned key = SMUtility::BufToInt(&cursor);
+
+  if (active_file_blocks.count(key))
+  {
+  	ActiveFileBlock* fblock = active_file_blocks[key];
+    delete fblock;
+    active_file_blocks.erase(key);
+	}
+  return ret;
+  //## end FileAnswer::CloseFile%1021420317.body
+}
+
+//## Operation: SetDefaultDirectory%1022123229
+void FileAnswer::SetDefaultDirectory (const char* dir_name)
+{
+  //## begin FileAnswer::SetDefaultDirectory%1022123229.body preserve=yes
+  default_directory = string (dir_name);
+  //## end FileAnswer::SetDefaultDirectory%1022123229.body
+}
+
+//## Operation: GetDefaultDirName%1022123230
+const char* FileAnswer::GetDefaultDirName ()
+{
+  //## begin FileAnswer::GetDefaultDirName%1022123230.body preserve=yes
+  return default_directory.c_str();
+  //## end FileAnswer::GetDefaultDirName%1022123230.body
+}
+
+//## Operation: SaveNVRAM%1032126400
+//## Preconditions:
+//	question buf has the parameters as follows
+//	P_IDENTITY
+unsigned FileAnswer::SaveNVRAM (const BYTE* question, BYTE* answer, unsigned answer_size)
+{
+  //## begin FileAnswer::SaveNVRAM%1032126400.body preserve=yes
+  NVRAMStore::SaveFiles(GetDefaultDirName ());
+  return 0;
+  //## end FileAnswer::SaveNVRAM%1032126400.body
+}
+
+//## Operation: EraseNVRAM%1032171148
+//## Preconditions:
+//	question buf has the parameters as follows
+//	P_IDENTITY
+unsigned FileAnswer::EraseNVRAM (const BYTE* question, BYTE* answer, unsigned answer_size)
+{
+  //## begin FileAnswer::EraseNVRAM%1032171148.body preserve=yes
+  NVRAMStore::EraseNVRAM();
+  return 0;
+  //## end FileAnswer::EraseNVRAM%1032171148.body
+}
+
+//## Operation: SaveFileToDisk%1051589363
+//## Preconditions:
+//	question buf has the parameters as follows
+//	P_IDENTITY
+unsigned FileAnswer::SaveFileToDisk (const BYTE* question, BYTE* answer, unsigned answer_size)
+{
+  //## begin FileAnswer::SaveFileToDisk%1051589363.body preserve=yes
+  unsigned ret = 0;
+  const BYTE* cursor = question;
+
+  unsigned long crc = SMUtility::BufToDword(&cursor);
+  const char* filename = (const char*)cursor;
+
+  char* filepath = new char [strlen (default_directory.c_str()) + strlen (filename) + 1];
+
+  strcpy (filepath, default_directory.c_str());
+  strcat (filepath, filename);
+
+  printf ("Save %s to ide \r\n", filepath);
+  SaveFileToIde (filepath, filename, crc);
+  delete [] filepath;
+
+  return ret;
+
+  //## end FileAnswer::SaveFileToDisk%1051589363.body
+}
+
+// Additional Declarations
+  //## begin FileAnswer%3CE19DE0008B.declarations preserve=yes
+  extern "C" const char* GetDefaultPatchPath()
+  {
+    return FileAnswer::GetDefaultDirName();
+  }
+  //## end FileAnswer%3CE19DE0008B.declarations
+
+//## begin module%3CE19DE0008B.epilog preserve=yes
+//## end module%3CE19DE0008B.epilog

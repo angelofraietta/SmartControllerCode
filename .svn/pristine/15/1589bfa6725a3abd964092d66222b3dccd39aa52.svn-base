@@ -1,0 +1,310 @@
+//## begin module%3ACAA7820097.cm preserve=no
+//	  %X% %Q% %Z% %W%
+//## end module%3ACAA7820097.cm
+
+//## begin module%3ACAA7820097.cp preserve=no
+//	Angelo Fraietta
+//## end module%3ACAA7820097.cp
+
+//## Module: WinSimulator%3ACAA7820097; Package body
+//## Subsystem: hal_windows%3A80A55A00D8
+//	This contains the implementation for the Windows
+//	specific build.  These are used for the engine simulator
+//	that will have to run within the Patch Editor.  These
+//	modules are linked with the engine package.
+//## Source file: c:\develop\SmartController\controller\source\hal_windows\winsimulator.cpp
+
+//## begin module%3ACAA7820097.additionalIncludes preserve=no
+#include "stdafx.h"
+//## end module%3ACAA7820097.additionalIncludes
+
+//## begin module%3ACAA7820097.includes preserve=yes
+#include "iodata.h"
+#include "scheduler.h"
+#include "answertask.h"
+#include "midioutputdriver.h"
+#include "enginedatainput.h"
+#include "control.h"
+#include "patch.h"
+#include "fileanswer.h"
+#include <vector.h>
+
+#include "nvramstore.h"
+//## end module%3ACAA7820097.includes
+
+// SimulatorInterface
+#include "simulatorinterface.h"
+// SessionInterface
+#include "sessioninterface.h"
+//## begin module%3ACAA7820097.declarations preserve=no
+//## end module%3ACAA7820097.declarations
+
+//## begin module%3ACAA7820097.additionalDeclarations preserve=yes
+void maintask ();
+
+std::vector<EngineDataInput*> MidiInDevs;
+std::vector<MidiOutputDriver*> MidiOutDevs;
+
+//## end module%3ACAA7820097.additionalDeclarations
+const char* nvram_file = "C:\\temp\\Nvram.dat";
+
+extern "C"	const char* GetNVRAMFilename() {return nvram_file;}
+extern "C"	void SyncNVRAM(){}
+
+//## begin module%3ACAA7820097.epilog preserve=yes
+extern "C" void  __export OpenCommPorts ()
+{
+  AnswerTask* answer_task_1 = new AnswerTask;
+  answer_task_1->startTask ("COM2", 0);
+/*
+  AnswerTask* answer_task_2 = new AnswerTask;
+  answer_task_2->startTask ("COM1", 0);
+  */
+}
+
+extern "C"   unsigned __export GetNumMidiInDevices()
+{
+  return MidiInputDriver::NumDevices ();
+}
+
+extern "C"   unsigned __export GetNumMidiOutDevices()
+{
+  return MidiOutputDriver::NumDevices ();
+}
+
+extern "C"   bool __export GetMidiInputName (unsigned device_index, char* ret_buf, unsigned buf_len)
+{
+  return MidiInputDriver::GetDeviceName (device_index, ret_buf, buf_len);
+}
+
+extern "C"   bool __export GetMidiOutputName (unsigned device_index, char* ret_buf, unsigned buf_len)
+{
+  return MidiOutputDriver::GetDeviceName (device_index, ret_buf, buf_len);
+}
+
+extern "C"   unsigned long __export OpenSysexSendFile (const char* sysex_filename)
+{
+  return (unsigned long) fopen (sysex_filename, "r+b");
+}
+
+extern "C"   bool __export TransmitSysexData (unsigned long file_key, unsigned device_index, unsigned num_bytes)
+{
+  bool ret = false;
+  if (device_index < MidiOutDevs.size ())
+  {
+    MidiOutputDriver* pDriver = MidiOutDevs [device_index];
+
+    if (pDriver)
+    {
+      FILE* fp = (FILE*)file_key;
+
+      if (fp)
+      {
+        ret = true;
+        for (unsigned i = 0; i < num_bytes && ret; i++)
+        {
+          char c;
+          ret = fread (&c, 1, 1, fp);
+          if (ret)
+          {
+            pDriver->TransmitMidiMessageByte (c ,0, device_index);
+          }
+        }
+        cout<<"Tx End"<<endl;
+
+      }
+    }
+  }
+  return ret;
+}
+
+extern "C"   bool __export CloseSysexData (unsigned long file_key)
+{
+  bool ret = false;
+  FILE* fp = (FILE*)file_key;
+
+  if (fp)
+  {
+    fclose (fp);
+    ret = true;
+  }
+
+  return ret;
+}
+
+extern "C" bool __export OpenMidiOutputDevice (unsigned device_num, unsigned device_index)
+{
+	bool ret = false;
+
+  if (device_num < MidiOutputDriver::NumDevices ())
+  {
+  	MidiOutputDriver* pDriver = MidiOutputDriver::create (1024);
+
+    if (pDriver)
+    	{
+      pDriver->open (device_num, device_index);
+      MidiOutDevs.push_back(pDriver);
+      ret = true;
+      }
+    else
+    	{
+      MessageBox (0, "Unable to open device", "MidiOut",  MB_OK);
+      }
+
+
+  }
+
+  return ret;
+}
+
+extern "C" void __export CloseMidiOutputDevices ()
+{
+	unsigned num_devs = MidiOutDevs.size();
+
+	for (unsigned i = 0; i < num_devs; i++)
+  {
+  	delete MidiOutDevs[i];
+    MidiOutDevs[i] = NULL;
+  }
+
+  MidiOutDevs.erase(MidiOutDevs.begin(), MidiOutDevs.end());
+}
+
+extern "C" void __export SetDefaultDirectory (const char* dir_name)
+{
+  FileAnswer::SetDefaultDirectory (dir_name);
+  printf ("Setting Default Directory : %s\r\n", dir_name);
+}
+
+extern "C" bool __export GetDefaultDirectory (char* buf, unsigned buf_size)
+{
+  bool ret = false;
+  const char* dir = FileAnswer::GetDefaultDirName();
+
+  if (dir)
+  {
+    strncpy (buf, dir, buf_size);
+    buf [buf_size -1] = 0; // make sure last is NULL;
+    ret = true;
+  }
+  else
+  {
+    *buf = 0;
+  }
+
+  return ret;
+}
+
+extern "C" bool __export SimulatorInitialise()
+{
+  printf ("Simulator Initialise\r\n");
+	return hal_include::Scheduler::initialise ();
+}
+
+extern "C" bool __export SimulatorDeinitialise()
+{
+	return hal_include::Scheduler::deinitialise ();
+}
+
+extern "C" void __export SaveNVRAM (const char* path)
+{
+      NVRAMStore::create();
+      NVRAMStore::SaveFiles(path);
+
+}
+
+extern "C" void __export RestoreNVRAM()
+{
+  NVRAMStore::create();
+  NVRAMStore::RestoreFiles();
+}
+
+extern "C" bool __export NVRAMIdle ()
+{
+  return NVRAMStore::IsIdle();
+}
+
+extern "C" bool __export OpenMidiInputDevice (unsigned device_num, unsigned device_index)
+{
+	bool ret = false;
+
+	if (device_num < midiInGetNumDevs())
+  {
+		EngineDataInput* pMidiIn = new EngineDataInput (1024 * 8);
+
+   	if (!pMidiIn->open(device_num, device_index))
+   	{
+   	 	cout<<"Unable to open Midi In"<<endl;
+   	}
+    else
+    {
+   		pMidiIn->start();
+      MidiInDevs.push_back(pMidiIn);
+      ret = true;
+    }
+
+  }
+
+  return ret;
+}
+
+extern "C" void __export CloseMidiInputDevices ()
+{
+	unsigned num_devs = MidiInDevs.size();
+
+	for (unsigned i = 0; i < num_devs; i++)
+  {
+	 	delete MidiInDevs[i];
+  	MidiInDevs[i] = NULL;
+  }
+
+  MidiInDevs.erase(MidiInDevs.begin(), MidiInDevs.end());
+}
+
+
+extern "C" bool __export SimulatorGetAnswer (const BYTE* question, BYTE* ret_answer)
+{
+	return SimulatorAnswer::GetAnswer (question, ret_answer);
+}
+
+/*
+int WINAPI DllEntryPoint(HINSTANCE hinst, unsigned long reason, void*)
+{
+  switch (reason)
+  {
+    case DLL_PROCESS_ATTACH:
+      hal_include::Scheduler::initialise ();
+      //SetDefaultDirectory (".\\");
+       break;
+
+    case DLL_PROCESS_DETACH:
+    	//CloseMidiInputDevices ();
+      hal_include::Scheduler::deinitialise ();
+      break;
+
+    default:
+
+    break;
+  }
+
+  UNREFERENCED_PARAMETER(hinst);
+  return 1;
+}
+  */
+// deletes all Patches When Dll is being detached
+extern "C" void _export DeleteAllPatches()
+{
+		unsigned num_patches = Patch::NumPatches();
+
+    if (num_patches)
+    {
+      for (unsigned i = num_patches; i != 0; i--)
+      {
+        Patch* pPatch = Patch::GetPatch (i -1);
+        delete pPatch;
+      }
+		}
+}
+
+extern "C" void SaveFileToIde (const char* source_file, const char* target_file, unsigned long CRC) {}
+//## end module%3ACAA7820097.epilog

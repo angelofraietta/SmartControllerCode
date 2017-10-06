@@ -1,0 +1,151 @@
+CCS PCM C Compiler, Version 3.060, 12652
+
+               Filename: C:\DEVELOP\MIDICO~3\MIDICO~1\CODE\TESTAN.LST
+
+               ROM used: 67 (1%)
+                         Largest free fragment is 2048
+               RAM used: 8 (5%) at main() level
+                         9 (5%) worst case
+               Stack:    1 locations
+
+*
+0000:  MOVLW  00
+0001:  MOVWF  0A
+0002:  GOTO   01E
+0003:  NOP
+....................  /******************************************************************************* 
+.................... *	Author: Angelo Fraietta 
+.................... *	Description: General Purpose Midi controller 
+.................... *	Processor PIC16F877 
+.................... *	Specifications: 
+.................... *		16 Digital input to Midi Output (SPI) 
+.................... *		16 Analogue input to Midi Output (ADC) 
+.................... *		Midi input to Midi output merge (UART) 
+.................... *   Midi input to 16 Analogue ouput (I2C) 
+.................... * 
+.................... *******************************************************************************/ 
+....................  
+.................... #include "16f877.h" 
+....................  //////// Standard Header file for the PIC16F877 device //////////////// 
+.................... #device PIC16F877 
+.................... #list 
+.................... 
+.................... #device adc=8 
+.................... #fuses HS, WDT, BROWNOUT, PUT, NOLVP, PROTECT 
+....................  
+.................... #define MIDIOUT_1_PIN PIN_C6 
+.................... #define MIDIOUT_2_PIN PIN_C5 
+.................... #define MIDI_IN_PIN PIN_C7 
+....................  
+....................  
+.................... #USE FAST_IO(B) 
+.................... #use delay(clock=20000000) 
+*
+0009:  MOVLW  23
+000A:  MOVWF  04
+000B:  MOVF   00,W
+000C:  BTFSC  03.2
+000D:  GOTO   01B
+000E:  MOVLW  06
+000F:  MOVWF  78
+0010:  CLRF   77
+0011:  DECFSZ 77,F
+0012:  GOTO   011
+0013:  DECFSZ 78,F
+0014:  GOTO   010
+0015:  MOVLW  7B
+0016:  MOVWF  77
+0017:  DECFSZ 77,F
+0018:  GOTO   017
+0019:  DECFSZ 00,F
+001A:  GOTO   00E
+001B:  BCF    0A.3
+001C:  BCF    0A.4
+001D:  GOTO   03F (RETURN)
+....................  
+.................... void WriteOutData (byte out_byte) 
+.................... { 
+.................... #use rs232(baud=31250, xmit=MIDIOUT_1_PIN, rcv=MIDI_IN_PIN, ERRORS)  
+.................... #ifndef _SIMULATE 
+.................... 	putc (out_byte); 
+*
+0004:  MOVF   23,W
+0005:  BTFSS  0C.4
+0006:  GOTO   005
+0007:  MOVWF  19
+0008:  RETLW  00
+.................... #endif 
+....................  
+.................... } 
+....................  
+....................  
+.................... short ReadAnaloguePulse() 
+.................... { 
+....................   int sub_bank; 
+....................   short ret = false; 
+....................  
+.................... 	for (sub_bank = 0; sub_bank < 8; sub_bank++) 
+.................... 		{ 
+.................... 			restart_wdt(); 
+....................       output_bit(PIN_B1, bit_test(sub_bank, 0)); 
+....................       output_bit(PIN_B2, bit_test(sub_bank, 1)); 
+....................       output_bit(PIN_B3, bit_test(sub_bank, 2)); 
+....................     } 
+....................   return true; 
+.................... } 
+....................  
+.................... main() { 
+*
+002E:  CLRF   21
+....................    int value = 0; 
+*
+001E:  CLRF   04
+001F:  MOVLW  1F
+0020:  ANDWF  03,F
+0021:  MOVLW  9F
+0022:  MOVWF  04
+0023:  MOVLW  07
+0024:  MOVWF  00
+0025:  CLRF   20
+0026:  MOVLW  09
+0027:  BSF    03.5
+0028:  MOVWF  19
+0029:  MOVLW  22
+002A:  MOVWF  18
+002B:  MOVLW  90
+002C:  BCF    03.5
+002D:  MOVWF  18
+....................    do { 
+....................       WriteOutData (0xB0); // Write Controller Channel 0 
+*
+002F:  MOVLW  B0
+0030:  MOVWF  23
+0031:  CALL   004
+....................       WriteOutData (0x0);  // Write Controller number     
+0032:  CLRF   23
+0033:  CALL   004
+....................       WriteOutData (value & 0x70); // write controller value clear MSB 
+0034:  MOVF   21,W
+0035:  ANDLW  70
+0036:  MOVWF  22
+0037:  MOVWF  23
+0038:  CALL   004
+....................       value++; 
+0039:  INCF   21,F
+....................       delay_ms (1000); 
+003A:  MOVLW  04
+003B:  MOVWF  22
+003C:  MOVLW  FA
+003D:  MOVWF  23
+003E:  GOTO   009
+003F:  DECFSZ 22,F
+0040:  GOTO   03C
+....................    } while (TRUE); 
+0041:  GOTO   02F
+....................  
+.................... } 
+....................  
+0042:  SLEEP
+....................  
+....................  
+.................... 

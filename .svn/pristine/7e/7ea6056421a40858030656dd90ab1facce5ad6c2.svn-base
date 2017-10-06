@@ -1,0 +1,592 @@
+
+(object Petal
+    version    	42
+    _written   	"Rose 4.5.8163.3"
+    charSet    	0)
+
+(object Design "Logical View"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3BDF18D403C0"
+    defaults   	(object defaults
+	rightMargin 	0.250000
+	leftMargin 	0.250000
+	topMargin  	0.250000
+	bottomMargin 	0.500000
+	pageOverlap 	0.250000
+	clipIconLabels 	TRUE
+	autoResize 	TRUE
+	snapToGrid 	TRUE
+	gridX      	16
+	gridY      	16
+	defaultFont 	(object Font
+	    size       	10
+	    face       	"Arial"
+	    bold       	FALSE
+	    italics    	FALSE
+	    underline  	FALSE
+	    strike     	FALSE
+	    color      	0
+	    default_color 	TRUE)
+	showMessageNum 	1
+	showClassOfObject 	TRUE
+	notation   	"Unified")
+    root_usecase_package 	(object Class_Category "Use Case View"
+	quid       	"3BDF18D403C2"
+	exportControl 	"Public"
+	global     	TRUE
+	logical_models 	(list unit_reference_list
+	    (object Class "SwitchInput"
+		quid       	"3BDF19F203C1"
+		stereotype 	"Actor")
+	    (object UseCase "ReadDigitalInput"
+		quid       	"3BDF192703DD")
+	    (object UseCase "ReadAnalogueInput"
+		quid       	"3BDF19340378")
+	    (object UseCase "WriteMidiInput"
+		quid       	"3BDF194403D5")
+	    (object UseCase "ReadMidiInput"
+		quid       	"3BDF19520353")
+	    (object UseCase "WriteAnalogueOutput"
+		quid       	"3BDF195E0350")
+	    (object Association "$UNNAMED$0"
+		quid       	"3BDF1A0F011A"
+		documentation 	"Uses SPI to read the value"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$1"
+			quid       	"3BDF1A0F034A"
+			supplier   	"Use Case View::SwitchInput"
+			quidu      	"3BDF19F203C1"
+			is_navigable 	TRUE)
+		    (object Role "$UNNAMED$2"
+			quid       	"3BDF1A0F034B"
+			supplier   	"Use Case View::ReadDigitalInput"
+			quidu      	"3BDF192703DD"))))
+	logical_presentations 	(list unit_reference_list
+	    (object UseCaseDiagram "Main"
+		quid       	"3BDF18D403CB"
+		title      	"Main"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list
+		    (object UseCaseView "Use Case View::ReadAnalogueInput" @1
+			location   	(768, 768)
+			label      	(object ItemLabel
+			    Parent_View 	@1
+			    location   	(768, 906)
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	633
+			    justify    	0
+			    label      	"ReadAnalogueInput")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3BDF19340378"
+			height     	118
+			autoResize 	TRUE)
+		    (object UseCaseView "Use Case View::WriteMidiInput" @2
+			location   	(768, 1088)
+			label      	(object ItemLabel
+			    Parent_View 	@2
+			    location   	(768, 1226)
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	633
+			    justify    	0
+			    label      	"WriteMidiInput")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3BDF194403D5"
+			height     	118
+			autoResize 	TRUE)
+		    (object UseCaseView "Use Case View::ReadMidiInput" @3
+			location   	(768, 176)
+			label      	(object ItemLabel
+			    Parent_View 	@3
+			    location   	(768, 314)
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	633
+			    justify    	0
+			    label      	"ReadMidiInput")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3BDF19520353"
+			height     	118
+			autoResize 	TRUE)
+		    (object UseCaseView "Use Case View::WriteAnalogueOutput" @4
+			location   	(768, 1408)
+			label      	(object ItemLabel
+			    Parent_View 	@4
+			    location   	(768, 1546)
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	633
+			    justify    	0
+			    label      	"WriteAnalogueOutput")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3BDF195E0350"
+			height     	118
+			autoResize 	TRUE)
+		    (object UseCaseView "Use Case View::ReadDigitalInput" @5
+			location   	(768, 432)
+			label      	(object ItemLabel
+			    Parent_View 	@5
+			    location   	(768, 570)
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	633
+			    justify    	0
+			    label      	"ReadDigitalInput")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3BDF192703DD"
+			height     	118
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Use Case View::SwitchInput" @6
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1376, 432)
+			label      	(object ItemLabel
+			    Parent_View 	@6
+			    location   	(1376, 592)
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	327
+			    justify    	0
+			    label      	"SwitchInput")
+			icon       	"Actor"
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3BDF19F203C1"
+			annotation 	8
+			autoResize 	TRUE)
+		    (object AssociationViewNew "$UNNAMED$0" @7
+			location   	(1095, 432)
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3BDF1A0F011A"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$1" @8
+				Parent_View 	@7
+				location   	(327, 0)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3BDF1A0F034A"
+				client     	@7
+				supplier   	@6
+				line_style 	0)
+			    (object RoleView "$UNNAMED$2" @9
+				Parent_View 	@7
+				location   	(327, 0)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3BDF1A0F034B"
+				client     	@7
+				supplier   	@5
+				line_style 	0)))))))
+    root_category 	(object Class_Category "Logical View"
+	quid       	"3BDF18D403C1"
+	exportControl 	"Public"
+	global     	TRUE
+	subsystem  	"Component View"
+	quidu      	"3BDF18D403C3"
+	logical_models 	(list unit_reference_list
+	    (object Class "SpiDevice"
+		quid       	"3BDF1A7403D2"
+		stereotype 	"Interface"
+		operations 	(list Operations
+		    (object Operation "InputLatch"
+			quid       	"3BDF1AB9006A"
+			documentation 	"Latches the data from Parallel inputs to shift registers"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "ClockDevice"
+			quid       	"3BDF1B1101F7"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "ReadBit"
+			quid       	"3BDF1BC60306"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0))
+		language   	"C++")
+	    (object Class "CPU"
+		quid       	"3BDF234C02E7"
+		documentation 	"Central Processing Unit"
+		stereotype 	"unique"
+		operations 	(list Operations
+		    (object Operation "ReadDigitalInputs"
+			quid       	"3BDF2369000E"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0))
+		language   	"C++")
+	    (object Mechanism @10
+		logical_models 	(list unit_reference_list
+		    (object Object "$UNNAMED$3"
+			quid       	"3BDF23860327"
+			collaborators 	(list link_list
+			    (object Link
+				quid       	"3BDF23A80311"
+				supplier   	"DigitalInput"
+				quidu      	"3BDF238E0260"
+				messages   	(list Messages
+				    (object Message "InputLatch( )"
+					quid       	"3BDF23A80312"
+					documentation 	"Latches parrell data into shift registers"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	""
+					ordinal    	0
+					quidu      	"3BDF1AB9006A")
+				    (object Message "ReadBit( )"
+					quid       	"3BDF23C90337"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	""
+					ordinal    	1
+					quidu      	"3BDF1BC60306")
+				    (object Message "ClockDevice( )"
+					quid       	"3BDF23E70362"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	""
+					ordinal    	2
+					quidu      	"3BDF1B1101F7"))))
+			class      	"Logical View::CPU"
+			quidu      	"3BDF234C02E7"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "DigitalInput"
+			quid       	"3BDF238E0260"
+			class      	"Logical View::SpiDevice"
+			quidu      	"3BDF1A7403D2"
+			persistence 	"Transient"
+			multi      	FALSE))))
+	logical_presentations 	(list unit_reference_list
+	    (object ClassDiagram "Main"
+		quid       	"3BDF18D403C7"
+		title      	"Main"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list
+		    (object ClassView "Class" "Logical View::SpiDevice" @11
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1264, 608)
+			label      	(object ItemLabel
+			    Parent_View 	@11
+			    location   	(1114, 499)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	300
+			    justify    	0
+			    label      	"SpiDevice")
+			stereotype 	(object ItemLabel
+			    Parent_View 	@11
+			    location   	(1114, 449)
+			    fill_color 	13434879
+			    anchor     	10
+			    nlines     	1
+			    max_width  	300
+			    justify    	0
+			    label      	"<<Interface>>")
+			icon       	"Interface"
+			icon_style 	"Label"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3BDF1A7403D2"
+			compartment 	(object Compartment
+			    Parent_View 	@11
+			    location   	(1114, 559)
+			    icon_style 	"Icon"
+			    fill_color 	13434879
+			    anchor     	2
+			    nlines     	4
+			    max_width  	297)
+			width      	318
+			height     	342
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Use Case View::SwitchInput" @12
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1744, 592)
+			label      	(object ItemLabel
+			    Parent_View 	@12
+			    location   	(1744, 752)
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	327
+			    justify    	0
+			    label      	"SwitchInput")
+			icon       	"Actor"
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3BDF19F203C1"
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::CPU" @13
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(480, 592)
+			label      	(object ItemLabel
+			    Parent_View 	@13
+			    location   	(283, 533)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	394
+			    justify    	0
+			    label      	"CPU")
+			stereotype 	(object ItemLabel
+			    Parent_View 	@13
+			    location   	(283, 483)
+			    fill_color 	13434879
+			    anchor     	10
+			    nlines     	1
+			    max_width  	394
+			    justify    	0
+			    label      	"<<unique>>")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3BDF234C02E7"
+			compartment 	(object Compartment
+			    Parent_View 	@13
+			    location   	(283, 593)
+			    icon_style 	"Icon"
+			    fill_color 	13434879
+			    anchor     	2
+			    nlines     	2
+			    max_width  	391)
+			width      	412
+			height     	242
+			annotation 	8
+			autoResize 	TRUE)))
+	    (object InteractionDiagram "ReadDigitalInputs"
+		mechanism_ref 	@10
+		quid       	"3BDF23780308"
+		title      	"ReadDigitalInputs"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list
+		    (object InterObjView "$UNNAMED$3" @14
+			location   	(256, 224)
+			font       	(object Font
+			    underline  	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@14
+			    location   	(256, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	282
+			    justify    	0
+			    label      	"")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3BDF23860327"
+			width      	300
+			height     	609
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @15
+			    location   	(256, 384)
+			    line_color 	3342489
+			    InterObjView 	@14
+			    height     	360
+			    y_coord    	300
+			    Nested     	FALSE))
+		    (object InterObjView "DigitalInput" @16
+			location   	(704, 224)
+			font       	(object Font
+			    underline  	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@16
+			    location   	(704, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	282
+			    justify    	0
+			    label      	"DigitalInput")
+			icon       	"Interface"
+			icon_style 	"Label"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3BDF238E0260"
+			width      	300
+			height     	609
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @17
+			    location   	(704, 384)
+			    line_color 	3342489
+			    InterObjView 	@16
+			    height     	60
+			    y_coord    	0
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @18
+			    location   	(704, 496)
+			    line_color 	3342489
+			    InterObjView 	@16
+			    height     	60
+			    y_coord    	0
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @19
+			    location   	(704, 624)
+			    line_color 	3342489
+			    InterObjView 	@16
+			    height     	60
+			    y_coord    	0
+			    Nested     	FALSE))
+		    (object InterMessView "" @20
+			location   	(0, 384)
+			label      	(object SegLabel @21
+			    Parent_View 	@20
+			    location   	(480, 340)
+			    quidu      	"3BDF23A80312"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	225
+			    justify    	0
+			    label      	"InputLatch( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@14
+			supplier   	@16
+			Focus_Src  	@15
+			Focus_Entry 	@17
+			origin     	(272, 384)
+			terminus   	(688, 384)
+			ordinal    	0)
+		    (object InterMessView "" @22
+			location   	(0, 496)
+			label      	(object SegLabel @23
+			    Parent_View 	@22
+			    location   	(480, 452)
+			    quidu      	"3BDF23C90337"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	181
+			    justify    	0
+			    label      	"ReadBit( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@14
+			supplier   	@16
+			Focus_Src  	@15
+			Focus_Entry 	@18
+			origin     	(272, 496)
+			terminus   	(688, 496)
+			ordinal    	1)
+		    (object InterMessView "" @24
+			location   	(0, 624)
+			label      	(object SegLabel @25
+			    Parent_View 	@24
+			    location   	(480, 580)
+			    quidu      	"3BDF23E70362"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	259
+			    justify    	0
+			    label      	"ClockDevice( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@14
+			supplier   	@16
+			Focus_Src  	@15
+			Focus_Entry 	@19
+			origin     	(272, 624)
+			terminus   	(688, 624)
+			ordinal    	2)
+		    (object NoteView @26
+			location   	(1136, 544)
+			label      	(object ItemLabel
+			    Parent_View 	@26
+			    location   	(998, 484)
+			    fill_color 	13434879
+			    nlines     	2
+			    max_width  	240
+			    label      	"iterate for Num bits")
+			line_color 	3342489
+			fill_color 	13434879
+			width      	300
+			height     	132)
+		    (object AttachView "" @27
+			stereotype 	TRUE
+			line_color 	3342489
+			client     	@26
+			supplier   	@23
+			line_style 	0)
+		    (object AttachView "" @28
+			stereotype 	TRUE
+			line_color 	3342489
+			client     	@26
+			supplier   	@25
+			line_style 	0)))))
+    root_subsystem 	(object SubSystem "Component View"
+	quid       	"3BDF18D403C3"
+	physical_models 	(list unit_reference_list)
+	physical_presentations 	(list unit_reference_list
+	    (object Module_Diagram "Main"
+		quid       	"3BDF18D403CA"
+		title      	"Main"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list))))
+    process_structure 	(object Processes
+	quid       	"3BDF18D403C4"
+	ProcsNDevs 	(list
+	    (object Process_Diagram "Deployment View"
+		quid       	"3BDF18D403C6"
+		title      	"Deployment View"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list))))
+    properties 	(object Properties
+	quid       	"3BDF18D403C5"))

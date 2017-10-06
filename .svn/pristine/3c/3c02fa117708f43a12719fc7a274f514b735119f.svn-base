@@ -1,0 +1,26 @@
+.SUFFIXES : .cpp .o
+
+
+CC_FILES = $(CC_PIECES:%=%.cpp)
+CC_O_FILES = $(CC_PIECES:%=%.o)
+
+CC_SIM_O_FILES = $(CC_SIM_PIECES:%=%.o)
+
+CPP_FLAGS = $(COMMON_CPPFLAGS)
+CPP_FLAGS += $(COMMON_DEFINES)
+
+LIB=$(LIBNAME)
+
+
+all: $(LIB) $(SIMLIBNAME) $(CC_O_FILES) $(CC_SIM_O_FILES)
+
+lib :$(LIB) $(SIMLIBNAME)
+
+.cpp.o :
+	cc $(CPP_FLAGS) -c $<
+
+$(SIMLIBNAME) : $(CC_SIM_O_FILES)
+	ar -r -s  $@ $?
+
+$(LIB) : $(CC_O_FILES)
+	ar -r -s  $@ $?

@@ -1,0 +1,2108 @@
+
+(object Petal
+    version    	42
+    _written   	"Rose 4.5.8163.3"
+    charSet    	0)
+
+(object Design "Logical View"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    defaults   	(object defaults
+	rightMargin 	0.250000
+	leftMargin 	0.250000
+	topMargin  	0.250000
+	bottomMargin 	0.500000
+	pageOverlap 	0.250000
+	clipIconLabels 	TRUE
+	autoResize 	TRUE
+	snapToGrid 	TRUE
+	gridX      	16
+	gridY      	16
+	defaultFont 	(object Font
+	    size       	10
+	    face       	"Arial"
+	    bold       	FALSE
+	    italics    	FALSE
+	    underline  	FALSE
+	    strike     	FALSE
+	    color      	0
+	    default_color 	TRUE)
+	showMessageNum 	1
+	showClassOfObject 	TRUE
+	notation   	"Unified")
+    root_usecase_package 	(object Class_Category "Use Case View"
+	quid       	"3C5836810037"
+	exportControl 	"Public"
+	global     	TRUE
+	logical_models 	(list unit_reference_list
+	    (object Class "CPU"
+		quid       	"3C5837EA039B"
+		stereotype 	"Actor"
+		operations 	(list Operations
+		    (object Operation "Interrupt"
+			quid       	"3C58494900F7"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)))
+	    (object Class "MIDI Controller Board"
+		quid       	"3C5838040230"
+		stereotype 	"Actor")
+	    (object UseCase "WriteMidi"
+		quid       	"3C5837050053"
+		documentation 	"Write MIDI to one of two MIDI ports. Initialted by CPU")
+	    (object UseCase "ReadMidi"
+		quid       	"3C58371201C4"
+		documentation 	"Read Midi from input port. Initiated by MIDI Controller Board")
+	    (object UseCase "ReadCV"
+		quid       	"3C5837620364"
+		documentation 	"Read Control Voltage or Digital Switch Input. Initiated by MIDI Controller Board.")
+	    (object UseCase "WriteCV"
+		quid       	"3C58376B010E"
+		documentation 	"Write Control Voltage output.  Initialted by CPU")
+	    (object Association "$UNNAMED$0"
+		quid       	"3C58381F0383"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$1"
+			quid       	"3C583826006C"
+			supplier   	"Use Case View::WriteMidi"
+			quidu      	"3C5837050053")
+		    (object Role "$UNNAMED$2"
+			quid       	"3C583826006D"
+			supplier   	"Use Case View::CPU"
+			quidu      	"3C5837EA039B")))
+	    (object Association "$UNNAMED$3"
+		quid       	"3C5838D900D8"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$4"
+			quid       	"3C5838DA02E2"
+			supplier   	"Use Case View::MIDI Controller Board"
+			quidu      	"3C5838040230")
+		    (object Role "$UNNAMED$5"
+			quid       	"3C5838DA02E3"
+			supplier   	"Use Case View::WriteMidi"
+			quidu      	"3C5837050053")))
+	    (object Association "$UNNAMED$6"
+		quid       	"3C5838F9017E"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$7"
+			quid       	"3C5838FA00C1"
+			supplier   	"Use Case View::CPU"
+			quidu      	"3C5837EA039B")
+		    (object Role "$UNNAMED$8"
+			quid       	"3C5838FA00CB"
+			supplier   	"Use Case View::ReadMidi"
+			quidu      	"3C58371201C4")))
+	    (object Association "$UNNAMED$9"
+		quid       	"3C5839030287"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$10"
+			quid       	"3C58390400F8"
+			supplier   	"Use Case View::MIDI Controller Board"
+			quidu      	"3C5838040230")
+		    (object Role "$UNNAMED$11"
+			quid       	"3C58390400F9"
+			supplier   	"Use Case View::ReadMidi"
+			quidu      	"3C58371201C4")))
+	    (object Association "$UNNAMED$12"
+		quid       	"3C583946037E"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$13"
+			quid       	"3C58394702C1"
+			supplier   	"Use Case View::WriteCV"
+			quidu      	"3C58376B010E")
+		    (object Role "$UNNAMED$14"
+			quid       	"3C58394702C2"
+			supplier   	"Use Case View::CPU"
+			quidu      	"3C5837EA039B")))
+	    (object Association "$UNNAMED$15"
+		quid       	"3C58394901BF"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$16"
+			quid       	"3C58394903C8"
+			supplier   	"Use Case View::MIDI Controller Board"
+			quidu      	"3C5838040230")
+		    (object Role "$UNNAMED$17"
+			quid       	"3C58394903C9"
+			supplier   	"Use Case View::WriteCV"
+			quidu      	"3C58376B010E")))
+	    (object Association "$UNNAMED$18"
+		quid       	"3C58394D0139"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$19"
+			quid       	"3C58394E00F4"
+			supplier   	"Use Case View::ReadCV"
+			quidu      	"3C5837620364")
+		    (object Role "$UNNAMED$20"
+			quid       	"3C58394E00F5"
+			supplier   	"Use Case View::CPU"
+			quidu      	"3C5837EA039B")))
+	    (object Association "$UNNAMED$21"
+		quid       	"3C583950010B"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$22"
+			quid       	"3C583951003A"
+			supplier   	"Use Case View::MIDI Controller Board"
+			quidu      	"3C5838040230")
+		    (object Role "$UNNAMED$23"
+			quid       	"3C583951003B"
+			supplier   	"Use Case View::ReadCV"
+			quidu      	"3C5837620364"))))
+	logical_presentations 	(list unit_reference_list
+	    (object UseCaseDiagram "Main"
+		quid       	"3C58368201E6"
+		title      	"Main"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list
+		    (object ClassView "Class" "Use Case View::CPU" @1
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(384, 896)
+			label      	(object ItemLabel
+			    Parent_View 	@1
+			    location   	(384, 1056)
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	327
+			    justify    	0
+			    label      	"CPU")
+			icon       	"Actor"
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3C5837EA039B"
+			annotation 	8
+			autoResize 	TRUE)
+		    (object UseCaseView "Use Case View::WriteMidi" @2
+			location   	(1056, 624)
+			label      	(object ItemLabel
+			    Parent_View 	@2
+			    location   	(1056, 762)
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	633
+			    justify    	0
+			    label      	"WriteMidi")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3C5837050053"
+			height     	118
+			autoResize 	TRUE)
+		    (object AssociationViewNew "$UNNAMED$0" @3
+			location   	(693, 767)
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3C58381F0383"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$1" @4
+				Parent_View 	@3
+				location   	(261, 63)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C583826006C"
+				client     	@3
+				supplier   	@2
+				line_style 	0)
+			    (object RoleView "$UNNAMED$2" @5
+				Parent_View 	@3
+				location   	(261, 63)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C583826006D"
+				client     	@3
+				supplier   	@1
+				line_style 	0)))
+		    (object UseCaseView "Use Case View::ReadMidi" @6
+			location   	(1088, 1200)
+			label      	(object ItemLabel
+			    Parent_View 	@6
+			    location   	(1088, 1338)
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	633
+			    justify    	0
+			    label      	"ReadMidi")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3C58371201C4"
+			height     	118
+			autoResize 	TRUE)
+		    (object AssociationViewNew "$UNNAMED$6" @7
+			location   	(709, 1035)
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3C5838F9017E"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$7" @8
+				Parent_View 	@7
+				location   	(-315, 171)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C5838FA00C1"
+				client     	@7
+				supplier   	@1
+				line_style 	0)
+			    (object RoleView "$UNNAMED$8" @9
+				Parent_View 	@7
+				location   	(-315, 171)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C5838FA00CB"
+				client     	@7
+				supplier   	@6
+				line_style 	0)))
+		    (object UseCaseView "Use Case View::WriteCV" @10
+			location   	(1088, 912)
+			label      	(object ItemLabel
+			    Parent_View 	@10
+			    location   	(1088, 1050)
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	633
+			    justify    	0
+			    label      	"WriteCV")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3C58376B010E"
+			height     	118
+			autoResize 	TRUE)
+		    (object AssociationViewNew "$UNNAMED$12" @11
+			location   	(709, 901)
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3C583946037E"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$13" @12
+				Parent_View 	@11
+				location   	(325, 5)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C58394702C1"
+				client     	@11
+				supplier   	@10
+				line_style 	0)
+			    (object RoleView "$UNNAMED$14" @13
+				Parent_View 	@11
+				location   	(325, 5)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C58394702C2"
+				client     	@11
+				supplier   	@1
+				line_style 	0)))
+		    (object ClassView "Class" "Use Case View::MIDI Controller Board" @14
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1792, 912)
+			label      	(object ItemLabel
+			    Parent_View 	@14
+			    location   	(1792, 1072)
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	327
+			    justify    	0
+			    label      	"MIDI Controller Board")
+			icon       	"Actor"
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3C5838040230"
+			annotation 	8
+			autoResize 	TRUE)
+		    (object AssociationViewNew "$UNNAMED$3" @15
+			location   	(1448, 775)
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3C5838D900D8"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$4" @16
+				Parent_View 	@15
+				location   	(424, 151)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C5838DA02E2"
+				client     	@15
+				supplier   	@14
+				line_style 	0)
+			    (object RoleView "$UNNAMED$5" @17
+				Parent_View 	@15
+				location   	(424, 151)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C5838DA02E3"
+				client     	@15
+				supplier   	@2
+				line_style 	0)))
+		    (object AssociationViewNew "$UNNAMED$9" @18
+			location   	(1464, 1042)
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3C5839030287"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$10" @19
+				Parent_View 	@18
+				location   	(440, 178)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C58390400F8"
+				client     	@18
+				supplier   	@14
+				line_style 	0)
+			    (object RoleView "$UNNAMED$11" @20
+				Parent_View 	@18
+				location   	(440, 178)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C58390400F9"
+				client     	@18
+				supplier   	@6
+				line_style 	0)))
+		    (object AssociationViewNew "$UNNAMED$15" @21
+			location   	(1464, 912)
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3C58394901BF"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$16" @22
+				Parent_View 	@21
+				location   	(440, -16)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C58394903C8"
+				client     	@21
+				supplier   	@14
+				line_style 	0)
+			    (object RoleView "$UNNAMED$17" @23
+				Parent_View 	@21
+				location   	(440, -16)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C58394903C9"
+				client     	@21
+				supplier   	@10
+				line_style 	0)))
+		    (object UseCaseView "Use Case View::ReadCV" @24
+			location   	(1104, 1456)
+			label      	(object ItemLabel
+			    Parent_View 	@24
+			    location   	(1104, 1594)
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	633
+			    justify    	0
+			    label      	"ReadCV")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3C5837620364"
+			height     	118
+			autoResize 	TRUE)
+		    (object AssociationViewNew "$UNNAMED$18" @25
+			location   	(790, 1212)
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3C58394D0139"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$19" @26
+				Parent_View 	@25
+				location   	(406, 316)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C58394E00F4"
+				client     	@25
+				supplier   	@24
+				line_style 	0)
+			    (object RoleView "$UNNAMED$20" @27
+				Parent_View 	@25
+				location   	(406, 316)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C58394E00F5"
+				client     	@25
+				supplier   	@1
+				line_style 	0)))
+		    (object AssociationViewNew "$UNNAMED$21" @28
+			location   	(1409, 1212)
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3C583950010B"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$22" @29
+				Parent_View 	@28
+				location   	(369, -340)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C583951003A"
+				client     	@28
+				supplier   	@14
+				line_style 	0)
+			    (object RoleView "$UNNAMED$23" @30
+				Parent_View 	@28
+				location   	(369, -340)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C583951003B"
+				client     	@28
+				supplier   	@24
+				line_style 	0)))))))
+    root_category 	(object Class_Category "Logical View"
+	quid       	"3C5836810036"
+	exportControl 	"Public"
+	global     	TRUE
+	subsystem  	"Component View"
+	quidu      	"3C5836810038"
+	logical_models 	(list unit_reference_list
+	    (object Class "DataTransferType"
+		quid       	"3C5839E60016"
+		documentation 	"16 bit integer"
+		class_attributes 	(list class_attribute_list
+		    (object ClassAttribute "data"
+			quid       	"3C583A15006E"
+			type       	"char"))
+		language   	"C++")
+	    (object Class "RegisterFlags"
+		quid       	"3C583ABA0089"
+		documentation 	
+|8 bit flags detailing state of transmit and receive data. Details whether the data byte contains a valid data byte and, if available, defines the data type.
+|
+		
+		class_attributes 	(list class_attribute_list
+		    (object ClassAttribute "bufferReady"
+			quid       	"3C583D80006C"
+			documentation 	"The device sneding this message has a receive buffer ready"
+			type       	"bit")
+		    (object ClassAttribute "dataValid"
+			quid       	"3C583DC40269"
+			documentation 	"Flag detailing whether the data byte contains information"
+			type       	"bit")
+		    (object ClassAttribute "isMidiData"
+			quid       	"3C583DF2011A"
+			documentation 	"Flag defining CV or Midi cdata type"
+			type       	"bit")
+		    (object ClassAttribute "dataParams"
+			quid       	"3C583E260274"
+			documentation 	"5 bit parameters for the data. This could be CV index, MidiOutput, etc."
+			type       	"5bits"))
+		language   	"C++")
+	    (object Class "DataTypeFlag"
+		quid       	"3C583E7601B1"
+		language   	"C++")
+	    (object Class "PLA"
+		quid       	"3C583F8D0071"
+		operations 	(list Operations
+		    (object Operation "WriteTxData"
+			quid       	"3C58443F01EC"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "ClearTxBufferReady"
+			quid       	"3C58447403B5"
+			concurrency 	"Sequential"
+			opExportControl 	"Private"
+			uid        	0)
+		    (object Operation "ReadRxData"
+			quid       	"3C5849250073"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "ReadTxData"
+			quid       	"3C584B6D03A8"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "WriteRxData"
+			quid       	"3C584B7600E4"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "SetTxBufferReady"
+			quid       	"3C5863890226"
+			concurrency 	"Sequential"
+			opExportControl 	"Private"
+			uid        	0))
+		language   	"C++")
+	    (object Class "TXRegister"
+		quid       	"3C584109024E"
+		documentation 	"Data is serial in, parallel out"
+		superclasses 	(list inheritance_relationship_list
+		    (object Inheritance_Relationship
+			quid       	"3C5841AB02F2"
+			supplier   	"Logical View::Register"
+			quidu      	"3C5841900393"))
+		language   	"C++")
+	    (object Class "RxRegister"
+		quid       	"3C58412A0274"
+		documentation 	"Data is Parallel in, serial out"
+		superclasses 	(list inheritance_relationship_list
+		    (object Inheritance_Relationship
+			quid       	"3C5841A60069"
+			supplier   	"Logical View::Register"
+			quidu      	"3C5841900393"))
+		language   	"C++")
+	    (object Class "Register"
+		quid       	"3C5841900393"
+		documentation 	"16 bit word"
+		language   	"C++")
+	    (object Class "PIC"
+		quid       	"3C5845F70004"
+		operations 	(list Operations
+		    (object Operation "PLADataInterrupt"
+			quid       	"3C584601015D"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "Perform_I_O_Output"
+			quid       	"3C584BCA0207"
+			concurrency 	"Sequential"
+			opExportControl 	"Private"
+			uid        	0))
+		language   	"C++")
+	    (object Association "txdata"
+		quid       	"3C583F9700E4"
+		documentation 	"The data received into the PLA from the CPU"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$24"
+			quid       	"3C583F9800DB"
+			supplier   	"Logical View::PLA"
+			quidu      	"3C583F8D0071"
+			Containment 	"By Value"
+			is_aggregate 	TRUE)
+		    (object Role "$UNNAMED$25"
+			quid       	"3C583F9800DC"
+			supplier   	"Logical View::DataTransferType"
+			quidu      	"3C5839E60016"
+			Containment 	"By Value"
+			is_navigable 	TRUE)))
+	    (object Association "data"
+		quid       	"3C584003027A"
+		documentation 	"Flags describing the data"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$26"
+			quid       	"3C5840080335"
+			supplier   	"Logical View::Register"
+			quidu      	"3C5841900393"
+			is_aggregate 	TRUE)
+		    (object Role "$UNNAMED$27"
+			quid       	"3C5840080336"
+			supplier   	"Logical View::DataTransferType"
+			quidu      	"3C5839E60016"
+			Containment 	"By Value"
+			is_navigable 	TRUE)))
+	    (object Association "flags"
+		quid       	"3C58408E0085"
+		documentation 	"Bitmask that defines the data in rxdata"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$28"
+			quid       	"3C58408F01B3"
+			supplier   	"Logical View::Register"
+			quidu      	"3C5841900393"
+			is_aggregate 	TRUE)
+		    (object Role "$UNNAMED$29"
+			quid       	"3C58408F01B4"
+			supplier   	"Logical View::RegisterFlags"
+			quidu      	"3C583ABA0089"
+			Containment 	"By Value"
+			is_navigable 	TRUE)))
+	    (object Association "rxReg"
+		quid       	"3C5841D60376"
+		documentation 	"Register containg information to be received by CPU"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$30"
+			quid       	"3C5841D80057"
+			supplier   	"Logical View::PLA"
+			quidu      	"3C583F8D0071"
+			is_aggregate 	TRUE)
+		    (object Role "$UNNAMED$31"
+			quid       	"3C5841D80058"
+			supplier   	"Logical View::RxRegister"
+			quidu      	"3C58412A0274"
+			Containment 	"By Value"
+			is_navigable 	TRUE)))
+	    (object Association "txReg"
+		quid       	"3C5841E8000A"
+		documentation 	"Information transmitted by the CPU"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$32"
+			quid       	"3C5841E80213"
+			supplier   	"Logical View::PLA"
+			quidu      	"3C583F8D0071"
+			is_aggregate 	TRUE)
+		    (object Role "$UNNAMED$33"
+			quid       	"3C5841E80214"
+			supplier   	"Logical View::TXRegister"
+			quidu      	"3C584109024E"
+			Containment 	"By Value"
+			is_navigable 	TRUE)))
+	    (object Mechanism @31
+		logical_models 	(list unit_reference_list
+		    (object Object "$UNNAMED$34"
+			quid       	"3C58490703A5"
+			collaborators 	(list link_list
+			    (object Link
+				quid       	"3C58493B00A7"
+				supplier   	"$UNNAMED$35"
+				quidu      	"3C58490C026C"
+				messages   	(list Messages
+				    (object Message "ReadRxData( )"
+					quid       	"3C58493B00BB"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	""
+					ordinal    	1
+					quidu      	"3C5849250073")
+				    (object Message "WriteTxData( )"
+					quid       	"3C5849B90206"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	""
+					ordinal    	2
+					quidu      	"3C58443F01EC"))))
+			class      	"Use Case View::CPU"
+			quidu      	"3C5837EA039B"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "$UNNAMED$35"
+			quid       	"3C58490C026C"
+			collaborators 	(list link_list
+			    (object Link
+				quid       	"3C5849C9019B"
+				supplier   	"$UNNAMED$35"
+				quidu      	"3C58490C026C"
+				messages   	(list Messages
+				    (object Message "ClearTxBufferReady( )"
+					quid       	"3C5849C9019C"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	""
+					ordinal    	3
+					quidu      	"3C58447403B5")
+				    (object Message "SetTxBufferReady( )"
+					quid       	"3C5863BE010A"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	""
+					ordinal    	6
+					quidu      	"3C5863890226")))
+			    (object Link
+				quid       	"3C5849E40302"
+				supplier   	"$UNNAMED$36"
+				quidu      	"3C5849DE02A0"
+				messages   	(list Messages
+				    (object Message "PLADataInterrupt( )"
+					quid       	"3C5849E40303"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	""
+					ordinal    	4
+					quidu      	"3C584601015D")
+				    (object Message "ReadTxData( )"
+					quid       	"3C584B6002A5"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"ToClientFromSupplier"
+					sequence   	""
+					ordinal    	5
+					quidu      	"3C584B6D03A8")
+				    (object Message "WriteRxData( )"
+					quid       	"3C58641E025C"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"ToClientFromSupplier"
+					sequence   	""
+					ordinal    	8
+					quidu      	"3C584B7600E4"))))
+			class      	"Logical View::PLA"
+			quidu      	"3C583F8D0071"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "$UNNAMED$36"
+			quid       	"3C5849DE02A0"
+			collaborators 	(list link_list
+			    (object Link
+				quid       	"3C584AFF0129"
+				supplier   	"$UNNAMED$34"
+				quidu      	"3C58490703A5"
+				messages   	(list Messages
+				    (object Message "Interrupt( )"
+					quid       	"3C584C01031E"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	""
+					ordinal    	10
+					quidu      	"3C58494900F7")
+				    (object Message "Interrupt( )"
+					quid       	"3C584D070221"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	""
+					ordinal    	0
+					quidu      	"3C58494900F7")
+				    (object Message "Interrupt( )"
+					quid       	"3C5863FF017C"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	""
+					ordinal    	9
+					quidu      	"3C58494900F7")))
+			    (object Link
+				quid       	"3C584BE90085"
+				supplier   	"$UNNAMED$36"
+				quidu      	"3C5849DE02A0"
+				messages   	(list Messages
+				    (object Message "Perform_I_O_Output( )"
+					quid       	"3C584BE90086"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	""
+					ordinal    	7
+					quidu      	"3C584BCA0207"))))
+			class      	"Logical View::PIC"
+			quidu      	"3C5845F70004"
+			persistence 	"Transient"
+			multi      	FALSE)))
+	    (object Mechanism @32
+		logical_models 	(list unit_reference_list
+		    (object Object "$UNNAMED$37"
+			quid       	"3C584DAC034A"
+			collaborators 	(list link_list
+			    (object Link
+				quid       	"3C584DC50260"
+				supplier   	"$UNNAMED$38"
+				quidu      	"3C584DB103B6"
+				messages   	(list Messages
+				    (object Message "WriteRxData( )"
+					quid       	"3C584DC50261"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	""
+					ordinal    	0
+					quidu      	"3C584B7600E4")
+				    (object Message "PLADataInterrupt( )"
+					quid       	"3C5864E70099"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"ToClientFromSupplier"
+					sequence   	""
+					ordinal    	4
+					quidu      	"3C584601015D")
+				    (object Message "ReadTxData( )"
+					quid       	"3C586529030B"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	""
+					ordinal    	5
+					quidu      	"3C584B6D03A8")))
+			    (object Link
+				quid       	"3C584DD600C0"
+				supplier   	"$UNNAMED$39"
+				quidu      	"3C584DBC03E4"
+				messages   	(list Messages
+				    (object Message "Interrupt( )"
+					quid       	"3C584DD600C1"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	""
+					ordinal    	1
+					quidu      	"3C58494900F7"))))
+			class      	"Logical View::PIC"
+			quidu      	"3C5845F70004"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "$UNNAMED$38"
+			quid       	"3C584DB103B6"
+			class      	"Logical View::PLA"
+			quidu      	"3C583F8D0071"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "$UNNAMED$39"
+			quid       	"3C584DBC03E4"
+			collaborators 	(list link_list
+			    (object Link
+				quid       	"3C584DE70309"
+				supplier   	"$UNNAMED$38"
+				quidu      	"3C584DB103B6"
+				messages   	(list Messages
+				    (object Message "ReadRxData( )"
+					quid       	"3C584DE7030A"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	""
+					ordinal    	2
+					quidu      	"3C5849250073")
+				    (object Message "WriteTxData( )"
+					quid       	"3C5864B4008B"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	""
+					ordinal    	3
+					quidu      	"3C58443F01EC"))))
+			class      	"Use Case View::CPU"
+			quidu      	"3C5837EA039B"
+			persistence 	"Transient"
+			multi      	FALSE))))
+	logical_presentations 	(list unit_reference_list
+	    (object ClassDiagram "Main"
+		quid       	"3C5836820203"
+		title      	"Main"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list
+		    (object ClassView "Class" "Logical View::RxRegister" @33
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(384, 1120)
+			label      	(object ItemLabel
+			    Parent_View 	@33
+			    location   	(267, 1069)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	234
+			    justify    	0
+			    label      	"RxRegister")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3C58412A0274"
+			width      	252
+			height     	126
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::PLA" @34
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(944, 224)
+			label      	(object ItemLabel
+			    Parent_View 	@34
+			    location   	(727, 18)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	434
+			    justify    	0
+			    label      	"PLA")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3C583F8D0071"
+			compartment 	(object Compartment
+			    Parent_View 	@34
+			    location   	(727, 78)
+			    icon_style 	"Icon"
+			    fill_color 	13434879
+			    anchor     	2
+			    nlines     	7
+			    max_width  	440)
+			width      	452
+			height     	436
+			annotation 	8
+			autoResize 	TRUE)
+		    (object AssociationViewNew "rxReg" @35
+			location   	(615, 749)
+			label      	(object SegLabel @36
+			    Parent_View 	@35
+			    location   	(615, 690)
+			    font       	(object Font
+				italics    	TRUE)
+			    anchor     	1
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	600
+			    justify    	0
+			    label      	"rxReg"
+			    pctDist    	0.500000
+			    height     	60
+			    orientation 	0)
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3C5841D60376"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$30" @37
+				Parent_View 	@35
+				location   	(151, 125)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C5841D80057"
+				client     	@35
+				supplier   	@34
+				line_style 	0)
+			    (object RoleView "$UNNAMED$31" @38
+				Parent_View 	@35
+				location   	(151, 125)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C5841D80058"
+				client     	@35
+				supplier   	@33
+				line_style 	0)))
+		    (object ClassView "Class" "Logical View::TXRegister" @39
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1504, 1168)
+			label      	(object ItemLabel
+			    Parent_View 	@39
+			    location   	(1393, 1117)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	222
+			    justify    	0
+			    label      	"TXRegister")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3C584109024E"
+			width      	240
+			height     	126
+			annotation 	8
+			autoResize 	TRUE)
+		    (object AssociationViewNew "txReg" @40
+			location   	(1268, 773)
+			label      	(object SegLabel @41
+			    Parent_View 	@40
+			    location   	(1268, 714)
+			    font       	(object Font
+				italics    	TRUE)
+			    anchor     	1
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	600
+			    justify    	0
+			    label      	"txReg"
+			    pctDist    	0.500000
+			    height     	60
+			    orientation 	0)
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3C5841E8000A"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$32" @42
+				Parent_View 	@40
+				location   	(-188, 101)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C5841E80213"
+				client     	@40
+				supplier   	@34
+				line_style 	0)
+			    (object RoleView "$UNNAMED$33" @43
+				Parent_View 	@40
+				location   	(-188, 101)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C5841E80214"
+				client     	@40
+				supplier   	@39
+				line_style 	0)))
+		    (object NoteView @44
+			location   	(2080, 448)
+			label      	(object ItemLabel
+			    Parent_View 	@44
+			    location   	(1876, 238)
+			    fill_color 	13434879
+			    nlines     	8
+			    max_width  	372
+			    label      	"Receive and Transmit register are defined in the same way a UART defines transmit and receive data")
+			line_color 	3342489
+			fill_color 	13434879
+			width      	432
+			height     	432)
+		    (object AttachView "" @45
+			stereotype 	TRUE
+			line_color 	3342489
+			client     	@33
+			supplier   	@44
+			line_style 	0)
+		    (object AttachView "" @46
+			stereotype 	TRUE
+			line_color 	3342489
+			client     	@39
+			supplier   	@44
+			line_style 	0)
+		    (object ClassView "Class" "Logical View::PIC" @47
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(304, 160)
+			label      	(object ItemLabel
+			    Parent_View 	@47
+			    location   	(81, 54)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	446
+			    justify    	0
+			    label      	"PIC")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3C5845F70004"
+			compartment 	(object Compartment
+			    Parent_View 	@47
+			    location   	(81, 114)
+			    icon_style 	"Icon"
+			    fill_color 	13434879
+			    anchor     	2
+			    nlines     	3
+			    max_width  	453)
+			width      	464
+			height     	236
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::DataTransferType" @48
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1344, 1600)
+			label      	(object ItemLabel
+			    Parent_View 	@48
+			    location   	(1169, 1519)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	350
+			    justify    	0
+			    label      	"DataTransferType")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3C5839E60016"
+			compartment 	(object Compartment
+			    Parent_View 	@48
+			    location   	(1169, 1579)
+			    icon_style 	"Icon"
+			    fill_color 	13434879
+			    anchor     	2
+			    nlines     	2
+			    max_width  	253)
+			width      	368
+			height     	186
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::Register" @49
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(976, 784)
+			label      	(object ItemLabel
+			    Parent_View 	@49
+			    location   	(885, 733)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	182
+			    justify    	0
+			    label      	"Register")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3C5841900393"
+			width      	200
+			height     	126
+			annotation 	8
+			autoResize 	TRUE)
+		    (object InheritTreeView "" @50
+			location   	(953, 1000)
+			line_color 	3342489
+			fill_color 	13434879
+			supplier   	@49
+			vertices   	(list Points
+			    (953, 1000)
+			    (953, 847)))
+		    (object InheritView "" @51
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3C5841AB02F2"
+			client     	@39
+			supplier   	@49
+			line_style 	3
+			origin_attachment 	(1512, 1105)
+			terminal_attachment 	(1512, 1000)
+			drawSupplier 	@50)
+		    (object AssociationViewNew "data" @52
+			location   	(1152, 1176)
+			label      	(object SegLabel @53
+			    Parent_View 	@52
+			    location   	(1152, 1118)
+			    font       	(object Font
+				italics    	TRUE)
+			    anchor     	1
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	96
+			    justify    	0
+			    label      	"data"
+			    pctDist    	0.500000
+			    height     	59
+			    orientation 	0)
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3C584003027A"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$26" @54
+				Parent_View 	@52
+				location   	(64, 728)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C5840080335"
+				client     	@52
+				supplier   	@49
+				line_style 	0)
+			    (object RoleView "$UNNAMED$27" @55
+				Parent_View 	@52
+				location   	(64, 728)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C5840080336"
+				client     	@52
+				supplier   	@48
+				line_style 	0)))
+		    (object InheritView "" @56
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3C5841A60069"
+			client     	@33
+			supplier   	@49
+			line_style 	3
+			origin_attachment 	(384, 1057)
+			terminal_attachment 	(384, 1000)
+			drawSupplier 	@50)
+		    (object ClassView "Class" "Logical View::RegisterFlags" @57
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(592, 1648)
+			label      	(object ItemLabel
+			    Parent_View 	@57
+			    location   	(394, 1492)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	396
+			    justify    	0
+			    label      	"RegisterFlags")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3C583ABA0089"
+			compartment 	(object Compartment
+			    Parent_View 	@57
+			    location   	(394, 1552)
+			    icon_style 	"Icon"
+			    fill_color 	13434879
+			    anchor     	2
+			    nlines     	5
+			    max_width  	394)
+			width      	414
+			height     	336
+			annotation 	8
+			autoResize 	TRUE)
+		    (object AssociationViewNew "flags" @58
+			location   	(807, 1163)
+			label      	(object SegLabel @59
+			    Parent_View 	@58
+			    location   	(807, 1104)
+			    font       	(object Font
+				italics    	TRUE)
+			    anchor     	1
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	600
+			    justify    	0
+			    label      	"flags"
+			    pctDist    	0.500000
+			    height     	60
+			    orientation 	0)
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3C58408E0085"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$28" @60
+				Parent_View 	@58
+				location   	(-505, 171)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C58408F01B3"
+				client     	@58
+				supplier   	@49
+				line_style 	0)
+			    (object RoleView "$UNNAMED$29" @61
+				Parent_View 	@58
+				location   	(-505, 171)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3C58408F01B4"
+				client     	@58
+				supplier   	@57
+				line_style 	0)))))
+	    (object ClassDiagram "WriteFlags"
+		quid       	"3C5837CC0063"
+		title      	"WriteFlags"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list))
+	    (object InteractionDiagram "Write Data"
+		mechanism_ref 	@31
+		quid       	"3C583F6501C8"
+		title      	"Write Data"
+		documentation 	"Data is written from the CPU into the PLA. This assumes that The TXBuffer is already clear"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	228
+		items      	(list diagram_item_list
+		    (object InterObjView "$UNNAMED$34" @62
+			location   	(1696, 224)
+			font       	(object Font
+			    underline  	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@62
+			    location   	(1696, 296)
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	360
+			    justify    	0
+			    label      	"")
+			icon       	"Actor"
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3C58490703A5"
+			width      	336
+			height     	2657
+			icon_height 	162
+			icon_width 	120
+			icon_y_offset 	-47
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @63
+			    location   	(1696, 352)
+			    line_color 	3342489
+			    InterObjView 	@62
+			    height     	248
+			    y_coord    	188
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @64
+			    location   	(1696, 928)
+			    line_color 	3342489
+			    InterObjView 	@62
+			    height     	356
+			    y_coord    	296
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @65
+			    location   	(1696, 1984)
+			    line_color 	3342489
+			    InterObjView 	@62
+			    height     	60
+			    y_coord    	0
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @66
+			    location   	(1696, 2672)
+			    line_color 	3342489
+			    InterObjView 	@62
+			    height     	60
+			    y_coord    	0
+			    Nested     	FALSE))
+		    (object InterObjView "$UNNAMED$35" @67
+			location   	(864, 224)
+			font       	(object Font
+			    underline  	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@67
+			    location   	(864, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	282
+			    justify    	0
+			    label      	"")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3C58490C026C"
+			width      	300
+			height     	2657
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @68
+			    location   	(864, 480)
+			    line_color 	3342489
+			    InterObjView 	@67
+			    height     	60
+			    y_coord    	0
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @69
+			    location   	(864, 928)
+			    line_color 	3342489
+			    InterObjView 	@67
+			    height     	296
+			    y_coord    	236
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @70
+			    location   	(864, 1328)
+			    line_color 	3342489
+			    InterObjView 	@67
+			    height     	280
+			    y_coord    	220
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @71
+			    location   	(864, 1856)
+			    line_color 	3342489
+			    InterObjView 	@67
+			    height     	60
+			    y_coord    	0
+			    Nested     	FALSE))
+		    (object InterMessView "" @72
+			location   	(0, 480)
+			label      	(object SegLabel @73
+			    Parent_View 	@72
+			    location   	(1280, 436)
+			    quidu      	"3C58493B00BB"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	266
+			    justify    	0
+			    label      	"ReadRxData( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	1)
+			line_color 	3342489
+			client     	@62
+			supplier   	@67
+			Focus_Src  	@63
+			Focus_Entry 	@68
+			origin     	(1680, 480)
+			terminus   	(880, 480)
+			ordinal    	1)
+		    (object NoteView @74
+			location   	(2048, 560)
+			label      	(object ItemLabel
+			    Parent_View 	@74
+			    location   	(1876, 463)
+			    fill_color 	13434879
+			    nlines     	3
+			    max_width  	309
+			    label      	"Test if Tx Buffer is Ready")
+			line_color 	3342489
+			fill_color 	13434879
+			width      	369
+			height     	206)
+		    (object InterMessView "" @75
+			location   	(0, 928)
+			label      	(object SegLabel @76
+			    Parent_View 	@75
+			    location   	(1280, 884)
+			    quidu      	"3C5849B90206"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	262
+			    justify    	0
+			    label      	"WriteTxData( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	1)
+			line_color 	3342489
+			client     	@62
+			supplier   	@67
+			Focus_Src  	@64
+			Focus_Entry 	@69
+			origin     	(1680, 928)
+			terminus   	(880, 928)
+			ordinal    	2)
+		    (object SelfMessView "" @77
+			location   	(0, 1008)
+			label      	(object SegLabel @78
+			    Parent_View 	@77
+			    location   	(955, 964)
+			    quidu      	"3C5849C9019C"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	394
+			    justify    	0
+			    label      	"ClearTxBufferReady( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@67
+			supplier   	@67
+			Focus_Src  	@69
+			origin     	(880, 1008)
+			terminus   	(1030, 1008)
+			ordinal    	3)
+		    (object InterObjView "$UNNAMED$36" @79
+			location   	(272, 224)
+			font       	(object Font
+			    underline  	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@79
+			    location   	(272, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	282
+			    justify    	0
+			    label      	"")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3C5849DE02A0"
+			width      	300
+			height     	2657
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @80
+			    location   	(272, 320)
+			    line_color 	3342489
+			    InterObjView 	@79
+			    height     	340
+			    y_coord    	280
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @81
+			    location   	(272, 1104)
+			    line_color 	3342489
+			    InterObjView 	@79
+			    height     	60
+			    y_coord    	0
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @82
+			    location   	(272, 1328)
+			    line_color 	3342489
+			    InterObjView 	@79
+			    height     	776
+			    y_coord    	716
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @83
+			    location   	(272, 2672)
+			    line_color 	3342489
+			    InterObjView 	@79
+			    height     	120
+			    y_coord    	60
+			    Nested     	FALSE))
+		    (object InterMessView "" @84
+			location   	(0, 1104)
+			label      	(object SegLabel @85
+			    Parent_View 	@84
+			    location   	(568, 1060)
+			    quidu      	"3C5849E40303"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	347
+			    justify    	0
+			    label      	"PLADataInterrupt( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	1)
+			line_color 	3342489
+			client     	@67
+			supplier   	@79
+			Focus_Src  	@69
+			Focus_Entry 	@81
+			origin     	(848, 1104)
+			terminus   	(288, 1104)
+			ordinal    	4)
+		    (object NoteView @86
+			location   	(352, 880)
+			label      	(object ItemLabel
+			    Parent_View 	@86
+			    location   	(99, 768)
+			    fill_color 	13434879
+			    nlines     	4
+			    max_width  	471
+			    label      	"Test for Valid Data (CPU did a write)")
+			line_color 	3342489
+			fill_color 	13434879
+			width      	531
+			height     	237)
+		    (object InterMessView "" @87
+			location   	(0, 1328)
+			label      	(object SegLabel @88
+			    Parent_View 	@87
+			    location   	(568, 1284)
+			    quidu      	"3C584B6002A5"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	259
+			    justify    	0
+			    label      	"ReadTxData( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@79
+			supplier   	@67
+			Focus_Src  	@82
+			Focus_Entry 	@70
+			origin     	(288, 1328)
+			terminus   	(848, 1328)
+			ordinal    	5)
+		    (object AttachView "" @89
+			stereotype 	TRUE
+			line_color 	3342489
+			client     	@86
+			supplier   	@87
+			line_style 	0)
+		    (object SelfMessView "" @90
+			location   	(0, 1680)
+			label      	(object SegLabel @91
+			    Parent_View 	@90
+			    location   	(523, 1637)
+			    quidu      	"3C584BE90086"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	406
+			    justify    	0
+			    label      	"Perform_I_O_Output( )"
+			    pctDist    	1.566667
+			    height     	44
+			    orientation 	0)
+			line_color 	3342489
+			client     	@79
+			supplier   	@79
+			Focus_Src  	@82
+			origin     	(288, 1680)
+			terminus   	(438, 1680)
+			ordinal    	7)
+		    (object InterMessView "" @92
+			location   	(0, 2672)
+			label      	(object SegLabel @93
+			    Parent_View 	@92
+			    location   	(984, 2628)
+			    quidu      	"3C584C01031E"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	184
+			    justify    	0
+			    label      	"Interrupt( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@79
+			supplier   	@62
+			Focus_Src  	@83
+			Focus_Entry 	@66
+			origin     	(288, 2672)
+			terminus   	(1680, 2672)
+			ordinal    	10)
+		    (object NoteView @94
+			location   	(2080, 912)
+			label      	(object ItemLabel
+			    Parent_View 	@94
+			    location   	(1892, 793)
+			    fill_color 	13434879
+			    nlines     	4
+			    max_width  	340
+			    label      	"Only when something is ready to be written")
+			line_color 	3342489
+			fill_color 	13434879
+			width      	400
+			height     	250)
+		    (object AttachView "" @95
+			stereotype 	TRUE
+			line_color 	3342489
+			client     	@94
+			supplier   	@76
+			line_style 	0)
+		    (object InterMessView "" @96
+			location   	(0, 352)
+			label      	(object SegLabel @97
+			    Parent_View 	@96
+			    location   	(984, 308)
+			    quidu      	"3C584D070221"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	184
+			    justify    	0
+			    label      	"Interrupt( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@79
+			supplier   	@62
+			Focus_Src  	@80
+			Focus_Entry 	@63
+			origin     	(288, 352)
+			terminus   	(1680, 352)
+			ordinal    	0)
+		    (object AttachView "" @98
+			stereotype 	TRUE
+			line_color 	3342489
+			client     	@74
+			supplier   	@72
+			vertices   	(list Points
+			    (1863, 584)
+			    (1581, 622)
+			    (1280, 480))
+			line_style 	0)
+		    (object SelfMessView "" @99
+			location   	(0, 1488)
+			label      	(object SegLabel @100
+			    Parent_View 	@99
+			    location   	(955, 1444)
+			    quidu      	"3C5863BE010A"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	362
+			    justify    	0
+			    label      	"SetTxBufferReady( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@67
+			supplier   	@67
+			Focus_Src  	@70
+			origin     	(880, 1488)
+			terminus   	(1030, 1488)
+			ordinal    	6)
+		    (object InterMessView "" @101
+			location   	(0, 1984)
+			label      	(object SegLabel @102
+			    Parent_View 	@101
+			    location   	(984, 1940)
+			    quidu      	"3C5863FF017C"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	184
+			    justify    	0
+			    label      	"Interrupt( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@79
+			supplier   	@62
+			Focus_Src  	@82
+			Focus_Entry 	@65
+			origin     	(288, 1984)
+			terminus   	(1680, 1984)
+			ordinal    	9)
+		    (object InterMessView "" @103
+			location   	(0, 1856)
+			label      	(object SegLabel @104
+			    Parent_View 	@103
+			    location   	(568, 1812)
+			    quidu      	"3C58641E025C"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	269
+			    justify    	0
+			    label      	"WriteRxData( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@79
+			supplier   	@67
+			Focus_Src  	@82
+			Focus_Entry 	@71
+			origin     	(288, 1856)
+			terminus   	(848, 1856)
+			ordinal    	8)
+		    (object NoteView @105
+			location   	(2016, 1808)
+			label      	(object ItemLabel
+			    Parent_View 	@105
+			    location   	(1835, 1702)
+			    fill_color 	13434879
+			    nlines     	4
+			    max_width  	327
+			    label      	"Notifies CPU that Data Has been read and the Tx Register is clear")
+			line_color 	3342489
+			fill_color 	13434879
+			width      	387
+			height     	225)
+		    (object AttachView "" @106
+			stereotype 	TRUE
+			line_color 	3342489
+			client     	@105
+			supplier   	@104
+			line_style 	0)
+		    (object AttachView "" @107
+			stereotype 	TRUE
+			line_color 	3342489
+			client     	@105
+			supplier   	@102
+			line_style 	0)
+		    (object AttachView "" @108
+			stereotype 	TRUE
+			line_color 	3342489
+			client     	@105
+			supplier   	@97
+			line_style 	0)))
+	    (object InteractionDiagram "ReadData"
+		mechanism_ref 	@32
+		quid       	"3C584DA700CC"
+		title      	"ReadData"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list
+		    (object InterObjView "$UNNAMED$37" @109
+			location   	(416, 224)
+			font       	(object Font
+			    underline  	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@109
+			    location   	(416, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	282
+			    justify    	0
+			    label      	"")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3C584DAC034A"
+			width      	300
+			height     	1041
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @110
+			    location   	(416, 384)
+			    line_color 	3342489
+			    InterObjView 	@109
+			    height     	280
+			    y_coord    	220
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @111
+			    location   	(416, 848)
+			    line_color 	3342489
+			    InterObjView 	@109
+			    height     	60
+			    y_coord    	0
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @112
+			    location   	(416, 1040)
+			    line_color 	3342489
+			    InterObjView 	@109
+			    height     	136
+			    y_coord    	76
+			    Nested     	FALSE))
+		    (object InterObjView "$UNNAMED$38" @113
+			location   	(1040, 224)
+			font       	(object Font
+			    underline  	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@113
+			    location   	(1040, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	282
+			    justify    	0
+			    label      	"")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3C584DB103B6"
+			width      	300
+			height     	1041
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @114
+			    location   	(1040, 384)
+			    line_color 	3342489
+			    InterObjView 	@113
+			    height     	60
+			    y_coord    	0
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @115
+			    location   	(1040, 688)
+			    line_color 	3342489
+			    InterObjView 	@113
+			    height     	60
+			    y_coord    	0
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @116
+			    location   	(1040, 800)
+			    line_color 	3342489
+			    InterObjView 	@113
+			    height     	168
+			    y_coord    	108
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @117
+			    location   	(1040, 1056)
+			    line_color 	3342489
+			    InterObjView 	@113
+			    height     	60
+			    y_coord    	0
+			    Nested     	FALSE))
+		    (object InterObjView "$UNNAMED$39" @118
+			location   	(1648, 224)
+			font       	(object Font
+			    underline  	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@118
+			    location   	(1648, 249)
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	360
+			    justify    	0
+			    label      	"")
+			icon       	"Actor"
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3C584DBC03E4"
+			width      	336
+			height     	1041
+			icon_height 	162
+			icon_width 	120
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @119
+			    location   	(1648, 544)
+			    line_color 	3342489
+			    InterObjView 	@118
+			    height     	60
+			    y_coord    	0
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @120
+			    location   	(1648, 688)
+			    line_color 	3342489
+			    InterObjView 	@118
+			    height     	340
+			    y_coord    	280
+			    Nested     	FALSE))
+		    (object InterMessView "" @121
+			location   	(0, 384)
+			label      	(object SegLabel @122
+			    Parent_View 	@121
+			    location   	(728, 340)
+			    quidu      	"3C584DC50261"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	269
+			    justify    	0
+			    label      	"WriteRxData( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@109
+			supplier   	@113
+			Focus_Src  	@110
+			Focus_Entry 	@114
+			origin     	(432, 384)
+			terminus   	(1024, 384)
+			ordinal    	0)
+		    (object InterMessView "" @123
+			location   	(0, 544)
+			label      	(object SegLabel @124
+			    Parent_View 	@123
+			    location   	(1032, 500)
+			    quidu      	"3C584DD600C1"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	184
+			    justify    	0
+			    label      	"Interrupt( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@109
+			supplier   	@118
+			Focus_Src  	@110
+			Focus_Entry 	@119
+			origin     	(432, 544)
+			terminus   	(1632, 544)
+			ordinal    	1)
+		    (object InterMessView "" @125
+			location   	(0, 688)
+			label      	(object SegLabel @126
+			    Parent_View 	@125
+			    location   	(1344, 646)
+			    quidu      	"3C584DE7030A"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	266
+			    justify    	0
+			    label      	"ReadRxData( )"
+			    pctDist    	0.501736
+			    height     	43
+			    orientation 	1)
+			line_color 	3342489
+			client     	@118
+			supplier   	@113
+			Focus_Src  	@120
+			Focus_Entry 	@115
+			origin     	(1632, 688)
+			terminus   	(1056, 688)
+			ordinal    	2)
+		    (object NoteView @127
+			location   	(2032, 560)
+			label      	(object ItemLabel
+			    Parent_View 	@127
+			    location   	(1863, 451)
+			    fill_color 	13434879
+			    nlines     	4
+			    max_width  	303
+			    label      	"Obtain Data. Also Tx Buffer Ready state is obtained")
+			line_color 	3342489
+			fill_color 	13434879
+			width      	363
+			height     	231)
+		    (object AttachView "" @128
+			stereotype 	TRUE
+			line_color 	3342489
+			client     	@127
+			supplier   	@126
+			line_style 	0)
+		    (object InterMessView "" @129
+			location   	(0, 800)
+			label      	(object SegLabel @130
+			    Parent_View 	@129
+			    location   	(1344, 756)
+			    quidu      	"3C5864B4008B"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	262
+			    justify    	0
+			    label      	"WriteTxData( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	1)
+			line_color 	3342489
+			client     	@118
+			supplier   	@113
+			Focus_Src  	@120
+			Focus_Entry 	@116
+			origin     	(1632, 800)
+			terminus   	(1056, 800)
+			ordinal    	3)
+		    (object NoteView @131
+			location   	(2048, 944)
+			label      	(object ItemLabel
+			    Parent_View 	@131
+			    location   	(1895, 813)
+			    fill_color 	13434879
+			    nlines     	5
+			    max_width  	271
+			    label      	"Notify PIC that Read is complete. i.e. Data Valid flag is false")
+			line_color 	3342489
+			fill_color 	13434879
+			width      	331
+			height     	275)
+		    (object InterMessView "" @132
+			location   	(0, 848)
+			label      	(object SegLabel @133
+			    Parent_View 	@132
+			    location   	(728, 804)
+			    quidu      	"3C5864E70099"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	347
+			    justify    	0
+			    label      	"PLADataInterrupt( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	1)
+			line_color 	3342489
+			client     	@113
+			supplier   	@109
+			Focus_Src  	@116
+			Focus_Entry 	@111
+			origin     	(1024, 848)
+			terminus   	(432, 848)
+			ordinal    	4)
+		    (object InterMessView "" @134
+			location   	(0, 1056)
+			label      	(object SegLabel @135
+			    Parent_View 	@134
+			    location   	(728, 1012)
+			    quidu      	"3C586529030B"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	259
+			    justify    	0
+			    label      	"ReadTxData( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@109
+			supplier   	@113
+			Focus_Src  	@112
+			Focus_Entry 	@117
+			origin     	(432, 1056)
+			terminus   	(1024, 1056)
+			ordinal    	5)
+		    (object NoteView @136
+			location   	(736, 1312)
+			label      	(object ItemLabel
+			    Parent_View 	@136
+			    location   	(436, 1199)
+			    fill_color 	13434879
+			    nlines     	4
+			    max_width  	565
+			    label      	"Start again at top if more data available")
+			line_color 	3342489
+			fill_color 	13434879
+			width      	625
+			height     	238)))))
+    root_subsystem 	(object SubSystem "Component View"
+	quid       	"3C5836810038"
+	physical_models 	(list unit_reference_list)
+	physical_presentations 	(list unit_reference_list
+	    (object Module_Diagram "Main"
+		quid       	"3C58368201E5"
+		title      	"Main"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list))))
+    process_structure 	(object Processes
+	quid       	"3C5836810039"
+	ProcsNDevs 	(list
+	    (object Process_Diagram "Deployment View"
+		quid       	"3C583681003F"
+		title      	"Deployment View"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list))))
+    properties 	(object Properties
+	quid       	"3C583681003A"))

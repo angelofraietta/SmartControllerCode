@@ -1,0 +1,2843 @@
+CCS PCM C Compiler, Version 3.060, 12652
+
+               Filename: C:\DEVELOP\MIDICO~3\MIDICO~1\CODE\DIGOUT.LST
+
+               ROM used: 392 (5%)
+                         Largest free fragment is 2048
+               RAM used: 103 (59%) at main() level
+                         116 (66%) worst case
+               Stack:    3 worst case (1 in main + 2 for interrupts)
+
+*
+0000:  MOVLW  00
+0001:  MOVWF  0A
+0002:  GOTO   12F
+0003:  NOP
+0004:  MOVWF  7F
+0005:  SWAPF  03,W
+0006:  BCF    03.5
+0007:  BCF    03.6
+0008:  MOVWF  21
+0009:  MOVF   0A,W
+000A:  MOVWF  20
+000B:  CLRF   0A
+000C:  MOVF   04,W
+000D:  MOVWF  22
+000E:  MOVF   77,W
+000F:  MOVWF  23
+0010:  MOVF   78,W
+0011:  MOVWF  24
+0012:  MOVF   79,W
+0013:  MOVWF  25
+0014:  MOVF   7A,W
+0015:  MOVWF  26
+0016:  MOVF   7B,W
+0017:  MOVWF  27
+0018:  BCF    03.7
+0019:  BCF    03.5
+001A:  BTFSS  0B.4
+001B:  GOTO   01E
+001C:  BTFSC  0B.1
+001D:  GOTO   037
+001E:  MOVLW  8C
+001F:  MOVWF  04
+0020:  BTFSS  00.5
+0021:  GOTO   024
+0022:  BTFSC  0C.5
+0023:  GOTO   03A
+0024:  MOVF   22,W
+0025:  MOVWF  04
+0026:  MOVF   23,W
+0027:  MOVWF  77
+0028:  MOVF   24,W
+0029:  MOVWF  78
+002A:  MOVF   25,W
+002B:  MOVWF  79
+002C:  MOVF   26,W
+002D:  MOVWF  7A
+002E:  MOVF   27,W
+002F:  MOVWF  7B
+0030:  MOVF   20,W
+0031:  MOVWF  0A
+0032:  SWAPF  21,W
+0033:  MOVWF  03
+0034:  SWAPF  7F,F
+0035:  SWAPF  7F,W
+0036:  RETFIE
+0037:  BCF    0A.3
+0038:  BCF    0A.4
+0039:  GOTO   03D
+003A:  BCF    0A.3
+003B:  BCF    0A.4
+003C:  GOTO   054
+....................  #include "16f877.h" 
+....................  //////// Standard Header file for the PIC16F877 device //////////////// 
+.................... #device PIC16F877 
+.................... #list 
+.................... 
+....................  
+.................... #include "../../mididriver/midiflags.h" 
+....................  /************************************************************* 
+.................... Module contains Flags used for using 16 bit word as bitmask 
+....................  
+.................... Tx and RX are respective to the Smart Controller CPU device 
+.................... The Midi IO board, therefore would treat it's tx as RX 
+.................... *************************************************************/ 
+....................  
+.................... #define TX_DATA_MASK    0x8000 
+.................... #define DATA_TYPE_MASK   0x7000 
+.................... #define DATA_PARAMS_MASK 0x0F00 
+.................... #define DATA_VALUE_MASK  0x00FF 
+....................  
+.................... // define the diagnostic messages 
+....................  
+.................... #define DIAG_DIAG_MESSAGE_FLAG 0xFF 
+....................  
+.................... #define DIAG_INVALID_RX_DATA 0xFFFF //this means this message is bad 
+.................... #define DIAG_MESSAGE_MASK 0xFF00 // we are checking the first byte 
+.................... #define DIAG_RE_TRANSMIT_LAST_MESSAGE 0xFF00 // We are requesting the last message be re-sent 
+.................... #define DIAG_ETX 0xFF01 // This is the End of our transmission. Pic Requires a response 
+.................... #define DIAG_ECHO 0xFF02 // Same Data is returned. Initiated by PIC 
+.................... #define DIAG_RESET 0xFF03 // Reset. Sent by 386 upon device driver startup 
+.................... #define DIAG_ASYNC_MESSAGE_READY 0xFF04 // 386 has a message ready, transmitted asynchronously from 386. 
+.................... #define DIAG_SYNC_MESSAGE_READY 0xFF05 // 386 has a message ready, transmitted within context of ISR from 386.   
+.................... #define DIAG_RECEIVE_RESPONSE  0xFF06 // 386 has received PICS message but has no data. Response still required 
+.................... #define DIAG_REQUEST_RX_BYTES  0xFF07 // requesting the number of Data bytes received be returned 
+.................... #define DIAG_REQUEST_TX_BYTES  0xFF08 // requesting the number of Data bytes transmitted be returned 
+.................... #define DIAG_INCOMPLETE_PLA    0xFF09 // this is what the Pla will give out if it has not been loded properly 
+.................... // Synchronisation returns have the number as the last nibble. Value is therefore 0 to F 
+.................... #define DIAG_RETURN_RX_BYTES   0xFFE0 
+.................... #define DIAG_RETURN_TX_BYTES   0xFFD0 
+.................... #define DIAG_TEST_RETURN_BYTES_MASK 0xFFF0 // AND with Diag message to determine whether it is a synch mask 
+.................... #define DIAG_RETURN_BYTES_MASK 0x0001 // AND with Message to read the number of bytes. Only test 1 and zero 
+....................  
+.................... #define SYSEX_START_STATUS 0xF0 
+.................... #define SYSEX_END_STATUS 	 0xF7 
+.................... 	 
+.................... /************************************************* 
+.................... 16 bit Message Consists of following Bits 
+....................  
+.................... T  DDD CCCC DATABYTE 
+....................  
+.................... T = Transmit Data - 1 bit 
+.................... DDD = Data Types - 3 bits (listed below). Up to a maximum of 7 
+.................... CCCC = Channel - 4 bits (16 channels) 
+.................... DATABYTE = Message Data Value - 8 bits 
+....................  
+.................... Note that DDDCCCC that equals 7F is a diag message 
+.................... **************************************************/ 
+.................... #define TX_DATA_FLAG      0x80 
+....................  
+.................... // define four Data Types. Last three bits of first byte. Remaining are Type specific 
+....................  
+.................... #define MIDI_CHAN_1_DATA  0x00 
+.................... #define MIDI_CHAN_2_DATA  0x10 
+.................... #define ANALOG_DATA       0x20 
+.................... #define DIGITAL_DATA      0x30 
+....................  
+.................... #define EEPROM_WRITE_PAGE_SIZE 64 // the maximum we are allowed to write at one time 
+.................... #define EEPROM_READ_PAGE_SIZE  128 // the number of bytes we will receive from the IO card 
+.................... #define EEPROM_INT_PAGE_SIZE   256 
+....................  
+.................... // define EEPROM flags  
+.................... #define EEPROM_DATA          0x40  
+.................... #define EEPROM_INIT_ADDRESS  0x41 // sent by 386 
+.................... #define EEPROM_START_WRITE   0x42 // sent by 386 
+.................... #define EEPROM_END_WRITE     0x43 // completes the page write 
+.................... #define EEPROM_WRITE_READY   0x44 // sent by PIC 
+.................... #define EEPROM_END_READ      0x45 // sent by PIC 
+.................... #define EEPROM_BLOCK_READ    0x46 // sent by 386 
+....................  
+.................... // define masks to Disable and enable IO 
+.................... #define EEPROM_START         0x47 
+.................... #define EEPROM_END           0x48 
+....................  
+.................... // define Masks for the internal rom 
+.................... #define INT_EEPROM_DATA      0x49 
+.................... #define INT_EEPROM_READ      0x4A 
+....................  
+.................... // define flags for IO infortmation 
+.................... #define IO_FLAGS             0x50 
+.................... #define IO_NUM_PATCHES       IO_FLAGS // the data will contain the number 
+....................  
+.................... 
+....................  
+.................... #define IOCARD_BUILD 
+....................  
+.................... #device adc=8 
+.................... #fuses HS, WDT, BROWNOUT, PUT, NOLVP , PROTECT 
+....................  
+.................... #define _SIMULATE 
+....................  
+....................  
+.................... // define pins for SPI input reads and output writes 
+.................... #define SPI_IN_LATCH      PIN_C2 
+.................... #define SPI_CLOCK         PIN_C3 
+....................  
+.................... #define SPI_DATA_OUT      PIN_D1 
+.................... #define DIGITAL_OUT_LATCH PIN_D2 
+.................... #define DIGITAL_IN_DATA   PIN_C4 
+.................... #define LCD_CLK           SPI_CLOCK          
+.................... #define LCD_DATA          SPI_DATA_OUT 
+.................... #define LCD_ENABLE        PIN_D0 
+....................    
+.................... // define PLA Pins 
+.................... #define PLA_CLK                 PIN_D5 
+.................... #define SPI_PLA_DATA_OUT        PIN_D4 
+.................... #define SPI_PLA_DATA_IN         PIN_D6 
+....................  
+.................... //#define SPI_PLA_DATA          PIN_D4 
+.................... #define SPI_PLA_DATA_DIR        PIN_D3 
+....................  
+.................... #define CYCLE_COUNT 2 
+....................  
+.................... // set the following define to Do a count test 
+.................... //#define DIAG_COUNT 
+....................  
+....................  
+.................... #ifdef _SIMULATE 
+.................... #define _NO_DELAY 
+.................... #else 
+.................... #define _USE_PRINTF 
+.................... #endif 
+....................  
+.................... #define NUM_ANALOGUE_OUT 8 
+.................... #define NUM_DIGITAL_OUT 16 
+....................  
+....................  
+.................... #use delay(clock=20000000) 
+....................  
+.................... #define MIDIOUT_1_PIN PIN_C6 
+.................... #define MIDIOUT_2_PIN PIN_C5 
+.................... #define MIDI_IN_PIN PIN_C7 
+....................  
+.................... #define WATCHDOG_OVERFLOW_COUNT     255 
+.................... #define WATCHDOG_NORMAL_COUNT       5000L 
+.................... #define WATCHDOG_PATCH_LOADED_COUNT 1000L 
+.................... #define WATCHDOG_EEPROM_COUNT       20 
+.................... #define NUM_MAX_OVERFLOW_BLINK      10 
+.................... #define MAX_RESENDS                 2 
+....................  
+.................... #define NUM_ANALOGUE_IN_BANKS 2 
+.................... #define NUM_ANALOGUE_IN_SUB_BANKS 8 
+.................... #define NUM_ANALOGUE_IN_CHANS (NUM_ANALOGUE_IN_BANKS * NUM_ANALOGUE_IN_SUB_BANKS) 
+.................... #define AD_READ_DELAY 20 // num us to delay from setting channel to making read 
+.................... #define AD_SWITCH_DELAY 1 // num us to wait between switching analog switch to reading 
+.................... #define NUM_ANALOG_VALID_READS 2 // must be this many identical reads to be a valid input 
+....................  
+.................... //#define SEVEN_BIT_AD 
+....................  
+.................... #ifdef SEVEN_BIT_AD 
+.................... #define DIG_ON_VAL 0x7f 
+.................... #else 
+.................... #define DIG_ON_VAL 0xff 
+.................... #endif 
+....................  
+.................... #byte PORTA = 5 
+.................... #byte PORTB = 6 
+.................... #byte PORTC = 7 
+....................  
+....................  
+.................... #use rs232(baud=31250, xmit=MIDIOUT_1_PIN, rcv=MIDI_IN_PIN, ERRORS)  
+*
+0046:  BTFSS  0C.5
+0047:  GOTO   046
+0048:  MOVF   18,W
+0049:  MOVWF  28
+004A:  MOVF   1A,W
+004B:  MOVWF  78
+004C:  BTFSS  28.1
+004D:  GOTO   050
+004E:  BCF    18.4
+004F:  BSF    18.4
+0050:  NOP
+0051:  BCF    0A.3
+0052:  BCF    0A.4
+0053:  GOTO   055 (RETURN)
+....................  
+.................... #USE I2C(master, sda=PIN_B7, scl=PIN_B6) 
+.................... #use fast_io(e)   
+....................  
+.................... #define IO_INTERUPT_OUT_DATA PIN_E1 
+.................... #define IO_INTERUPT_OUT_MIDI PIN_E2 
+.................... //#define IO_INTERUPT_OUT_MIDI PIN_E1 
+....................  
+.................... typedef struct 
+.................... { 
+....................   byte flags; 
+....................   byte data; 
+.................... } str_PLA_Data; 
+....................  
+....................  
+.................... short resync_required = true; 
+.................... short patch_loaded = false; 
+....................  
+.................... int num_overflow_blinks = 0; 
+.................... int16 quiet_cycles = 0; // the number of cycles where we have heard nothing 
+....................  
+.................... short enable_analogs = true; 
+.................... short processing_analogs = true; // this defines whethere we are in the analog processing loop 
+....................  
+.................... #define MAX_QUIET_CYCLES  5000 
+....................  
+.................... void MessageRead() 
+.................... { 
+....................   resync_required = false; 
+.................... } 
+....................  
+.................... #include "cfgram.h" 
+....................  /********************************************************* 
+.................... Module for storing configuration in Pic EEProm 
+.................... ********************************************************/ 
+....................  
+....................  
+.................... //#inline 
+.................... void WriteConfigByte (int index, byte config_byte) 
+.................... { 
+....................  
+.................... #ifndef _SIMULATE 
+....................   restart_wdt(); 
+.................... 	write_eeprom (index, config_byte); 
+....................   restart_wdt(); 
+.................... #else // let us decode from here 
+....................   int x; 
+....................   x = index; 
+.................... #endif 
+.................... } // end WriteConfigByte 
+....................  
+....................  
+.................... #inline 
+.................... byte ReadConfigByte (int index) 
+.................... { 
+.................... 	return read_eeprom (index); 
+.................... } // end ReadConfigByte 
+.................... 
+.................... #include "lcd.h" 
+....................  //////////////////////////////////////////////////////////////////////////// 
+.................... ////                             LCD.C                                  //// 
+.................... ////                 Driver for common LCD modules                      //// 
+.................... ////                                                                    //// 
+.................... ////  lcd_init()   Must be called before any other function.            //// 
+.................... ////                                                                    //// 
+.................... ////  lcd_putc(c)  Will display c on the next position of the LCD.      //// 
+.................... ////                     The following have special meaning:            //// 
+.................... ////                      \f  Clear display                             //// 
+.................... ////                      \n  Go to start of second line                //// 
+.................... ////                      \b  Move back one position                    //// 
+.................... ////                                                                    //// 
+.................... ////  lcd_gotoxy(x,y) Set write position on LCD (upper left is 1,1)     //// 
+.................... ////                                                                    //// 
+.................... ////  lcd_getc(x,y)   Returns character at position x,y on LCD          //// 
+.................... ////                                                                    //// 
+.................... //////////////////////////////////////////////////////////////////////////// 
+.................... ////        (C) Copyright 1996,1997 Custom Computer Services            //// 
+.................... //// This source code may only be used by licensed users of the CCS C   //// 
+.................... //// compiler.  This source code may only be distributed to other       //// 
+.................... //// licensed users of the CCS C compiler.  No other use, reproduction  //// 
+.................... //// or distribution is permitted without written permission.           //// 
+.................... //// Derivative programs created using this software in object code     //// 
+.................... //// form are not restricted in any way.                                //// 
+.................... //////////////////////////////////////////////////////////////////////////// 
+....................  
+.................... // This code Modified by Angelo Fraietta for use as a 3 wire interface 
+.................... // using a 16 x 2 LCD 
+....................  
+.................... // The following Pins must be defined 
+.................... // LCD_CLK 
+.................... // LCD_DATA 
+.................... // LCD_ENABLE 
+....................  
+....................  
+.................... #define lcd_type 2           // 0=5x7, 1=5x10, 2=2 lines 
+.................... #define lcd_line_two 0x40    // LCD RAM address for the second line 
+....................  
+.................... const byte LCD_INIT_STRING [] = {0x38, 0x01, 0x0C};  
+....................                              // These bytes need to be sent to the LCD 
+....................                              // to start it up. 
+....................  
+....................  
+....................                              // The following are used for setting 
+....................                              // the I/O port direction register. 
+....................  
+....................  
+.................... // sends data to LCD. If data_type is True, then is a data byte, otherwise is a command byte 
+.................... void lcd_send_byte(byte out_byte, short data_type)  
+.................... { 
+.................... 	int byte_num; 
+.................... 	// prepare clock and enable 
+.................... 	output_low (LCD_CLK); 
+.................... 	output_high (LCD_ENABLE); 
+....................    
+.................... 	for (byte_num = 0; byte_num < 8; byte_num++) 
+.................... 		{	 
+.................... 			// write the high bit 
+.................... 			output_bit (LCD_DATA, bit_test (out_byte, 7)); 
+.................... 			out_byte<<=1; 
+....................  
+.................... 			// now clock register 
+.................... 			output_high (LCD_CLK); 
+.................... 			output_low (LCD_CLK); 
+.................... 		} 
+....................  
+.................... 	// now output the RS bit (do not clock) 
+.................... 	output_bit (LCD_DATA,data_type); 
+....................   	 
+....................   output_low (LCD_ENABLE); 
+.................... } 
+....................  
+....................  
+.................... void lcd_init()  
+.................... { 
+.................... 	byte i; 
+....................   byte j; 
+....................  
+.................... 	delay_ms(25); 
+....................    
+....................   for (j = 0; j < 3; j++) 
+....................     { 
+....................     lcd_send_byte(0x38, false); 
+....................     delay_ms(2); 
+....................     } 
+....................  
+.................... 	for(i = 0; i< sizeof(LCD_INIT_STRING); i++) 
+.................... 		{ 
+.................... 			lcd_send_byte(LCD_INIT_STRING[i], false); 
+....................       delay_ms(2); 
+.................... 		} 
+.................... } 
+....................  
+....................  
+.................... void lcd_gotoxy( byte x, byte y) { 
+....................    byte address; 
+....................  
+....................    if(y!=1) 
+....................      address=lcd_line_two; 
+....................    else 
+....................      address=0; 
+....................    address+=x-1; 
+....................    lcd_send_byte(0x80|address, false); 
+.................... } 
+....................  
+.................... void lcd_putc( char c) { 
+....................    switch (c)  
+.................... 		 { 
+.................... 		 case '\f':  
+.................... 			 lcd_send_byte(1, false); 
+.................... 			 delay_ms(2); 
+.................... 			 break; 
+.................... 			  
+.................... 		 case '\n':  
+.................... 			 lcd_gotoxy(1,2);         
+.................... 			 break; 
+....................  
+....................      case '\b':  
+.................... 			 lcd_send_byte(0x10, false);   
+.................... 			 break; 
+....................  
+....................      default:  
+.................... 			 lcd_send_byte(c, true);      
+.................... 			 break; 
+....................    } 
+.................... } 
+....................  
+....................  
+.................... 
+.................... #include "watchdog.h" 
+....................   
+.................... #define NUM_WD_FLASHES	8 
+....................  
+.................... //#ifndef WATCHDOG_PIN 
+.................... #define WATCHDOG_PIN	PIN_C0 
+.................... //#endif 
+....................  
+.................... void FlashWatchdog(int16 ms_time) 
+.................... { 
+.................... 		output_high (WATCHDOG_PIN); 
+.................... 		restart_wdt(); 
+.................... #ifndef _SIMULATE 
+.................... 		delay_ms (ms_time); 
+.................... #endif 
+.................... 		restart_wdt(); 
+.................... 		output_low (WATCHDOG_PIN); 
+.................... #ifndef _SIMULATE 
+.................... 		delay_ms (ms_time); 
+.................... #endif 
+.................... 		restart_wdt(); 
+.................... } 
+....................  
+.................... void SetWatchdogLed (short value) 
+.................... { 
+.................... 	output_bit (WATCHDOG_PIN, value); 
+.................... } 
+....................  
+.................... void InitialiseWatchdog() 
+.................... { 
+.................... 	int i; 
+.................... 	for (i = 0; i < NUM_WD_FLASHES; i++) 
+.................... 		{ 
+.................... 			FlashWatchdog(100); 
+.................... 			restart_wdt(); 
+.................... 		} 
+.................... } 
+....................  
+.................... 
+....................  
+.................... #include "pla_io.h" 
+....................  #ifndef PLA_IO_H 
+.................... #define PLA_IO_H 
+....................  
+....................  
+.................... #define WRITE_TRIS_VAL 0xE0 
+.................... #define READ_TRIS_VAL  0xd0  
+....................  
+.................... void MessageRead(); //forward declaration of function 
+....................  
+.................... #define PLA_DATA_SIZE 2 // 2 bytes in a PLA transfer 
+.................... #define VALID_DATA_VALUE 0 // bit that defines whether a read has a valid value 
+....................  
+.................... short tx_ready = true; 
+.................... short message_received = false; 
+.................... short awaiting_response = false; 
+.................... short message_lost = false; 
+.................... short midi_tx = false; // defines whether we send a mid or data irq 
+....................  
+.................... str_PLA_Data pla_out_data, pla_in_data, prev_pla_out; 
+....................  
+.................... #inline 
+.................... void SavePlaMessage() // saves the Pla message in case we need to re-send it 
+.................... { 
+....................   // store the old value 
+....................   prev_pla_out.flags = pla_out_data.flags; 
+....................   prev_pla_out.data = pla_out_data.data; 
+.................... } 
+....................  
+.................... #inline 
+.................... void WritePlaFlags() 
+.................... { 
+.................... 	if (bit_test (pla_out_data.flags, 7))  
+....................     { 
+....................       output_bit (SPI_PLA_DATA_OUT, 1); 
+....................     } 
+.................... 	else 
+.................... 		{ 
+.................... 			output_bit (SPI_PLA_DATA_OUT, 0); 
+....................     } 
+....................  
+.................... 	// now clock register 
+.................... 	output_high (PLA_CLK); 
+.................... 	 
+.................... 	output_low (PLA_CLK); 
+.................... } // end WritePlaFlags 
+....................  
+.................... #inline 
+.................... void WritePlaData() 
+.................... { 
+.................... 	if (bit_test (pla_out_data.data, 7))  
+....................     { 
+....................       output_bit (SPI_PLA_DATA_OUT, 1); 
+....................     } 
+.................... 	else 
+.................... 		{ 
+.................... 			output_bit (SPI_PLA_DATA_OUT, 0); 
+....................     } 
+.................... 	 
+....................  
+.................... 	 
+.................... 	// now clock register 
+.................... 	output_high (PLA_CLK); 
+.................... 	 
+.................... 	output_low (PLA_CLK); 
+.................... } // end WritePlaData 
+....................  
+.................... #inline  
+.................... void ReadPlaFlags() 
+.................... { 
+.................... 	// read the input 
+.................... 	if (input (SPI_PLA_DATA_IN)) 
+.................... 		{ 
+.................... 			pla_in_data.flags |= 0x01; 
+.................... 		} 
+.................... 	 
+.................... 	// now clock register 
+.................... 	output_high (PLA_CLK); 
+.................... 	 
+.................... 	output_low (PLA_CLK); 
+.................... 					 
+.................... } // end ReadPlaFlags; 
+....................  
+.................... #inline  
+.................... void ReadPlaData() 
+.................... { 
+.................... 	if (input (SPI_PLA_DATA_IN)) 
+.................... 		{ 
+.................... 			pla_in_data.data |= 0x01; 
+.................... 		} 
+.................... 	 
+.................... 	// now clock register 
+.................... 	output_high (PLA_CLK); 
+.................... 	 
+.................... 	output_low (PLA_CLK); 
+.................... 					 
+.................... } // end ReadPlaData 
+....................  
+.................... #inline 
+.................... short PlaTxReady() 
+.................... { 
+....................   return tx_ready; 
+.................... } 
+....................  
+.................... #inline MessageWaiting() 
+.................... { 
+....................   return message_received; 
+.................... } 
+....................  
+.................... #int_ext 
+.................... ProcessInterrupt() 
+.................... { 
+....................   output_low(IO_INTERUPT_OUT_DATA); // by removing this we may just prevent the PC from reading an interrupt we just sent 
+*
+003D:  BCF    09.1
+....................   output_low(IO_INTERUPT_OUT_MIDI); // by removing this we may just prevent the PC from reading an interrupt we just sent 
+003E:  BCF    09.2
+....................   message_received = true; 
+003F:  BSF    29.5
+....................   tx_ready = true; 
+0040:  BSF    29.4
+....................   message_lost = false; 
+0041:  BCF    29.7
+....................  
+.................... } 
+....................  
+....................  
+.................... /******************************************************************** 
+....................  writes 16 bit word to pla 
+.................... *********************************************************************/ 
+....................  
+....................  
+0042:  BCF    0B.1
+0043:  BCF    0A.3
+0044:  BCF    0A.4
+0045:  GOTO   024
+.................... #inline 
+.................... void Pla_write_fast_data () 
+.................... { 
+.................... #use fast_io(d) 
+.................... 	int byte_num; 
+.................... 	int bit_num; 
+.................... 	byte out_val; 
+.................... 	short data_val; 
+....................  
+....................   // prepare Direction 
+....................   set_tris_d (WRITE_TRIS_VAL); 
+....................  
+.................... 	output_low (PLA_CLK); 
+.................... 	output_high(SPI_PLA_DATA_DIR); 
+....................  
+....................   // set the MSB to a one so we can stop the shifting in the pla 
+....................   bit_set (pla_out_data.flags, 7); 
+....................  
+....................   //out_val = pla_out_data.flags; 
+....................   WritePlaFlags(); 
+.................... 	pla_out_data.flags<<=1; 
+....................   WritePlaFlags(); 
+.................... 	pla_out_data.flags<<=1; 
+....................   WritePlaFlags(); 
+.................... 	pla_out_data.flags<<=1; 
+....................   WritePlaFlags(); 
+.................... 	pla_out_data.flags<<=1; 
+....................   WritePlaFlags(); 
+.................... 	pla_out_data.flags<<=1; 
+....................   WritePlaFlags(); 
+.................... 	pla_out_data.flags<<=1; 
+....................   WritePlaFlags(); 
+.................... 	pla_out_data.flags<<=1; 
+....................   WritePlaFlags(); 
+....................  
+....................  
+....................  
+.................... 	// now write the data byte 
+.................... 	WritePlaData(); 
+.................... 	pla_out_data.data<<=1; 
+.................... 	WritePlaData(); 
+.................... 	pla_out_data.data<<=1; 
+.................... 	WritePlaData(); 
+.................... 	pla_out_data.data<<=1; 
+.................... 	WritePlaData(); 
+.................... 	pla_out_data.data<<=1; 
+.................... 	WritePlaData(); 
+.................... 	pla_out_data.data<<=1; 
+.................... 	WritePlaData(); 
+.................... 	pla_out_data.data<<=1; 
+.................... 	WritePlaData(); 
+.................... 	pla_out_data.data<<=1; 
+.................... 	WritePlaData(); 
+.................... 	 
+.................... 	 
+....................   set_tris_d (READ_TRIS_VAL); 
+.................... } 
+....................  
+.................... /************************************************************************* 
+.................... Reads 16 bit word plus test bit from PLA. Returns true if test bit is valid 
+.................... ret_data contains returned data 
+.................... *************************************************************************/ 
+....................  
+.................... #inline 
+.................... void Pla_fast_read_data () 
+.................... { 
+.................... 	int byte_num; 
+.................... 	int bit_num; 
+.................... 	short data_val; 
+.................... #use fast_io(d) 
+....................  
+....................   message_received = false; // clear flag as there is no longer a message available 
+.................... 	// prepare clock 
+....................  
+....................   set_tris_d (READ_TRIS_VAL); 
+....................  
+.................... 	output_low (SPI_CLOCK); 
+.................... 	pla_in_data.flags = 0; 
+.................... 	pla_in_data.data = 0; 
+....................  
+....................   // prepare for read 
+.................... 	output_low(SPI_PLA_DATA_DIR); 
+....................  
+.................... 	ReadPlaFlags();	 
+.................... 	pla_in_data.flags <<= 1;  
+.................... 	ReadPlaFlags();	 
+.................... 	pla_in_data.flags <<= 1;  
+.................... 	ReadPlaFlags();	 
+.................... 	pla_in_data.flags <<= 1;  
+.................... 	ReadPlaFlags();	 
+.................... 	pla_in_data.flags <<= 1;  
+.................... 	ReadPlaFlags();	 
+.................... 	pla_in_data.flags <<= 1;  
+.................... 	ReadPlaFlags();	 
+.................... 	pla_in_data.flags <<= 1;  
+.................... 	ReadPlaFlags();	 
+.................... 	pla_in_data.flags <<= 1;  
+.................... 	ReadPlaFlags();	 
+....................  
+....................  
+.................... 	ReadPlaData(); 
+.................... 	pla_in_data.data <<= 1;  
+.................... 	ReadPlaData(); 
+.................... 	pla_in_data.data <<= 1;  
+.................... 	ReadPlaData(); 
+.................... 	pla_in_data.data <<= 1;  
+.................... 	ReadPlaData(); 
+.................... 	pla_in_data.data <<= 1;  
+.................... 	ReadPlaData(); 
+.................... 	pla_in_data.data <<= 1;  
+.................... 	ReadPlaData(); 
+.................... 	pla_in_data.data <<= 1;  
+.................... 	ReadPlaData(); 
+.................... 	pla_in_data.data <<= 1;  
+.................... 	ReadPlaData(); 
+....................  
+....................  
+....................   // make PLA Data Dir Write 
+....................   output_high(SPI_PLA_DATA_DIR); 
+....................  
+.................... } 
+....................  
+....................  
+....................  
+.................... void Pla_Send_data () //(int* out_data) 
+.................... { 
+.................... #use fast_io(e)   
+.................... #use fast_io(d)   
+....................    
+....................   tx_ready = false; // set flag that we are no longer ready to Transmit 
+....................   message_lost = false; 
+....................  
+....................  
+....................   output_low(IO_INTERUPT_OUT_DATA); 
+....................   output_low(IO_INTERUPT_OUT_MIDI); 
+....................    
+....................   Pla_write_fast_data(); 
+....................  
+....................   awaiting_response = true;   
+....................  
+....................   //enable_interrupts(GLOBAL); 
+....................  
+....................   if (midi_tx) 
+....................     output_high(IO_INTERUPT_OUT_MIDI); 
+....................   else   
+....................     output_high(IO_INTERUPT_OUT_DATA); 
+....................  
+.................... } 
+....................  
+....................  
+.................... void InitialisePlaIn() 
+.................... { 
+....................   message_received = false; // clear flag as there is no longer a message available 
+.................... 	output_low (SPI_CLOCK); 
+....................  
+....................   Pla_fast_read_data (); 
+....................  
+....................   output_low(IO_INTERUPT_OUT_DATA); // PREPARE THE iNTERRUPT PIN 
+....................   output_low(IO_INTERUPT_OUT_MIDI); // PREPARE THE iNTERRUPT PIN 
+....................  
+.................... } 
+....................  
+.................... #endif 
+....................  
+....................  
+....................  
+....................  
+.................... 
+.................... #include "Pla_out.h" 
+....................  /************************************************************** 
+....................  * Author: Angelo Fraietta 
+....................  * Description: Midi output interface 
+....................  *************************************************************/ 
+....................  
+.................... #define PLA_OUT_QUEUE_SIZE  4 
+....................  
+.................... // forward declarations 
+.................... void ProcessPlaInputStream(); 
+.................... short PlaOutFree(); 
+....................  
+.................... typedef struct 
+.................... { 
+....................   str_PLA_Data queue_data [PLA_OUT_QUEUE_SIZE]; 
+....................   int  head :2; // the size is important as we just make the value  
+....................   int  tail :2; // cycle from 0x0 to QUEUE_SIZE by incrementing 
+....................   int overflow :1; 
+....................   int empty :1; 
+....................  
+.................... } str_pla_queue;   
+....................  
+....................  
+.................... str_pla_queue pla_out_queue; 
+....................  
+....................  
+.................... #inline  
+.................... short PlaOutQueueEmpty() 
+.................... { 
+....................   return pla_out_queue.empty; 
+.................... } // end PlaOutQueueEmpty 
+....................  
+.................... #inline  
+.................... short PlaOutQueueFull() 
+.................... { 
+.................... 	return (!pla_out_queue.empty && pla_out_queue.tail == pla_out_queue.head); 
+.................... } // end PlaOutQueueFull 
+....................  
+.................... #inline 
+.................... void InitialisePlaOutQueue() 
+.................... { 
+....................   pla_out_queue.tail = 0;  
+....................   pla_out_queue.head = 0; 
+....................   pla_out_queue.overflow = false; 
+....................   pla_out_queue.empty = true; 
+....................  
+.................... } // end InitialiseOutQueue 
+....................  
+.................... #inline 
+.................... void AddPlaQueue (byte flags, byte data) 
+.................... { 
+.................... 	pla_out_queue.queue_data [pla_out_queue.tail].flags = flags; 
+.................... 	pla_out_queue.queue_data [pla_out_queue.tail].data = data; 
+....................  
+.................... 	pla_out_queue.tail++; 
+....................  
+.................... 	pla_out_queue.empty = false; 
+.................... }  // end AddPlaQueue 
+....................  
+.................... #inline  
+.................... void GetPlaQueue () 
+.................... { 
+....................   pla_out_data.flags = pla_out_queue.queue_data [pla_out_queue.head].flags;  
+....................   pla_out_data.data = pla_out_queue.queue_data [pla_out_queue.head].data;  
+....................  
+....................   pla_out_queue.head++; 
+....................  
+....................   if (pla_out_queue.tail == pla_out_queue.head) 
+....................     { 
+....................       pla_out_queue.empty = true; 
+....................     } 
+.................... } // end GetPlaQueue 
+....................  
+....................  
+.................... #inline 
+.................... short OutputPla (int flags, int value) 
+.................... { 
+.................... 	short ret = false; 
+....................  
+.................... 	if  (!PlaOutQueueFull ()) 
+.................... 		{ 
+.................... 			AddPlaQueue (flags, value); 
+.................... 			ProcessPlaInputStream(); 
+.................... 			ret = true; 
+.................... 		} 
+....................  
+.................... 	return ret; 
+.................... } 
+....................  
+....................  
+.................... #inline 
+.................... short OutputAnalog (int channel, int value) 
+.................... { 
+....................   int flags = 0; 
+....................  
+....................   flags = (ANALOG_DATA | channel); 
+....................  
+....................   return OutputPla (flags, value); 
+.................... } 
+....................  
+.................... #inline 
+.................... short OutputDigital (int channel, int value) 
+.................... { 
+....................   int flags = 0; 
+....................   flags = (DIGITAL_DATA | channel); 
+....................   return OutputPla (flags, value); 
+....................  
+.................... } 
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+.................... 
+.................... #include "24lc256.h" 
+....................  /********************************************************** 
+....................  * I2C driver for 24LC256 32k EEPROM 
+....................  *********************************************************/ 
+....................  
+.................... #define LC256_SLAVE_MASK 0xA0 // must be ORed with slave device number 
+....................   
+.................... #define LC256_MEM_SIZE 0x00008000 
+.................... #define LC256_PAGE_SIZE 64 
+.................... #define LC256_NUM_REPOLLS 1 
+.................... #define LC256_POLL_TIME 1 
+....................  
+.................... typedef struct 
+.................... { 
+.................... 	int lower_address; 
+.................... 	int upper_address :7; 
+.................... 	int restart:1; 
+.................... 	int device; 
+.................... } str_LC256; 
+....................  
+.................... str_LC256 LC_256_device_info; // this is current device info 
+....................  
+.................... void ExtEEpromIncAddress() 
+.................... { 
+.................... 			LC_256_device_info.lower_address++; 
+.................... 			 
+.................... 			// check for cycle 
+.................... 			if (!LC_256_device_info.lower_address) 
+.................... 				{ 
+.................... 					LC_256_device_info.upper_address++; 
+.................... 					 
+.................... 					if (!LC_256_device_info.upper_address) 
+.................... 						{ 
+.................... 							LC_256_device_info.device++; 
+.................... 						} 
+.................... 				} 
+.................... } 
+....................  
+.................... void ExtEEpromScheduleRestart() 
+.................... { 
+.................... 	LC_256_device_info.restart = true; 
+.................... } 
+....................  
+.................... void ResyncEEprom() 
+.................... { 
+.................... 	LC_256_device_info.restart = true; 
+.................... 	 
+.................... #ifndef _SIMULATE 
+.................... 	 
+.................... 	i2c_read (0); // clock anything out in case we stopped during a read without sending a stop 
+.................... 	i2c_stop(); 
+.................... #endif 
+.................... 	 
+.................... } 
+....................  
+.................... void ResetEEPROM() 
+.................... { 
+.................... 	LC_256_device_info.lower_address = 0; 
+.................... 	LC_256_device_info.upper_address = 0; 
+.................... 	LC_256_device_info.restart = 1; 
+.................... 	LC_256_device_info.device = 0; 
+.................... 	 
+.................... 	ResyncEEprom(); 
+.................... 	 
+.................... } // ResetEEPROM 
+....................  
+.................... #inline 
+.................... int GenerateSlaveNum (int device_num) 
+.................... { 
+.................... 	// packs the Control Byte 
+.................... 	device_num <<= 1; 
+.................... 	return LC256_SLAVE_MASK | device_num; 
+.................... } 
+....................  
+.................... short PollSlave(int device_address, short stop) 
+.................... { 
+.................... 	short ret = false; 
+.................... 	 
+.................... 	i2c_start(); 
+.................... 	ret = !i2c_write(device_address);  
+.................... 	restart_wdt(); 
+.................... 	if (!ret) 
+.................... 		{ 
+.................... 			i2c_stop(); 
+.................... 			delay_ms (LC256_POLL_TIME); 
+.................... 		} 
+.................... 	 
+.................... 	 
+.................... 	if (ret && stop) 
+.................... 		{ 
+.................... 			i2c_stop(); 
+.................... 		} 
+.................... 	 
+.................... 	return ret; 
+.................... } // end PollSlave(int device_address, short stop) 
+....................  
+....................  
+.................... short WriteEEpromAddress () 
+.................... { 
+.................... 	short ret = false; 
+.................... 	 
+.................... #ifndef _SIMULATE 
+.................... 	ret = ! i2c_write (LC_256_device_info.upper_address); 
+.................... 	 
+.................... #else 
+.................... 	ret = true; 
+.................... #endif 
+.................... 	 
+.................... 	if (ret) 
+.................... 		{ 
+.................... #ifndef _SIMULATE 
+.................... 			ret = !i2c_write (LC_256_device_info.lower_address); 
+.................... #endif 
+.................... 		} 
+.................... 	 
+.................... 	return ret; 
+.................... 	 
+.................... } //WriteEEpromAddress 
+....................  
+.................... short InitialiseReadExtEEProm (int port_num) 
+.................... { 
+.................... 	// we will convert Port Num to the Slave Address 
+.................... 	short ret; 
+.................... 	int device_address; 
+.................... 	 
+.................... 	i2c_start(); 
+.................... 	 
+.................... 	device_address = GenerateSlaveNum (port_num) | 0x01; // the lsb is the read control bit  
+.................... 	 
+.................... #ifndef _SIMULATE 
+.................... 	ret = !i2c_write (device_address); 
+.................... #else 
+....................   ret = true; 
+.................... #endif 
+.................... 	 
+.................... 	return ret; 
+.................... } // InitialiseReadExtEEProm 
+....................  
+....................  
+.................... short InitialiseWriteExtEEPROM (int port_num) 
+.................... { 
+.................... 	// we will convert Port Num to the Slave Address 
+.................... 	short ret; 
+.................... 	int device_address; 
+.................... 	 
+.................... 	device_address = GenerateSlaveNum (port_num);  
+.................... 	 
+.................... #ifndef _SIMULATE 
+.................... 	ret = PollSlave (device_address, false); 
+.................... #else 
+....................   ret = true; 
+.................... #endif 
+.................... 	 
+.................... 	return ret; 
+.................... } // InitialiseWriteExtEEPROM 
+....................  
+....................  
+.................... short SetEEpromMemoryAddress () 
+.................... { 
+....................   short ret; 
+.................... 	 
+.................... 	ret = InitialiseWriteExtEEPROM (LC_256_device_info.device); 
+.................... 	 
+.................... 	ret |= WriteEEpromAddress (); 
+.................... 	 
+.................... 	return ret; 
+.................... } // SetEEpromMemoryAddress 
+....................  
+.................... #inline  
+.................... void FinishEEpromWrite() 
+.................... { 
+.................... 	i2c_stop(); 
+.................... 	LC_256_device_info.restart = true; 
+.................... } 
+....................  
+.................... #inline 
+.................... short CheckCurrentEEpromDevice() 
+.................... { 
+.................... 	return true; // for some reason this is not working 
+.................... 	//return PollSlave (LC_256_device_info.device, true); 
+.................... } 
+....................  
+.................... // write a byte of data to eeprom 
+.................... short WriteEEProm (int tx_byte) 
+.................... { 
+.................... 	short ret = false; 
+.................... 	 
+.................... 	 
+.................... 	// we will restart if LC256_eeprom_address is zero or a multiple of LC256_PAGE_SIZE 
+.................... 	// this is becase of physical page boundaries 
+.................... 	LC_256_device_info.restart |= !(LC_256_device_info.lower_address % LC256_PAGE_SIZE); 
+.................... 	 
+.................... 	if (LC_256_device_info.restart) 
+.................... 		{ 
+.................... 			ResyncEEprom(); 
+.................... 			ret = SetEEpromMemoryAddress(); 
+.................... 		} 
+.................... 	else 
+.................... 		{ 
+.................... 			ret = true; 
+.................... 		} 
+.................... 	 
+.................... 	if (ret) 
+.................... 		{ 
+.................... #ifndef _SIMULATE 
+.................... 			ret = !i2c_write (tx_byte); 
+.................... #endif 
+.................... 			if (ret) 
+.................... 				{ 
+.................... 					ExtEEpromIncAddress(); 
+....................  
+.................... 					// test if we are going over boundary 
+.................... 					if (!(LC_256_device_info.lower_address % LC256_PAGE_SIZE)) 
+.................... 						{ 
+.................... #ifndef _SIMULATE 
+.................... 							i2c_stop(); 
+.................... 							LC_256_device_info.restart = true; 
+.................... #else 
+.................... 							tx_byte++; // set a break point in debugger 
+.................... #endif 
+.................... 						} 
+.................... 				} 
+.................... 		} 
+.................... 	 
+.................... 	LC_256_device_info.restart = !ret; 
+.................... 	 
+.................... 	return ret; 
+.................... } // WriteEEProm  
+....................  
+....................  
+.................... short ReadEEprom (int *ret_byte) 
+.................... { 
+.................... 	short ret; 
+....................  
+.................... 	// we will restart if LC_256_device_info.upper_address is zero  
+.................... 	// this is becase of physical size of memory, not boundary 
+.................... 	LC_256_device_info.restart |= (!LC_256_device_info.upper_address && !LC_256_device_info.lower_address); 
+.................... 	 
+.................... 	if (LC_256_device_info.restart) 
+.................... 		{ 
+.................... 			ResyncEEprom(); 
+.................... 			 
+....................       ret = SetEEpromMemoryAddress(); 
+.................... 			 
+.................... 			ret &= InitialiseReadExtEEProm (LC_256_device_info.device); 
+.................... 		} 
+.................... 	else 
+.................... 		{ 
+.................... 			ret = true; 
+.................... 		} 
+.................... 	 
+.................... 	if (ret) 
+.................... 		{ 
+.................... 			ExtEEpromIncAddress(); 
+....................  
+.................... #ifndef _SIMULATE 
+.................... 			// if we are going over a boundary, we will have to send a stop 
+.................... 			if (LC_256_device_info.upper_address || LC_256_device_info.lower_address) 
+.................... 				{ 
+.................... 					*ret_byte = i2c_read (1); // send ack 
+.................... 				} 
+.................... 			else 
+.................... 				{ 
+.................... 					*ret_byte = i2c_read (0); // do not send ack 
+.................... 					LC_256_device_info.restart = true; 
+.................... 					i2c_stop(); 
+.................... 				} 
+.................... #endif 
+.................... 			 
+.................... 		} 
+....................  
+.................... 	LC_256_device_info.restart = !ret; 
+....................  
+.................... 	return ret; 
+.................... } 
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+....................  
+.................... 
+.................... #include "extprom.h" 
+....................   
+.................... // this module implements the interface between the eeprom driver and the pla 
+.................... // requires 24lc256.h 
+....................   
+.................... typedef struct 
+.................... { 
+.................... 	int reading: 1; // flag to indicate that we are doing an eeprom read 
+.................... 	int bytes_read:7; // counter that cycles back to zero 
+.................... } str_ext_eeprom; 
+....................  
+....................  
+.................... str_ext_eeprom extprom_read_state; 
+.................... byte extprom_int_index = 0; // internal EEprom Index 
+....................  
+.................... #inline 
+.................... void InitialiseEEprom() 
+.................... { 
+.................... 	ResetEEprom(); 
+.................... 	extprom_read_state.reading = 0; // clear flag 
+.................... 	extprom_read_state.bytes_read = 0; // we let this cycle back to zero 
+.................... 	extprom_int_index = 0; 
+.................... } 
+....................  
+.................... // return true if more data, false if back at zero 
+.................... #inline 
+.................... short ReadIntEEprom(byte* ret_data) 
+.................... { 
+.................... 	*ret_data = ReadConfigByte (extprom_int_index); 
+.................... 	extprom_int_index++; 
+.................... 	return (extprom_int_index); 
+.................... } 
+....................  
+.................... #inline 
+.................... void WriteIntEEprom(byte data) 
+.................... { 
+.................... 	WriteConfigByte (extprom_int_index++, data); 
+.................... } 
+....................  
+.................... #inline  
+.................... short EEpromWriteReady() 
+.................... { 
+.................... 	return CheckCurrentEEpromDevice(); 
+.................... } 
+....................  
+....................  
+.................... short ReadExtEEpromByte (byte* ret_byte) 
+.................... { 
+.................... 	short ret = false; 
+....................  
+.................... 	if (extprom_read_state.reading) 
+.................... 		{ 
+.................... 			if (extprom_read_state.bytes_read) 
+.................... 				{ 
+.................... 					ret = ReadEEprom (ret_byte); 
+.................... 					if (ret) 
+.................... 						{ 
+.................... 							extprom_read_state.bytes_read++; 
+.................... 						} 
+.................... 				} 
+.................... 			else //we have cycled back to zero Give them nothing and stop reading 
+.................... 				{ 
+.................... 					extprom_read_state.reading = 0; 
+.................... 				} 
+.................... 		} 
+.................... 	else // we were not reading when we first got here but will be now 
+.................... 		{ 
+.................... 			ret = ReadEEprom (ret_byte); 
+.................... 			if (ret) 
+.................... 				{ 
+.................... 					extprom_read_state.bytes_read++; 
+.................... 					extprom_read_state.reading = 1; // we are reading now 
+.................... 				} 
+.................... 		} 
+.................... 			 
+.................... 	return ret; 
+.................... } //ReadExtEEpromByte 
+....................  
+....................  
+....................  
+....................  
+....................  
+.................... 
+.................... #include "max520.h" 
+....................  /********************************************************** 
+....................  * I2C driver for Max520 ADC 
+....................  *********************************************************/ 
+....................  
+.................... #define MAX520_SLAVE_MASK 0x50 // must be ORed with slave device number 
+.................... #define NUM_520_OP 4     // the maximum outputs of a Max 520 
+....................  
+....................  
+.................... #inline 
+.................... short WriteAnalogueOutput (int port_num, byte outval) 
+.................... { 
+.................... 	short ret; 
+.................... 	byte slave_num, op_num, device_address; 
+....................  
+.................... 	i2c_start(); 
+....................  
+.................... 	slave_num = port_num / NUM_520_OP; 
+....................   slave_num <<= 1; 
+.................... 	device_address = MAX520_SLAVE_MASK | slave_num; 
+.................... #ifndef _SIMULATE 
+.................... 	i2c_write (device_address); 
+.................... #endif 
+....................  
+.................... 	op_num = port_num % NUM_520_OP; 
+....................  
+.................... #ifndef _SIMULATE 
+.................... 	i2c_write (op_num); 
+.................... 	i2c_write (outval); 
+.................... 	i2c_stop(); 
+.................... #else 
+....................   op_num = port_num % NUM_520_OP; 
+.................... #endif 
+.................... } 
+.................... 
+.................... #include "anaout.h" 
+....................  /********************************************************************** 
+.................... Performs the ana;logue output using an SPI write 
+.................... ***********************************************************************/ 
+....................   
+....................  
+.................... void GenerateAnalogueOutput (int out_num, byte val) 
+.................... { 
+.................... 	WriteAnalogueOutput (out_num, val); 
+.................... } 
+....................  
+....................  
+.................... 
+.................... #include "midiin.h" 
+....................  /************************************************************* 
+.................... * Author: Angelo Fraietta 
+.................... * Description Process the reception of Input and output using a  
+.................... * sixteen byte queue 
+.................... * Dependancy : calls ProcessMidiIn 
+.................... *************************************************************/ 
+.................... #byte PIR1 = 0x0C 
+.................... #byte TXREG = 0x19 
+....................  
+.................... // define a  volatile flag that becomes true when a char is received 
+.................... // and is reset by external program 
+.................... short input_unlocked;  
+....................                     
+....................  
+.................... #define QUEUE_SIZE  32 
+....................  
+.................... typedef struct 
+.................... { 
+....................   byte queue_data [QUEUE_SIZE]; 
+....................  
+....................   int  head :5; // the size is important as we just make the value  
+....................   int dummy :3; 
+....................   int  tail :5; // cycle from 0x0 to QUEUE_SIZE by incrementing 
+....................   int overflow :1; 
+....................   int empty :1; 
+....................  
+.................... } str_data_queue;   
+....................  
+.................... str_data_queue in_queue; 
+....................  
+....................  
+.................... // return true if flag was set when we cleared it 
+.................... #inline  
+.................... short ClearRxFlag() 
+.................... { 
+.................... 	short ret; 
+....................  
+.................... 	ret = input_unlocked; 
+.................... 	input_unlocked = 0; 
+.................... 	return ret; 
+.................... } 
+....................  
+.................... #inline  
+.................... short InQueueEmpty() 
+.................... { 
+....................   return in_queue.empty; 
+.................... } 
+....................  
+....................  
+.................... #ifdef _USE_OUT_BUFFER 
+.................... #inline  
+.................... short OutQueueEmpty() 
+.................... { 
+....................   return out_queue.empty; 
+.................... } 
+.................... #endif 
+....................  
+.................... #inline  
+.................... short InOverflow() 
+.................... { 
+....................   return in_queue.overflow; 
+.................... } 
+....................  
+.................... #inline  
+.................... short InQueueFull() 
+.................... { 
+.................... 	return (!in_queue.empty && in_queue.tail == in_queue.head); 
+*
+0059:  BTFSC  64.6
+005A:  GOTO   069
+005B:  MOVF   64,W
+005C:  ANDLW  1F
+005D:  BSF    03.5
+005E:  MOVWF  33
+005F:  BCF    03.5
+0060:  MOVF   63,W
+0061:  ANDLW  1F
+0062:  BSF    03.5
+0063:  SUBWF  33,W
+0064:  BTFSS  03.2
+0065:  GOTO   068
+0066:  BCF    03.5
+0067:  GOTO   06B
+0068:  BCF    03.5
+0069:  MOVLW  00
+006A:  GOTO   06C
+006B:  MOVLW  01
+006C:  MOVWF  78
+.................... } 
+....................  
+....................  
+.................... #ifdef _USE_OUT_BUFFER 
+.................... #inline  
+.................... short OutQueueFull() 
+.................... { 
+.................... 	return (!out_queue.empty && out_queue.tail == out_queue.head); 
+.................... } 
+.................... #endif 
+....................  
+.................... #inline 
+.................... void InitialiseQueue(str_data_queue& q) 
+.................... { 
+....................   q.tail = 0;  
+*
+0073:  MOVLW  E0
+0074:  ANDWF  64,W
+0075:  MOVWF  64
+....................   q.head = 0; 
+0076:  MOVLW  E0
+0077:  ANDWF  63,W
+0078:  MOVWF  63
+....................   q.overflow = false; 
+0079:  BCF    64.5
+....................   q.empty = true; 
+007A:  BSF    64.6
+....................  
+.................... } 
+....................  
+....................  
+.................... void InitialiseInQueue() 
+.................... { 
+....................   disable_interrupts (INT_RDA); // disable any Midi in  
+*
+0070:  BSF    03.5
+0071:  BCF    0C.5
+0072:  BCF    03.5
+.................... 	InitialiseQueue (in_queue); 
+.................... 	input_unlocked = true; 
+*
+007B:  BSF    2E.1
+....................   enable_interrupts (INT_RDA); // disable any Midi in   
+007C:  BSF    03.5
+007D:  BSF    0C.5
+007E:  BCF    03.5
+.................... } 
+....................  
+....................  
+....................  
+.................... // function called when adding function. Called by interrupt by input 
+.................... #inline 
+.................... void AddQueue (byte new_byte, str_data_queue& q) 
+.................... { 
+.................... 	q.queue_data [q.tail] = new_byte; 
+.................... 	q.tail++; 
+....................  
+.................... 	q.empty = false; 
+....................  
+.................... }   
+....................  
+.................... #inline  
+.................... byte GetQueue (str_data_queue& q) 
+.................... { 
+....................   byte ret; 
+....................   ret = q.queue_data [q.head];  
+....................   q.head++; 
+....................  
+....................   if (q.tail == q.head) 
+....................     { 
+....................       q.empty = true; 
+....................     } 
+.................... 	return ret; 
+.................... } 
+....................  
+.................... #inline 
+.................... void ClearInQueueOverflow() 
+.................... { 
+....................   in_queue.overflow = false; 
+.................... } 
+....................  
+.................... #inline 
+.................... void AddInQueue (byte new_byte) 
+.................... { 
+.................... 	AddQueue (new_byte, in_queue); 
+.................... } 
+....................  
+.................... #int_rda 
+.................... DataReceived() 
+.................... { 
+....................   int midi_char; 
+....................   midi_char = getc(); 
+*
+0054:  GOTO   046
+0055:  MOVF   78,W
+0056:  BSF    03.5
+0057:  MOVWF  32
+0058:  BCF    03.5
+....................   if (InQueueFull()) 
+*
+006D:  MOVF   78,F
+006E:  BTFSC  03.2
+006F:  GOTO   080
+.................... 		{ 
+.................... 			InitialiseInQueue(); 
+.................... 			in_queue.overflow = true; 
+*
+007F:  BSF    64.5
+.................... 		} 
+....................  
+.................... 	in_queue.queue_data [in_queue.tail] = midi_char; 
+0080:  MOVF   64,W
+0081:  ANDLW  1F
+0082:  ADDLW  43
+0083:  MOVWF  04
+0084:  BSF    03.5
+0085:  MOVF   32,W
+0086:  MOVWF  00
+.................... 	in_queue.tail++; 
+0087:  BCF    03.5
+0088:  MOVF   64,W
+0089:  ADDLW  01
+008A:  ANDLW  1F
+008B:  MOVWF  77
+008C:  MOVLW  E0
+008D:  ANDWF  64,W
+008E:  IORWF  77,W
+008F:  MOVWF  64
+....................  
+.................... 	in_queue.empty = false; 
+0090:  BCF    64.6
+....................  
+.................... } 
+....................  
+....................  
+0091:  BCF    0C.5
+0092:  BCF    0A.3
+0093:  BCF    0A.4
+0094:  GOTO   024
+.................... #inline  
+.................... void WriteOutData (byte out_byte) 
+.................... { 
+.................... #use rs232(baud=31250, xmit=MIDIOUT_1_PIN, rcv=MIDI_IN_PIN, ERRORS)  
+.................... #ifndef _SIMULATE 
+.................... 	putc (out_byte); 
+.................... #endif 
+....................  
+.................... } 
+....................  
+.................... #inline 
+.................... byte GetInChar() 
+.................... { 
+....................   byte ret; 
+....................    
+....................   disable_interrupts (INT_RDA); // disable any Midi in  
+....................  
+....................   ret = GetQueue (in_queue); 
+....................    
+....................   enable_interrupts (INT_RDA); // re-enable Midi in  
+....................  
+....................   input_unlocked = true; // set flag 
+....................  
+....................   return ret; 
+.................... } 
+....................  
+....................  
+....................  
+....................  
+....................  
+.................... #inline  
+.................... void WriteOutData2 (byte out_byte) 
+.................... { 
+.................... #use rs232(baud=31250, xmit=MIDIOUT_2_PIN, rcv=MIDI_IN_PIN, ERRORS)  
+....................   // we have to disable the interrupts here otherwise the data will become corrupted because it has no uart 
+....................   disable_interrupts(GLOBAL); 
+.................... #ifndef _SIMULATE 
+.................... 	putc (out_byte); 
+.................... #endif 
+....................   enable_interrupts(GLOBAL); 
+.................... } 
+....................  
+....................  
+.................... 
+.................... #include "spi_read.h" 
+....................  /******************************************************************************* 
+.................... *	Author: Angelo Fraietta 
+.................... *	Description: General SPI Read function 
+.................... *	Processor N/A 
+.................... * Inputs:  
+.................... *    data_size: size of the data structure receiving the data 
+.................... *    data_pin: the I/O pin that receives the data*      
+.................... * Outputs: 
+.................... *           ret_data: pointer to structure to receive data  
+.................... * 
+.................... * Global 
+.................... *    SPI_IN_LATCH: the I/O pin that latches input registers 
+.................... *    SPI_CLOCK: the I/O pin that clocks the device shift registers 
+....................  
+....................  
+.................... *	Description: 
+.................... *  
+.................... *		The registers are latched.  
+.................... *   [iterate] 
+.................... *   The state of the Input is read and shifted left 
+.................... *   When 8 bits are read and shifted, the value is stored into ret_data 
+....................  
+....................  
+.................... * Notes: asuumes the I/O pins are configured if not using standard I/O 
+.................... * Assumes a Low latch and a Low to High clock 
+.................... *******************************************************************************/ 
+.................... #inline 
+.................... void Spi_read_data (int* ret_data,  
+.................... 											int data_size,  
+.................... 											int data_pin) 
+.................... { 
+.................... 	int byte_num; 
+.................... 	int bit_num; 
+.................... 	byte in_val; 
+.................... 	short data_val; 
+....................  
+.................... 	// prepare clock 
+.................... 	output_low (SPI_CLOCK); 
+....................  
+....................   // latch the data 
+....................   switch (data_pin) 
+....................   { 
+....................     case DIGITAL_IN_DATA: 
+.................... 	 
+.................... 	    output_low (SPI_IN_LATCH); 
+.................... 	    output_high (SPI_IN_LATCH); 
+....................       break; 
+....................  
+....................     default: 
+....................       break; 
+....................   } 
+....................  
+.................... 	 
+.................... 	for (byte_num = 0; byte_num < data_size; byte_num++) 
+.................... 		{ 
+.................... 			in_val = 0; 
+....................  
+.................... 			for (bit_num = 0; bit_num < 8; bit_num++) 
+.................... 				{ 
+.................... 					in_val <<= 1; // first shift is a dummy. Only seven are really shifted 
+....................  
+.................... 					// read the input 
+.................... 					switch (data_pin) 
+.................... 						{ 
+.................... 							case DIGITAL_IN_DATA: 
+.................... 								data_val = input (DIGITAL_IN_DATA); 
+.................... 								break; 
+....................                
+.................... 						} 
+....................  
+.................... 					if (data_val) 
+.................... 						{ 
+.................... 							in_val |= 0x0001; 
+.................... 						} 
+....................  
+.................... 					// now clock register 
+.................... 					output_high (SPI_CLOCK); 
+.................... 					output_low (SPI_CLOCK); 
+.................... 				} 
+....................  
+.................... 			// now store that byte in ret_data 
+.................... 			ret_data [byte_num] = in_val; 
+.................... 		} 
+.................... } 
+....................  
+....................  
+.................... /******************************************************************************* 
+.................... *	Author: Angelo Fraietta 
+.................... *	Description: General SPI Write function 
+.................... *	Processor N/A 
+.................... * Inputs:  
+.................... *    out_data: structure containing the data to be written 
+.................... *    data_size: size of the data structure receiving the data 
+.................... *    latch_pin: the I/O pin that receives the data*      
+.................... * Outputs: 
+.................... *           Data written to the outputs after being latched 
+.................... * 
+.................... * Global 
+.................... *    SPI_CLOCK: the I/O pin that clocks the device shift registers 
+.................... *    SPI_DATA_OUT: the data I/O pin that receives the output data 
+....................  
+.................... *	Description: 
+.................... *  
+.................... *		The registers are latched.  
+.................... *   [iterate] 
+.................... *   The state of the Output is written and shifted left 
+.................... *   When 8 bits are read and shifted, the value is stored into ret_data 
+....................  
+....................  
+.................... * Notes: asuumes the I/O pins are configured if not using standard I/O 
+.................... * Assumes a Low latch and a Low to High clock 
+.................... *******************************************************************************/ 
+.................... #inline 
+.................... void Spi_write_data (int* out_data,  
+.................... 											int data_size,  
+.................... 											int latch_pin) 
+.................... { 
+.................... 	int byte_num; 
+.................... 	int bit_num; 
+.................... 	byte out_val; 
+.................... 	short data_val; 
+....................    
+.................... 	// prepare clock 
+.................... 	output_low (SPI_CLOCK); 
+*
+00DB:  BCF    2D.3
+00DC:  MOVF   2D,W
+00DD:  BSF    03.5
+00DE:  MOVWF  07
+00DF:  BCF    03.5
+00E0:  BCF    07.3
+....................  
+.................... 	for (byte_num = 0; byte_num < data_size; byte_num++) 
+00E1:  BSF    03.5
+00E2:  CLRF   2E
+00E3:  BCF    03.5
+00E4:  BSF    03.5
+00E5:  MOVF   2C,W
+00E6:  SUBWF  2E,W
+00E7:  BTFSS  03.0
+00E8:  GOTO   0EB
+00E9:  BCF    03.5
+00EA:  GOTO   120
+00EB:  BCF    03.5
+.................... 		{ 
+.................... 			out_val = out_data [byte_num]; 
+00EC:  BSF    03.5
+00ED:  MOVF   2B,W
+00EE:  ADDWF  2E,W
+00EF:  MOVWF  04
+00F0:  MOVF   00,W
+00F1:  MOVWF  30
+....................   
+....................  
+.................... 			for (bit_num = 0; bit_num < 8; bit_num++) 
+00F2:  CLRF   2F
+00F3:  BCF    03.5
+00F4:  BSF    03.5
+00F5:  MOVF   2F,W
+00F6:  SUBLW  07
+00F7:  BTFSC  03.0
+00F8:  GOTO   0FB
+00F9:  BCF    03.5
+00FA:  GOTO   11C
+00FB:  BCF    03.5
+.................... 				{ 
+.................... 					// write the high bit 
+....................           output_bit (SPI_DATA_OUT, out_val & 0x80); 
+00FC:  BSF    03.5
+00FD:  MOVF   30,W
+00FE:  ANDLW  80
+00FF:  XORLW  00
+0100:  BTFSC  03.2
+0101:  GOTO   104
+0102:  BCF    03.5
+0103:  GOTO   107
+0104:  BCF    03.5
+0105:  BCF    08.1
+0106:  GOTO   108
+0107:  BSF    08.1
+....................           out_val<<=1; 
+0108:  BCF    03.0
+0109:  BSF    03.5
+010A:  RLF    30,F
+....................  
+.................... 					// now clock register 
+.................... 					output_high (SPI_CLOCK); 
+010B:  BCF    03.5
+010C:  BCF    2D.3
+010D:  MOVF   2D,W
+010E:  BSF    03.5
+010F:  MOVWF  07
+0110:  BCF    03.5
+0111:  BSF    07.3
+.................... 					output_low (SPI_CLOCK); 
+0112:  BCF    2D.3
+0113:  MOVF   2D,W
+0114:  BSF    03.5
+0115:  MOVWF  07
+0116:  BCF    03.5
+0117:  BCF    07.3
+.................... 				} 
+0118:  BSF    03.5
+0119:  INCF   2F,F
+011A:  BCF    03.5
+011B:  GOTO   0F4
+....................  
+....................  
+.................... 		} 
+011C:  BSF    03.5
+011D:  INCF   2E,F
+011E:  BCF    03.5
+011F:  GOTO   0E4
+....................  
+.................... 	// latch the data 
+....................   switch (latch_pin) 
+0120:  BSF    03.5
+0121:  MOVF   2D,W
+0122:  MOVWF  77
+0123:  MOVLW  42
+0124:  SUBWF  77,W
+0125:  BTFSS  03.2
+0126:  GOTO   129
+0127:  BCF    03.5
+0128:  GOTO   12B
+0129:  BCF    03.5
+012A:  GOTO   12E
+....................   { 
+....................     case DIGITAL_OUT_LATCH: 
+.................... 	    output_low (DIGITAL_OUT_LATCH); 
+012B:  BCF    08.2
+.................... 	    output_high (DIGITAL_OUT_LATCH); 
+012C:  BSF    08.2
+....................       break; 
+012D:  GOTO   12E
+....................  
+....................   } 
+.................... } 
+....................  
+....................  
+....................  
+.................... 
+.................... #include "digout.h" 
+....................  /********************************************************************** 
+.................... Performs the digital output using an SPI write 
+.................... ***********************************************************************/ 
+.................... typedef struct  
+.................... { 
+....................   byte lower; 
+....................   byte upper; 
+.................... }str_digout; 
+....................  
+.................... str_digout current_value; // this is the current state of the digital pins 
+....................  
+....................  
+.................... void GenerateDigitalOutput (int out_num, byte val) 
+.................... { 
+*
+0095:  MOVLW  65
+0096:  BSF    03.5
+0097:  MOVWF  2A
+....................   byte* byte_to_write = &current_value.lower; 
+....................    
+....................  
+....................   if (out_num >= 8) 
+0098:  MOVF   28,W
+0099:  SUBLW  07
+009A:  BTFSS  03.0
+009B:  GOTO   09E
+009C:  BCF    03.5
+009D:  GOTO   0A3
+009E:  BCF    03.5
+....................     { 
+....................     byte_to_write = &current_value.upper; 
+009F:  MOVLW  66
+00A0:  BSF    03.5
+00A1:  MOVWF  2A
+00A2:  BCF    03.5
+....................     } 
+....................    
+....................   // now define the bit num 
+....................   out_num %= 8; 
+00A3:  MOVLW  07
+00A4:  BSF    03.5
+00A5:  ANDWF  28,F
+....................  
+.................... 	if (val > 63) 
+00A6:  MOVF   29,W
+00A7:  SUBLW  3F
+00A8:  BTFSS  03.0
+00A9:  GOTO   0AC
+00AA:  BCF    03.5
+00AB:  GOTO   0C0
+00AC:  BCF    03.5
+.................... 		{ 
+.................... 			bit_set (*byte_to_write, out_num); 
+00AD:  BSF    03.5
+00AE:  MOVF   2A,W
+00AF:  MOVWF  04
+00B0:  MOVLW  01
+00B1:  MOVWF  77
+00B2:  MOVF   28,W
+00B3:  MOVWF  78
+00B4:  BTFSS  03.2
+00B5:  GOTO   0B8
+00B6:  BCF    03.5
+00B7:  GOTO   0BD
+00B8:  BCF    03.5
+00B9:  BCF    03.0
+00BA:  RLF    77,F
+00BB:  DECFSZ 78,F
+00BC:  GOTO   0B9
+00BD:  MOVF   77,W
+00BE:  IORWF  00,F
+.................... 		} 
+.................... 	else 
+00BF:  GOTO   0D3
+.................... 		{ 
+.................... 			bit_clear (*byte_to_write, out_num); 
+00C0:  BSF    03.5
+00C1:  MOVF   2A,W
+00C2:  MOVWF  04
+00C3:  MOVLW  01
+00C4:  MOVWF  77
+00C5:  MOVF   28,W
+00C6:  MOVWF  78
+00C7:  BTFSS  03.2
+00C8:  GOTO   0CB
+00C9:  BCF    03.5
+00CA:  GOTO   0D0
+00CB:  BCF    03.5
+00CC:  BCF    03.0
+00CD:  RLF    77,F
+00CE:  DECFSZ 78,F
+00CF:  GOTO   0CC
+00D0:  MOVF   77,W
+00D1:  XORLW  FF
+00D2:  ANDWF  00,F
+.................... 		} 
+....................  
+.................... 	Spi_write_data (&current_value, sizeof(current_value), DIGITAL_OUT_LATCH); 
+00D3:  MOVLW  65
+00D4:  BSF    03.5
+00D5:  MOVWF  2B
+00D6:  MOVLW  02
+00D7:  MOVWF  2C
+00D8:  MOVLW  42
+00D9:  MOVWF  2D
+00DA:  BCF    03.5
+*
+012E:  RETLW  00
+.................... } 
+....................  
+.................... void InitialiseDigitalOut() 
+.................... { 
+....................   current_value.upper = 0; 
+....................   current_value.lower = 0; 
+....................   GenerateDigitalOutput (0, 0xff); 
+....................   GenerateDigitalOutput (0, 0); 
+.................... } 
+.................... 
+.................... #include "anain.h" 
+....................  /********************************************************************* 
+.................... Module defines functions used for Reading Analogue In 
+.................... *********************************************************************/ 
+.................... int current_analogue_val[NUM_ANALOGUE_IN_CHANS]; 
+....................  
+.................... void ReadAnalogueIn(byte produce_output); 
+....................  
+.................... // initialise the previous analogue in values 
+.................... // Sets RA0, RA1 and RA3 as analogue inputs 
+.................... // Sets the B1 to B3 as Outputs 
+.................... #USE FAST_IO(B) 
+....................  
+.................... #define CLEAR_BANK_MASK 0b11110001 // ANDing Mask will clear bits 1-3 
+.................... void InitialiseAnalogueIn() 
+.................... { 
+.................... 	int i; 
+.................... 	setup_adc (ADC_CLOCK_INTERNAL); 
+.................... 	setup_adc_ports (RA0_RA1_ANALOG_RA3_REF); 
+....................  
+.................... 	set_tris_b (CLEAR_BANK_MASK); 
+....................  
+....................  	for (i = 0; i < NUM_ANALOG_VALID_READS; i++) 
+....................  		{ 
+....................  			current_analogue_val[i] = 0; 
+....................  		} 
+....................  
+.................... } 
+....................  
+.................... // reads the analogue in and produces output if different 
+.................... short ProcessAnalogueIn() 
+.................... { 
+.................... 	return ReadAnalogueIn (true); 
+.................... } 
+....................  
+....................  
+.................... // if produce_output is true, the result will be sent to the output  
+.................... // if different from previous value 
+.................... short ReadAnalogueIn(byte produce_output) 
+.................... { 
+....................   short ret = false; 
+.................... 	int sub_bank; 
+.................... 	int init_b; 
+.................... 	int bank_num; 
+.................... 	int adc_val; 
+....................   int adc_val_second_read; 
+.................... 	int channel_num; 
+....................  
+.................... 	init_b = PORTB;	 
+.................... 	// clear sub_bank bits 
+.................... 	init_b &= CLEAR_BANK_MASK; 
+....................  
+.................... 	for (sub_bank = 0; sub_bank < NUM_ANALOGUE_IN_SUB_BANKS; sub_bank++) 
+.................... 		{ 
+.................... 			restart_wdt(); 
+.................... 			// now write the sub_bank address to PORTB bits 1-3 
+.................... 			PORTB = init_b | (sub_bank<<1); 
+....................  
+.................... 			delay_us (AD_SWITCH_DELAY); 
+....................  
+.................... 			for (bank_num = 0; bank_num < NUM_ANALOGUE_IN_BANKS; bank_num++) 
+.................... 				{ 
+....................  
+.................... #ifdef IOCARD_BUILD 
+....................           if (MessageWaiting()) 
+....................           { 
+.................... 						ret = ProcessPlaInputStream();  
+.................... 					} 
+....................  
+.................... #endif 
+....................  
+.................... 					channel_num = bank_num * NUM_ANALOGUE_IN_SUB_BANKS + sub_bank; 
+....................  
+.................... 					set_adc_channel (bank_num); 
+.................... 					delay_us (AD_READ_DELAY); 
+....................  
+.................... 					// only eight bits of AD required 
+.................... 					adc_val = read_adc(); 
+....................  
+....................           // now read channel second time 
+.................... 					set_adc_channel (bank_num); 
+.................... 					delay_us (AD_READ_DELAY); 
+....................           adc_val_second_read = read_adc(); 
+....................  
+.................... #ifdef SEVEN_BIT_AD 
+.................... 					adc_val >>= 1; 
+....................           adc_val_second_read >>= 1; 
+.................... #endif 
+....................  
+....................  
+.................... 					// see if this read and last matched 
+....................  
+.................... 					if (adc_val_second_read == adc_val && current_analogue_val[channel_num] != adc_val ) 
+.................... 						{ 
+....................  
+.................... 							if (produce_output) 
+.................... 								{ 
+.................... 									if (OutputAnalog (channel_num, adc_val)) 
+.................... 										{ 
+.................... 											current_analogue_val[channel_num] = adc_val; 
+....................                       ret = true; 
+.................... 										} 
+.................... 								} 
+.................... 							else 
+.................... 								{ 
+.................... 									current_analogue_val[channel_num] = adc_val; 
+.................... 								} 
+....................  						} 
+....................  
+.................... 				} 
+.................... 		} 
+....................   return ret; 
+.................... } 
+....................  
+....................  
+.................... 
+.................... #include "digin.h" 
+....................  /****************************************************************************** 
+.................... Module for processing Digital Inputs 
+.................... ******************************************************************************/ 
+.................... // digital Read variables 
+.................... int16 prev_digital_val; 
+.................... int16 current_digital_val; 
+....................  
+....................  
+.................... short ProcessDigitalInputs(int produce_output) 
+.................... { 
+....................   short ret = false; 
+.................... 	int bit_num; 
+.................... 	int byte_num; 
+.................... 	byte *cur_val = &current_digital_val; 
+.................... 	byte *prev_val = &prev_digital_val; 
+....................  
+.................... 	current_digital_val = 0; 
+....................  
+.................... 	Spi_read_data (&current_digital_val, sizeof(current_digital_val), DIGITAL_IN_DATA); 
+....................  
+.................... 	if (current_digital_val != prev_digital_val) 
+.................... 		{ 
+.................... 			if (produce_output) 
+.................... 				{ 
+....................           // iterate through each byte 
+.................... 					for (byte_num = 0; byte_num < sizeof(current_digital_val); byte_num++) 
+.................... 						{ 
+.................... 							// iterate through each bit 
+.................... 							for (bit_num = 0; bit_num < 8; bit_num++) 
+.................... 								{ 
+.................... #ifdef IOCARD_BUILD 
+....................                 if (MessageWaiting()) 
+....................                   { 
+....................                     ProcessPlaInputStream();  
+....................                     ret = true; 
+....................                   } 
+.................... #endif 
+.................... 									if (Bit_test (cur_val[byte_num], bit_num)  
+.................... 											!= bit_test(prev_val[byte_num], bit_num)) 
+.................... 										{ 
+.................... 											// we use this fancy calculation because of the endian of an int16 
+.................... 											// we want the first byte to be the high order byte 
+....................                       // also, a one will produce a zero ouitput 
+.................... 											if (OutputDigital ((sizeof(current_digital_val)-1 - byte_num) * 8 + bit_num,  
+.................... 																				 (!Bit_test (cur_val[byte_num], bit_num)) * DIG_ON_VAL)) 
+.................... 												{ 
+.................... 													if (Bit_test (cur_val[byte_num], bit_num) ) 
+.................... 														{ 
+.................... 															Bit_set(prev_val[byte_num], bit_num); 
+.................... 														} 
+.................... 													else 
+.................... 														{ 
+.................... 															Bit_clear(prev_val[byte_num], bit_num); 
+.................... 														} 
+....................                           ret = true; 
+.................... 												} 
+.................... 										} 
+.................... 								} 
+.................... 						} 
+.................... 				} 
+.................... 			 
+.................... 		} 
+....................  
+....................   return ret; 
+.................... } 
+.................... 
+.................... #include "proc_pla.h" 
+....................  /******************************************************************** 
+.................... Process Pla Messages 
+.................... ********************************************************************/ 
+....................  
+.................... // flag indicating that our transmitted data has been received by the 386 
+....................  
+.................... str_PLA_Data last_tx_data; 
+....................  
+.................... // count the number of actual data bytes transmitted and received 
+.................... int num_tx_data_bytes = 0;  
+.................... int num_rx_data_bytes = 0; 
+.................... short re_transmit_required = false; // this means that transmitted messages are out of sync 
+.................... short proc_pla_eeprom_read = false; 
+.................... short proc_pla_eeprom_write = false; 
+.................... short proc_pla_int_eeprom = false; 
+....................  
+.................... #ifdef DIAG_COUNT 
+.................... byte diag_flags = 0, diag_data = 0; 
+.................... #endif 
+....................  
+.................... #inline 
+.................... short RequestEEProm() 
+.................... { 
+.................... 	return proc_pla_eeprom_read || proc_pla_eeprom_write; 
+.................... } 
+....................  
+....................  
+.................... #inline  
+.................... void ResendLastMessage() 
+.................... { 
+....................   midi_tx = false; 
+....................   pla_out_data.flags = prev_pla_out.flags; 
+....................   pla_out_data.data = prev_pla_out.data;           
+....................   Pla_Send_data(); 
+.................... } 
+....................  
+.................... #inline  
+.................... void RequestNumRxBytes() 
+.................... { 
+....................   midi_tx = false; 
+....................   pla_out_data.flags = DIAG_DIAG_MESSAGE_FLAG; 
+....................   pla_out_data.data = DIAG_REQUEST_RX_BYTES;           
+....................   Pla_Send_data(); 
+.................... } 
+....................  
+.................... #inline  
+.................... void RequestNumTxBytes() 
+.................... { 
+....................   midi_tx = false; 
+....................   pla_out_data.flags = DIAG_DIAG_MESSAGE_FLAG; 
+....................   pla_out_data.data = DIAG_REQUEST_TX_BYTES;           
+....................   Pla_Send_data(); 
+.................... } 
+....................  
+....................  
+.................... short   GetNextPlaMessage ()  
+.................... { 
+....................   short ret = false; 
+....................   midi_tx = false; 
+....................   pla_out_data.flags = DIAG_DIAG_MESSAGE_FLAG; 
+....................   pla_out_data.data = DIAG_ETX; 
+....................  
+....................   if (re_transmit_required) 
+....................   { 
+....................     pla_out_data.flags = last_tx_data.flags; 
+....................     pla_out_data.data = last_tx_data.data;           
+....................     ret = true; 
+....................   } 
+....................   else if (!InQueueEmpty()) 
+....................   { 
+....................     restart_wdt(); 
+.................... 		pla_out_data.data = GetInChar(); 
+....................  
+....................     if (pla_out_data.data != 0xff) 
+....................       { 
+....................       midi_tx = true; 
+....................       } 
+....................  
+....................     pla_out_data.flags = MIDI_CHAN_1_DATA; 
+....................      
+....................     ret = true; 
+....................   } 
+....................   else 
+....................   { 
+.................... 		if (proc_pla_eeprom_read && !processing_analogs) 
+.................... 			{ 
+.................... 				if (ReadExtEEpromByte (&pla_out_data.data)) 
+.................... 					{ 
+.................... 						pla_out_data.flags = EEPROM_DATA; 
+.................... 					} 
+.................... 				else 
+.................... 					{ 
+.................... 						pla_out_data.flags = EEPROM_END_READ; 
+.................... 						proc_pla_eeprom_read = false; 
+.................... 					} 
+.................... 				ret = true; 
+.................... 			} 
+.................... 		 
+.................... 		else if (proc_pla_eeprom_write && !processing_analogs) 
+.................... 			{ 
+.................... 				// we must let the device know we are ready for a write 
+.................... 				if (EEpromWriteReady()) 
+.................... 					{ 
+.................... 						proc_pla_eeprom_write = false; 
+.................... 						pla_out_data.flags = EEPROM_WRITE_READY; 
+.................... 						ret = true; 
+.................... 					} 
+.................... 			} 
+....................  
+.................... 		else if (proc_pla_int_eeprom) 
+.................... 			{ 
+.................... 				 
+.................... 				proc_pla_int_eeprom = ReadIntEEprom (&pla_out_data.data); 
+.................... 				pla_out_data.flags = INT_EEPROM_DATA; 
+.................... 				ret = true; 
+.................... 			} 
+....................  
+.................... 		if (!ret && !PlaOutQueueEmpty()) 
+....................     { 
+....................       GetPlaQueue(); 
+....................       ret = true; 
+....................     } 
+.................... #ifdef DIAG_COUNT 
+....................   else 
+....................     { 
+....................     diag_flags = 0; 
+....................     diag_data++; 
+....................     pla_out_data.flags = diag_flags; 
+....................     pla_out_data.data = diag_data; 
+....................     ret = true; 
+....................     } 
+.................... #endif   
+....................  
+....................   } 
+....................  
+....................   last_tx_data.flags = pla_out_data.flags; 
+....................   last_tx_data.data = pla_out_data.data; 
+....................  
+....................   if (ret && (!re_transmit_required)) 
+....................   { 
+....................     num_tx_data_bytes++; 
+....................   } 
+....................  
+....................   re_transmit_required = false; 
+....................   return ret; 
+....................  
+.................... } // end GetNextMessage 
+....................  
+.................... #inline  
+.................... void ProcessIOData (int flags, int data) 
+.................... { 
+.................... 	switch (flags) 
+.................... 		{ 
+.................... 		case IO_NUM_PATCHES: 
+.................... 			patch_loaded = (data); 
+.................... 			break; 
+....................  
+.................... 		default: 
+.................... 			break; 
+.................... 		} 
+.................... } 
+....................  
+.................... #inline 
+.................... void ProcessEEpromData (int flags, int data) 
+.................... { 
+.................... 	//disable_interrupts(GLOBAL); 
+....................  
+.................... 	switch(flags) 
+.................... 		{ 
+.................... 		case EEPROM_DATA: 
+.................... 			WriteEEProm (data); 
+.................... 			break; 
+....................  
+.................... 		case EEPROM_END_WRITE: 
+.................... 			FinishEEpromWrite(); 
+.................... 			break; 
+....................  
+.................... 		case EEPROM_INIT_ADDRESS: 
+.................... 			InitialiseEEprom(); 
+.................... 			break; 
+....................  
+.................... 		case EEPROM_BLOCK_READ: 
+.................... 			proc_pla_eeprom_read = true; 
+.................... 			break; 
+....................  
+.................... 		case EEPROM_START_WRITE: 
+.................... 			proc_pla_eeprom_write = true; 
+.................... 			break; 
+....................  
+.................... 		case EEPROM_START: 
+.................... 			enable_analogs = false; 
+.................... 			disable_interrupts (INT_RDA); // disable any Midi in  
+.................... 			break; 
+....................  
+.................... 		case EEPROM_END: 
+.................... 			enable_analogs = true; 
+.................... 			enable_interrupts (INT_RDA); // disable any Midi in  
+.................... 			break; 
+....................  
+.................... 		case INT_EEPROM_READ: 
+.................... 			proc_pla_int_eeprom = true; 
+.................... 			break; 
+....................  
+.................... 		case INT_EEPROM_DATA: 
+.................... 			WriteIntEEprom (data); 
+.................... 			break; 
+.................... 	 
+.................... 		default: 
+.................... 			break; 
+.................... 		} 
+....................  
+.................... 	//enable_interrupts(GLOBAL); 
+.................... } //ProcessEEpromData 
+....................  
+.................... void ProcessOutputData (int flags, int data) 
+.................... { 
+....................   int channel; 
+....................   int data_type; 
+.................... 	 
+....................   channel = flags & 0x0f; 
+....................    
+....................   data_type = flags & 0x70; 
+.................... 	 
+....................   switch (data_type) 
+.................... 		{ 
+....................     case DIGITAL_DATA: 
+....................       GenerateDigitalOutput (channel, data); 
+....................       break; 
+.................... 			 
+....................     case MIDI_CHAN_1_DATA: 
+....................       WriteOutData (data); 
+....................       break; 
+.................... 			 
+....................     case MIDI_CHAN_2_DATA: 
+....................       WriteOutData2 (data); 
+....................       break; 
+.................... 			 
+.................... 		case ANALOG_DATA: 
+....................       GenerateAnalogueOutput (channel, data); 
+.................... 			ExtEEpromScheduleRestart(); 
+....................       break; 
+.................... 			 
+.................... 		case EEPROM_DATA: 
+.................... 			ProcessEEpromData (flags, data); 
+.................... 			break; 
+.................... 		case IO_FLAGS: 
+.................... 			ProcessIOData  (flags, data); 
+.................... 			break; 
+....................  
+....................     default: 
+....................       //output_high(IO_INTERUPT_OUT_PIN3); // set for debugging 
+....................       break; 
+....................   } 
+....................        
+....................  
+....................  
+.................... } 
+....................  
+....................  
+....................  
+.................... // returns true if the Pla is in a state that a transmission can take place 
+.................... short PlaOutFree() 
+.................... { 
+....................   return (InQueueEmpty () && PlaTxReady() && !MessageWaiting()); 
+.................... } 
+....................  
+....................  
+....................  
+.................... // check for input data 
+.................... // if there is data 
+.................... #inline 
+.................... void ProcessPlaInputMessage() 
+.................... { 
+....................     int rx_data;  
+....................  
+....................     output_low(IO_INTERUPT_OUT_DATA); // PREPARE THE iNTERRUPT PIN 
+....................     output_low(IO_INTERUPT_OUT_MIDI); // PREPARE THE iNTERRUPT PIN 
+....................  
+....................     Pla_fast_read_data(); 
+.................... 		 
+.................... 		if ( pla_in_data.flags == DIAG_DIAG_MESSAGE_FLAG) 
+.................... 			{ 
+....................         switch (pla_in_data.data) 
+....................           { 
+....................           case DIAG_ETX: // make first as it is most likely 
+....................             awaiting_response = false; 
+.................... 						 
+....................             // see if we have anything to send 
+....................             if (GetNextPlaMessage()) 
+.................... 							{ 
+.................... 								SavePlaMessage(); 
+.................... 								Pla_Send_data (); 
+.................... 							} 
+.................... 						 
+.................... 						break; 
+.................... 						 
+....................           case DIAG_RECEIVE_RESPONSE: // we must respond 
+....................             // there is no real point in setting transmitted_data_received as we are about to reset it again 
+.................... 						 
+....................             GetNextPlaMessage(); 
+....................             SavePlaMessage(); 
+.................... 						 
+....................              
+....................             Pla_Send_data (); 
+....................             break; 
+.................... 						 
+....................           case DIAG_RESET: 
+....................             InitialiseDigitalOut(); 
+....................             while (1); // watchdog out 
+....................             break; 
+.................... 						 
+....................           case DIAG_INVALID_RX_DATA: // They received rubbish from us 
+.................... 						 
+....................             RequestNumRxBytes(); 
+....................             break; 
+.................... 						 
+....................           case DIAG_SYNC_MESSAGE_READY: 
+....................             // get a count to see if theye got our last message 
+....................             RequestNumRxBytes();             
+....................             break; 
+.................... 						 
+....................           case DIAG_ASYNC_MESSAGE_READY: 
+....................             // we will have to check whether we are waiting for a response from us 
+....................             if (awaiting_response) // we have a conflict here.  
+.................... 							{ 
+.................... 								delay_ms(3); //wait and see if we get a response to the message we sent them 
+.................... 								 
+.................... 								// this can only be the case if we are expecting one, because this case only 
+.................... 								// occurs as an unsolicited response 
+.................... 								if (MessageWaiting())  // clear it and get them to send it again in synch with us 
+.................... 									{ 
+.................... 										InitialisePlaIn(); 
+.................... 									} 
+.................... 								 
+.................... 								RequestNumRxBytes(); 
+.................... 							} 
+....................             else 
+.................... 							{ 
+.................... 								GetNextPlaMessage(); 
+.................... 								SavePlaMessage(); 
+.................... 								Pla_Send_data ();             
+.................... 							} 
+....................              
+....................              
+....................             break; 
+.................... 						 
+....................           default: 
+....................             rx_data = pla_in_data.data & DIAG_TEST_RETURN_BYTES_MASK; 
+.................... 						 
+....................             switch (rx_data) 
+.................... 							{ 
+....................               case DIAG_RETURN_RX_BYTES: 
+....................                 if ((pla_in_data.data & DIAG_RETURN_BYTES_MASK)  
+.................... 										!= (num_tx_data_bytes & DIAG_RETURN_BYTES_MASK)) 
+.................... 									 
+.................... 									if((last_tx_data.flags == DIAG_DIAG_MESSAGE_FLAG) 
+....................  										 && (last_tx_data.data == DIAG_ETX)) 
+....................  										{ 
+....................  											// our last message was an ETX.  
+....................  											//We will have to synchronise ourselves with the pic 
+.................... 											 
+....................  											num_tx_data_bytes = pla_in_data.data; 
+....................                       re_transmit_required = false; 
+....................  										} 
+....................  									else 
+....................  										{ 
+.................... 											re_transmit_required = true; 
+....................  										} 
+.................... 								 
+.................... 								 
+....................                 else 
+.................... 									{ 
+.................... 										re_transmit_required = false; 
+.................... 									} 
+.................... 								 
+....................                 // see how many they transmitted 
+....................                 RequestNumTxBytes(); 
+....................        
+....................                 // do this for now as we are debugging 
+.................... 								//GetNextPlaMessage(); 
+.................... 								//SavePlaMessage(); 
+.................... 										 
+.................... 								//Pla_Send_data ();								 
+....................                 break; 
+.................... 								 
+....................               case DIAG_RETURN_TX_BYTES: 
+....................                 if ((pla_in_data.data & DIAG_RETURN_BYTES_MASK)  
+.................... 										!= (num_rx_data_bytes & DIAG_RETURN_BYTES_MASK)) 
+.................... 									{ 
+.................... 										midi_tx = false; 
+.................... 										pla_out_data.flags = DIAG_DIAG_MESSAGE_FLAG; 
+.................... 										pla_out_data.data = (byte) DIAG_RE_TRANSMIT_LAST_MESSAGE; 
+.................... 										 
+.................... 										// write that message back. Pla will no longer be free 
+.................... 										Pla_Send_data ();  
+.................... 									} 
+....................                 else 
+.................... 									{ 
+.................... 										GetNextPlaMessage(); 
+.................... 										SavePlaMessage(); 
+.................... 										 
+.................... 										Pla_Send_data (); 
+.................... 									} 
+.................... 								 
+....................               default: 
+....................                 break; 
+.................... 							} 
+.................... 						 
+....................             break; 
+....................           } // end diag message case 
+....................          
+.................... 				 
+.................... 			} 
+.................... 		else 
+.................... 			{ 
+.................... 				// we have to respond 
+.................... 				GetNextPlaMessage(); 
+.................... 				SavePlaMessage(); 
+.................... 				Pla_Send_data ();  
+.................... 				 
+.................... 				 
+.................... 				// we need to process the message if the Tx flag is Clear, indicating data 
+.................... 				if (!(pla_in_data.flags & TX_DATA_FLAG)) 
+....................           { 
+....................             ProcessOutputData (pla_in_data.flags, pla_in_data.data); 
+....................             num_rx_data_bytes++; 
+....................           } 
+.................... 				 
+.................... 			} 
+.................... 		 
+....................    
+.................... } // end ProcessPlaInputMessage 
+....................  
+....................  
+.................... // read message.  
+.................... // if Midi input is available, read it and send it 
+.................... // if there was no midi, read the output queue and send it if available 
+.................... // return true if a response to PLA is required 
+.................... short ProcessPlaInputStream() 
+.................... { 
+....................  
+.................... 	short ret = false; 
+....................  
+....................   while (MessageWaiting()) 
+....................     { 
+....................       restart_wdt(); 
+....................       ProcessPlaInputMessage(); 
+.................... 			ret = true; 
+....................     } 
+....................  
+.................... 	 
+....................   if (PlaTxReady() && !awaiting_response) 
+....................   { 
+.................... 		restart_wdt(); 
+....................  
+.................... 		if (GetNextPlaMessage ()) 
+.................... 			{ 
+....................         output_low(IO_INTERUPT_OUT_DATA); // PREPARE THE iNTERRUPT PIN 
+....................         output_low(IO_INTERUPT_OUT_MIDI); // PREPARE THE iNTERRUPT PIN 
+....................          
+.................... 				SavePlaMessage(); 
+.................... 				Pla_Send_data (); 
+.................... 				ret = true; 
+.................... 			} 
+....................      
+....................  
+....................   } 
+....................    
+.................... 	return ret; 
+.................... } // end ProcessPlaInputStream 
+....................  
+.................... 
+.................... // LED timers 
+.................... int16 watchdog_flash_count = 0; // when becomes zero, changes state of LED 
+.................... short watchdog_led = 0; 
+.................... short overflow_val = 0; 
+....................  
+.................... const byte LCD_INIT_TEXT [] = "Wait ..."; 
+....................  
+.................... void BlinkWatchdog() 
+.................... { 
+....................   str_PLA_Data pla_data; 
+....................   
+....................   if (RequestEEProm() && watchdog_flash_count > WATCHDOG_EEPROM_COUNT) 
+....................   { 
+....................     watchdog_flash_count = 0; 
+....................   } 
+....................  
+....................   if (!watchdog_flash_count) 
+....................     { 
+....................     watchdog_led = ~watchdog_led; 
+....................     SetWatchdogLed (watchdog_led); 
+....................  
+....................  
+....................     if (InOverflow()) 
+....................       { 
+....................       watchdog_flash_count = WATCHDOG_OVERFLOW_COUNT; 
+....................       num_overflow_blinks++; 
+....................  
+....................       if (num_overflow_blinks > NUM_MAX_OVERFLOW_BLINK) 
+....................         { 
+....................         num_overflow_blinks = 0; 
+....................         //ClearInQueueOverflow(); 
+....................         } 
+....................        
+....................  
+....................       } 
+....................     else 
+....................       { 
+....................  
+....................       if (!enable_analogs) 
+....................         { 
+....................         watchdog_flash_count = WATCHDOG_EEPROM_COUNT; 
+....................         } 
+....................       else 
+....................         { 
+....................         if (patch_loaded) 
+....................           { 
+....................           watchdog_flash_count = WATCHDOG_PATCH_LOADED_COUNT; 
+....................           } 
+....................         else 
+....................           { 
+....................           watchdog_flash_count = WATCHDOG_NORMAL_COUNT; 
+....................           } 
+....................         } 
+....................       } 
+....................     } 
+....................  
+....................   watchdog_flash_count--; 
+....................  
+.................... } 
+....................  
+....................  
+.................... void ResetController () 
+.................... { 
+....................   int i; 
+....................  
+....................   disable_interrupts(GLOBAL); 
+.................... 	//DigoutInitialise(); 
+....................  
+....................   lcd_init(); 
+....................  
+....................   for (i = 0; i < sizeof(LCD_INIT_TEXT) - 1; i++) 
+....................   { 
+.................... 	  lcd_putc(LCD_INIT_TEXT[i]); 
+....................     delay_ms (2); 
+....................   } 
+....................  
+....................   set_tris_e (0x00); 
+....................  
+....................   output_low(IO_INTERUPT_OUT_DATA); // PREPARE THE iNTERRUPT PIN 
+....................   output_low(IO_INTERUPT_OUT_MIDI); // PREPARE THE iNTERRUPT PIN 
+....................  
+.................... #ifndef _SIMULATE 
+....................   InitialiseWatchdog(); 
+.................... #endif 
+....................  
+....................   InitialisePlaOutQueue(); 
+....................  
+.................... #ifndef _SIMULATE 
+.................... 	InitialiseAnalogueIn(); 
+.................... #endif 
+....................  
+....................   last_tx_data.flags = DIAG_DIAG_MESSAGE_FLAG; 
+....................   last_tx_data.data = DIAG_ETX; 
+....................  
+....................   prev_pla_out.flags = DIAG_DIAG_MESSAGE_FLAG; 
+....................   prev_pla_out.data = DIAG_REQUEST_RX_BYTES; 
+....................  
+....................   InitialiseInQueue(); 
+.................... 	ProcessDigitalInputs(false);			 
+....................  
+....................  
+....................   ext_int_edge(L_TO_H);      // init interrupt triggering for positive transition 
+....................   enable_interrupts(INT_EXT);// turn on interrupt 
+....................    
+....................   InitialisePlaIn(); 
+....................  
+....................   InitialiseEEprom(); 
+....................   enable_interrupts(GLOBAL); 
+....................  
+....................   RequestNumRxBytes(); 
+....................  
+....................  
+.................... } 
+....................  
+....................  
+.................... main() { 
+....................   int i; 
+012F:  CLRF   04
+0130:  MOVLW  1F
+0131:  ANDWF  03,F
+0132:  MOVLW  9F
+0133:  MOVWF  04
+0134:  MOVLW  07
+0135:  MOVWF  00
+0136:  CLRF   28
+0137:  MOVLW  09
+0138:  BSF    03.5
+0139:  MOVWF  19
+013A:  MOVLW  22
+013B:  MOVWF  18
+013C:  MOVLW  90
+013D:  BCF    03.5
+013E:  MOVWF  18
+013F:  BSF    29.0
+0140:  BCF    29.1
+0141:  CLRF   2A
+0142:  CLRF   2B
+0143:  CLRF   2C
+0144:  BSF    29.2
+0145:  BSF    29.3
+0146:  MOVLW  FF
+0147:  MOVWF  2D
+0148:  BSF    29.4
+0149:  BCF    29.5
+014A:  BCF    29.6
+014B:  BCF    29.7
+014C:  BCF    2E.0
+014D:  CLRF   42
+014E:  MOVLW  09
+014F:  BSF    03.5
+0150:  MOVWF  19
+0151:  MOVLW  22
+0152:  MOVWF  18
+0153:  MOVLW  90
+0154:  BCF    03.5
+0155:  MOVWF  18
+0156:  BCF    2D.5
+0157:  MOVF   2D,W
+0158:  BSF    03.5
+0159:  MOVWF  07
+015A:  BCF    03.5
+015B:  BSF    07.5
+015C:  CLRF   7E
+015D:  BSF    03.5
+015E:  CLRF   24
+015F:  BCF    03.5
+0160:  BCF    2E.2
+0161:  BCF    2E.3
+0162:  BCF    2E.4
+0163:  BCF    2E.5
+0164:  BSF    03.5
+0165:  CLRF   25
+0166:  CLRF   26
+0167:  BCF    03.5
+0168:  BCF    2E.6
+0169:  BCF    2E.7
+....................  
+....................   while (1) 
+....................     for (i = 0; i < 16; i++) 
+016A:  BSF    03.5
+016B:  CLRF   27
+016C:  BCF    03.5
+016D:  BSF    03.5
+016E:  MOVF   27,W
+016F:  SUBLW  0F
+0170:  BTFSC  03.0
+0171:  GOTO   174
+0172:  BCF    03.5
+0173:  GOTO   186
+0174:  BCF    03.5
+....................     { 
+....................       GenerateDigitalOutput (i, 127); 
+0175:  BSF    03.5
+0176:  MOVF   27,W
+0177:  MOVWF  28
+0178:  MOVLW  7F
+0179:  MOVWF  29
+017A:  BCF    03.5
+017B:  CALL   095
+....................       GenerateDigitalOutput (i, 0); 
+017C:  BSF    03.5
+017D:  MOVF   27,W
+017E:  MOVWF  28
+017F:  CLRF   29
+0180:  BCF    03.5
+0181:  CALL   095
+....................     } 
+0182:  BSF    03.5
+0183:  INCF   27,F
+0184:  BCF    03.5
+0185:  GOTO   16D
+0186:  GOTO   16A
+....................  
+.................... } 
+....................  
+0187:  SLEEP
+....................  
+....................  
+.................... 
