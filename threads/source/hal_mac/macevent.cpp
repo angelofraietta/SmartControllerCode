@@ -179,13 +179,6 @@ bool MacEvent::Wait (int timeout)
 						case 0:
 							ret = true;
 							break;
-						case ETIMEDOUT:
-							//printf ("Event Timed out\r\n");
-							break;
-							
-						case EINVAL:
-							printf ("Invalid out\r\n");
-							break;
 							
 						default:
 							printf (" event fail\r\n");

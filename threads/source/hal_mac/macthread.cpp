@@ -19,7 +19,7 @@
 #include <unistd.h>
 #include "activeobject.h"
 #include <pthread.h>
-#include <iostream.h>
+#include <iostream>
 //## end module%3D4719D5004D.includes
 
 // MultiThread
