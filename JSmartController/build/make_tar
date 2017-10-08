@@ -1,0 +1,1 @@
+tar -cvzf MacSmartController.tgz smartcontroller.command libsmartcontroljava.jnilib SmartController.jar

@@ -1,0 +1,8 @@
+#make the Application in /test directory
+
+rm Graphics/*.class
+rm Graphics/test/*.class
+
+javac -classpath ../ Graphics/test/Application1.java
+
+

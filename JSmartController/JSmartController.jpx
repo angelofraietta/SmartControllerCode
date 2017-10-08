@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--JBuilder XML Project-->
+<project>
+  <property category="debug.0" name="SmartStepRedefineClasses" value="0"/>
+  <property category="debug.0" name="SmartStepSkipStaticInitializers" value="0"/>
+  <property category="debug.0" name="SmartStepSkipSynthetics" value="0"/>
+  <property category="runtime" name="DefaultConfiguration" value="-1"/>
+  <property category="runtime.0" name="ConfigurationName" value="MainApplication"/>
+  <property category="runtime.0" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
+  <property category="runtime.0" name="application.class" value="jsmartcontroller.MainApplication"/>
+  <property category="serverservices" name="disabled.services" value=""/>
+  <property category="serverservices" name="single.server.name" value="Tomcat 4.0"/>
+  <property category="sys" name="AuthorLabel" value="@author"/>
+  <property category="sys" name="BackupPath" value="bak"/>
+  <property category="sys" name="CheckStable" value="1"/>
+  <property category="sys" name="Company" value="Angelo Fraietta"/>
+  <property category="sys" name="CompanyLabel" value="Company:"/>
+  <property category="sys" name="Copyright" value="Copyright (c) 2003 Angelo Fraietta"/>
+  <property category="sys" name="CopyrightLabel" value="Copyright:"/>
+  <property category="sys" name="DefaultPath" value="src"/>
+  <property category="sys" name="Description" value="Smart Controller Patch Editor and Simulator"/>
+  <property category="sys" name="DescriptionLabel" value="Description:"/>
+  <property category="sys" name="DocPath" value="doc"/>
+  <property category="sys" name="ExcludeClassEnabled" value="0"/>
+  <property category="sys" name="IncludeTestPath" value="1"/>
+  <property category="sys" name="InstanceVisibility" value="2"/>
+  <property category="sys" name="JDK" value="java version 1.4.1-b21"/>
+  <property category="sys" name="JvmVersion" value="1.2"/>
+  <property category="sys" name="LastTag" value="0"/>
+  <property category="sys" name="Libraries" value="ViewForms;Jni"/>
+  <property category="sys" name="MakeStable" value="0"/>
+  <property category="sys" name="OutPath" value="classes"/>
+  <property category="sys" name="SourcePath" value="src;test"/>
+  <property category="sys" name="TestPath" value="test"/>
+  <property category="sys" name="Title" value="Smart Controller"/>
+  <property category="sys" name="TitleLabel" value="Title:"/>
+  <property category="sys" name="Version" value="1.0"/>
+  <property category="sys" name="VersionLabel" value="@version"/>
+  <property category="sys" name="WorkingDirectory" value="."/>
+  <property category="sys" name="uidesign.size.jsmartcontroller.BaseShellDisplayForm" value="400,301"/>
+  <property category="sys" name="uidesign.size.jsmartcontroller.CVSim" value="401,300"/>
+  <property category="sys" name="uidesign.size.jsmartcontroller.PatchForm" value="580,332"/>
+  <node name="ViewForms" type="Package"/>
+  <node name="ViewForms.Graphics" type="Package"/>
+  <file path="src/jsmartcontroller/about.png"/>
+  <file path="src/Jni/BaseShell.java"/>
+  <file path="src/jsmartcontroller/BaseShellBox.java"/>
+  <file path="src/jsmartcontroller/BaseShellDisplayForm.java"/>
+  <file path="src/jsmartcontroller/BaseShellHook.java"/>
+  <file path="src/jsmartcontroller/BaseShellInlet.java"/>
+  <file path="src/jsmartcontroller/BaseShellOutlet.java"/>
+  <file path="src/jsmartcontroller/BaseShellTransferHandler.java"/>
+  <file path="src/jsmartcontroller/BaseShellTreeNode.java"/>
+  <file path="src/ViewForms/Graphics/CBottomFollower.java"/>
+  <file path="src/ViewForms/Graphics/CDragObject.java"/>
+  <file path="src/ViewForms/Graphics/CHorizLineSegment.java"/>
+  <file path="src/ViewForms/Graphics/CLineFollower.java"/>
+  <file path="src/ViewForms/Graphics/CLineSegment.java"/>
+  <file path="src/jsmartcontroller/closeFile.png"/>
+  <file path="src/ViewForms/Graphics/CObjectBox.java"/>
+  <file path="src/ViewForms/Graphics/CObjectFollower.java"/>
+  <file path="src/Jni/Connector.java"/>
+  <file path="src/jsmartcontroller/ConnectorDisplayForm.java"/>
+  <file path="src/jsmartcontroller/ConnectorHook.java"/>
+  <file path="src/jsmartcontroller/ConnectorLine.java"/>
+  <file path="src/jsmartcontroller/ConnectorsNode.java"/>
+  <file path="src/jsmartcontroller/ConnectorTreeNode.java"/>
+  <file path="src/ViewForms/Graphics/CTopFollower.java"/>
+  <file path="src/ViewForms/Graphics/CVerticalLineSegment.java"/>
+  <file path="src/jsmartcontroller/CVOutSim.java"/>
+  <file path="src/jsmartcontroller/CVSim.java"/>
+  <file path="src/jsmartcontroller/DataFileFilter.java"/>
+  <file path="src/jsmartcontroller/down.png"/>
+  <file path="src/Jni/FileSend.java"/>
+  <file path="src/jsmartcontroller/help.png"/>
+  <file path="src/Jni/Identity.java"/>
+  <file path="src/jsmartcontroller/IdentityHook.java"/>
+  <file path="src/jsmartcontroller/IdentityTreeNode.java"/>
+  <file path="src/jsmartcontroller/MainApplication.java"/>
+  <file path="src/jsmartcontroller/MainFrame.java"/>
+  <file path="src/jsmartcontroller/MainFrame_AboutBox.java"/>
+  <file path="src/jsmartcontroller/ObjectsList.java"/>
+  <file path="src/jsmartcontroller/ObjectsNode.java"/>
+  <file path="src/jsmartcontroller/openFile.png"/>
+  <file path="src/jsmartcontroller/OzcoLogo.gif"/>
+  <file path="src/Jni/PatchEditor.java"/>
+  <file path="src/jsmartcontroller/PatchFileFilter.java"/>
+  <file path="src/jsmartcontroller/PatchForm.java"/>
+  <file path="src/jsmartcontroller/PatchTree.java"/>
+  <file path="src/jsmartcontroller/PatchTreeNode.java"/>
+  <file path="src/jsmartcontroller/ProjectFileFilter.java"/>
+  <file path="src/jsmartcontroller/SysexFileCreator.java"/>
+  <file path="src/jsmartcontroller/up.png"/>
+  <file path="src/Jni/View.java"/>
+  <file path="src/jsmartcontroller/ViewConnector.java"/>
+  <file path="src/jsmartcontroller/ViewForm.java"/>
+  <file path="src/ViewForms/Graphics/ViewFormPanel.java"/>
+  <file path="src/jsmartcontroller/ViewHook.java"/>
+  <file path="src/jsmartcontroller/ViewObject.java"/>
+  <file path="src/jsmartcontroller/ViewsNode.java"/>
+  <file path="src/jsmartcontroller/ViewTreeNode.java"/>
+</project>
