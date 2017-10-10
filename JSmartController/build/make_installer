@@ -1,0 +1,5 @@
+
+# build the jar file
+#this makes the Sysex installer for downloading new patches to harware device
+jar -cfm SmartExe.jar ../build/SmartBuild.mf Jni/*.class MidiExe.class
+

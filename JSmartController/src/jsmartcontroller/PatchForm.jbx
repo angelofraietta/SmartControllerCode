@@ -1,0 +1,57 @@
+[PropertyInfo]
+_connector_map,TreeMap,false,false, , ,false,<default>
+_display_type,ButtonGroup,false,false, , ,false,<default>
+_filename,String,false,false, , ,false,<default>
+_is_simulator,boolean,false,false, , ,false,<default>
+_last_node,IdentityTreeNode,false,false, , ,false,<default>
+_modified,boolean,false,false, , ,false,<default>
+_object_map,TreeMap,false,false, , ,false,<default>
+_PatchTree,PatchTree,false,false, , ,false,<default>
+_pinterface,int,false,false, , ,false,<default>
+_pPatch,int,false,false, , ,false,<default>
+_selected_connector,ConnectorHook,false,false, , ,false,<default>
+_selected_object,BaseShellBox,false,false, , ,false,<default>
+_smp_ext,String,false,false, , ,false,<default>
+_tree_model,DefaultTreeModel,false,false, , ,false,<default>
+_updater,ViewUpdater,false,false, , ,false,<default>
+_view_panel,ViewForm,false,false, , ,false,<default>
+borderLayout1,BorderLayout,false,false, , ,false,<default>
+chkDragResize,JCheckBox,false,false, , ,false,<default>
+chkForceUpdate,JCheckBox,false,false, , ,false,<default>
+CloseMenu,JMenuItem,false,false, , ,false,<default>
+ConnectorMenu,JMenu,false,false, , ,false,<default>
+DeleteConnectorMenu,JMenuItem,false,false, , ,false,<default>
+DeleteObjectMenu,JMenuItem,false,false, , ,false,<default>
+EditConnectorMenu,JMenuItem,false,false, , ,false,<default>
+EditObjectMenu,JMenuItem,false,false, , ,false,<default>
+FileMenu,JMenu,false,false, , ,false,<default>
+jMenu1,JMenu,false,false, , ,false,<default>
+jMenuBar1,JMenuBar,false,false, , ,false,<default>
+jMenuCreate,JMenuItem,false,false, , ,false,<default>
+jToolBar,JToolBar,false,false, , ,false,<default>
+jTree1,JTree,false,false, , ,false,<default>
+mnuAutoUpdate,JCheckBoxMenuItem,false,false, , ,false,<default>
+mnuShowSim,JMenuItem,false,false, , ,false,<default>
+mnuSimOutput,JMenuItem,false,false, , ,false,<default>
+NameBtn,JRadioButton,false,false, , ,false,<default>
+NewViewMenu,JMenuItem,false,false, , ,false,<default>
+object_count,int,false,false, , ,false,<default>
+ObjectTypeBtn,JRadioButton,false,false, , ,false,<default>
+PopupDelete,JMenuItem,false,false, , ,false,<default>
+PopupEdit,JMenuItem,false,false, , ,false,<default>
+ReloadButton,JButton,false,false, , ,false,<default>
+RemoveFromViewMenu,JMenuItem,false,false, , ,false,<default>
+SaveAsMenu,JMenuItem,false,false, , ,false,<default>
+SaveButton,JButton,false,false, , ,false,<default>
+SaveMenu,JMenuItem,false,false, , ,false,<default>
+SaveViewMenu,JMenuItem,false,false, , ,false,<default>
+statusBar,JLabel,false,false, , ,false,<default>
+TreePopupMenu,JPopupMenu,false,false, , ,false,<default>
+ValueBtn,JRadioButton,false,false, , ,false,<default>
+ViewScrollPanel,ScrollPane,false,false, , ,false,<default>
+ViewsMenu,JMenu,false,false, , ,false,<default>
+[IconNames]
+
+
+
+

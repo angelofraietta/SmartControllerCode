@@ -1,0 +1,5 @@
+
+# build the jar file
+#this must be run from the root directory of where your .class files are are
+jar -cfm ../build/SmartController.jar ../build/SmartControl.mf ViewForms/Graphics/*.class Jni/*.class jsmartcontroller/*.class jsmartcontroller/*.png jsmartcontroller/*.gif
+
