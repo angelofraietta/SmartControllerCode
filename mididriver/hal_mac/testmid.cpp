@@ -2,7 +2,7 @@
   Driver file to test Midi input and output
  */
 
-#include <iostream.h>
+#include <iostream>
 #include "midioutputdriver.h"
 #include "midiinputdriver.h"
 #include "midiinputsync.h"
@@ -46,21 +46,21 @@ int main()
   
   if (!pMidiIn->open(0))
     {
-      cout<<"Unable to open Midi In"<<endl;
+      std::cout<<"Unable to open Midi In"<<std::endl;
     }
   
   pMidiIn->start();
   
   if (pOutputDriver->open(0))
     {
-      cout<<"Midi Output opened"<<endl;
+      std::cout<<"Midi Output opened"<<std::endl;
     }
   else
     {
-      cout <<"Unable to open Midi Out"<<endl;
+      std::cout <<"Unable to open Midi Out"<<std::endl;
     }
 
-  cout<<"Press <ctrl> c to exit"<<endl;  
+  std::cout<<"Press <ctrl> c to exit"<<std::endl;  
   CFRunLoopRun();  
 	
   return 0;

@@ -18,8 +18,8 @@
 #include <CoreMIDI/MIDIServices.h>
 #include "iodata.h"
 #include "midiflags.h"
-#include "qtime/QuickTimeComponents.h"
-#include "qtime/QuickTimeMusic.h"
+//#include "qtime/QuickTimeComponents.h"
+//#include "qtime/QuickTimeMusic.h"
 //## end module%3D6AB5580013.includes
 
 #include "midioutputdriver.h"
@@ -92,8 +92,8 @@ class MacMidiOutputDriver : public MidiOutputDriver  //## Inherits: <unnamed>%3D
       //## Operation: TransmitQuicktimeMidiByte%1120506345
       //	Transmits Midi Byte to an output
       void TransmitQuicktimeMidiByte (unsigned char data, 	// The Midi byte to transmit
-      int output_num = 0	// The Midi Output to go to
-      );
+	    int output_num = 0	// The Midi Output to go to
+     );
 
     // Additional Public Declarations
       //## begin MacMidiOutputDriver%3D6AB8F6030E.public preserve=yes
@@ -143,7 +143,7 @@ class MacMidiOutputDriver : public MidiOutputDriver  //## Inherits: <unnamed>%3D
 
       //## Attribute: _qtNoteAllocator%42C9A3D002CE
       //## begin MacMidiOutputDriver::_qtNoteAllocator%42C9A3D002CE.attr preserve=no  private: static NoteAllocator {UA} NULL
-      static NoteAllocator _qtNoteAllocator;
+  //      static NoteAllocator _qtNoteAllocator;
       //## end MacMidiOutputDriver::_qtNoteAllocator%42C9A3D002CE.attr
 
     // Additional Private Declarations
@@ -333,7 +333,7 @@ bool MidiOutputDriver::GetDeviceName (unsigned index, char* ret_buf, unsigned bu
 
 
 //## begin MacMidiOutputDriver::_qtNoteAllocator%42C9A3D002CE.attr preserve=no  private: static NoteAllocator {UA} NULL
-NoteAllocator MacMidiOutputDriver::_qtNoteAllocator = NULL;
+//NoteAllocator MacMidiOutputDriver::_qtNoteAllocator = NULL;
 //## end MacMidiOutputDriver::_qtNoteAllocator%42C9A3D002CE.attr
 
 MacMidiOutputDriver::MacMidiOutputDriver (int queue_size)
@@ -448,6 +448,7 @@ bool MacMidiOutputDriver::TransmitSysex ()
 void MacMidiOutputDriver::TransmitQuicktimeMidiByte (unsigned char data, int output_num)
 {
   //## begin MacMidiOutputDriver::TransmitQuicktimeMidiByte%1120506345.body preserve=yes
+  /*
   IOData iodata = data;
 	EnqueData(iodata);
 
@@ -513,7 +514,7 @@ void MacMidiOutputDriver::TransmitQuicktimeMidiByte (unsigned char data, int out
       } //dequedata
     } // end !sysex
   }
-
+  */
   //## end MacMidiOutputDriver::TransmitQuicktimeMidiByte%1120506345.body
 }
 
@@ -521,16 +522,20 @@ bool MacMidiOutputDriver::OpenQuicktime ()
 {
   //## begin MacMidiOutputDriver::OpenQuicktime%1120506346.body preserve=yes
 	printf ("Open Quicktime\r\n");
-	_qtNoteAllocator = OpenDefaultComponent(kNoteAllocatorComponentType, 0);
-	return _qtNoteAllocator != NULL;
+	//_qtNoteAllocator = OpenDefaultComponent(kNoteAllocatorComponentType, 0);
+	//return _qtNoteAllocator != NULL;
+	return false;
   //## end MacMidiOutputDriver::OpenQuicktime%1120506346.body
 }
 
 bool MacMidiOutputDriver::CloseQuicktime ()
 {
   //## begin MacMidiOutputDriver::CloseQuicktime%1120506347.body preserve=yes
+  /*
 	if (_qtNoteAllocator != NULL)
 		CloseComponent(_qtNoteAllocator);
+  */
+  return false;
   //## end MacMidiOutputDriver::CloseQuicktime%1120506347.body
 }
 

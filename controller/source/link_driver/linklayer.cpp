@@ -22,6 +22,7 @@ using sm_str::string;
 #endif
 
 #include <stddef.h>
+#include "typedefs.h";
 #include "udpport.h"
 // LinkProtocol
 #include "linkprotocol.h"

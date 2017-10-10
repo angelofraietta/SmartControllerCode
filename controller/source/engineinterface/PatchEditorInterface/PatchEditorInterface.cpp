@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "smutility.h"
 #include <stdio.h>
-#include <windows.h>
+//#include <windows.h>
 
 #include "presentationquestion.h"
 

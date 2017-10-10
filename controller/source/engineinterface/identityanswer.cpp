@@ -20,7 +20,9 @@
 #include "smutility.h"
 #include "control.h"
 #include <string.h>
-#include "emap.h"
+#include "typedefs.h"
+#include "interfacetypes.h"
+
 //## end module%3ACAAFDE026B.includes
 
 // identity
@@ -30,7 +32,7 @@
 // PatchAnswer
 #include "patchanswer.h"
 
-
+#include "emap.h"
 //## begin module%3ACAAFDE026B.declarations preserve=no
 using sm_str::map;
 
