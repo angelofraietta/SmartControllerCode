@@ -274,7 +274,8 @@ extern "C" JNIEXPORT jstring JNICALL Java_Jni_BaseShell_GetInletName
  */
 extern "C" JNIEXPORT jstring JNICALL Java_Jni_BaseShell_GetOutletName
   (JNIEnv * env, jclass, jint pQuestion, jint objKey, jint outlet_num)
-{
+
+{
   char buf [256];
 
   BaseShellQuestion::GetOutletName ((PresentationQuestion* )pQuestion, 	// Pointer to the Presentation Question used to get the

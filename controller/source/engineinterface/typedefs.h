@@ -60,12 +60,12 @@
   #define UNREFERENCED_PARAMETER(P) (P)=(P);
 #endif
 
-typedef unsigned long DWORD;
+typedef unsigned DWORD;
 typedef char* LPSTR;
-typedef unsigned long UINT32;
+typedef unsigned UINT32;
 typedef unsigned short UINT16;
 typedef short INT16;
-typedef long  INT32;
+typedef int  INT32;
 typedef signed char INT8;
 typedef unsigned char UINT8;
 typedef unsigned char UCHAR;

@@ -66,7 +66,13 @@ int main ()
   std::cout<<"TestThread App2"<<std::endl;
 
 
+  int int_size = sizeof(int);
+  int long_size = sizeof(long);
+  
+    std::cout<<"Int Size"<<int_size<<std::endl;
+    std::cout<<"Long Size"<<long_size<<std::endl;
 
+  
   TestThread* t = new TestThread;
   t->start();
 

@@ -21,3 +21,7 @@ lib :$(LIB)
 
 $(LIB) : $(CC_O_FILES)
 	ar -r -s  $@ $?
+
+clean:
+	-rm *.a
+	-rm *.o

@@ -8,6 +8,8 @@ CC_SIM_O_FILES = $(CC_SIM_PIECES:%=%.o)
 
 CPP_FLAGS = $(COMMON_CPPFLAGS)
 CPP_FLAGS += $(COMMON_DEFINES)
+CPP_FLAGS += -I/System/Library/Frameworks/JavaVM.framework/Headers
+
 
 LIB=$(LIBNAME)
 
@@ -24,3 +26,7 @@ $(SIMLIBNAME) : $(CC_SIM_O_FILES)
 
 $(LIB) : $(CC_O_FILES)
 	ar -r -s  $@ $?
+
+clean:
+	-rm *.a
+	-rm *.o

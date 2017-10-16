@@ -1,5 +1,592 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="84">
+<configurationDescriptor version="100">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df root="." name="0">
+      <df name="controller">
+        <df name="bsp">
+        </df>
+        <df name="design">
+        </df>
+        <df name="source">
+          <df name="engine">
+            <in>analogin.cpp</in>
+            <in>analogin.h</in>
+            <in>analogout.cpp</in>
+            <in>analogout.h</in>
+            <in>baseshel.cpp</in>
+            <in>baseshel.h</in>
+            <in>calculate.cpp</in>
+            <in>calculate.h</in>
+            <in>clock.h</in>
+            <in>connect.cpp</in>
+            <in>connect.h</in>
+            <in>connectormessage.h</in>
+            <in>control.h</in>
+            <in>convertmidi.cpp</in>
+            <in>counter.cpp</in>
+            <in>counter.h</in>
+            <in>delay.cpp</in>
+            <in>delay.h</in>
+            <in>deltatime.cpp</in>
+            <in>deltatime.h</in>
+            <in>digitalin.cpp</in>
+            <in>digitalin.h</in>
+            <in>digitalout.cpp</in>
+            <in>digitalout.h</in>
+            <in>display.cpp</in>
+            <in>display.h</in>
+            <in>engine.cpp</in>
+            <in>enginedatainput.cpp</in>
+            <in>enginedatainput.h</in>
+            <in>error_messages.h</in>
+            <in>flipflop.cpp</in>
+            <in>flipflop.h</in>
+            <in>funcdec.h</in>
+            <in>globals.h</in>
+            <in>globfunc.cpp</in>
+            <in>identity.cpp</in>
+            <in>identity.h</in>
+            <in>mainline.cpp</in>
+            <in>memorycache.cpp</in>
+            <in>memorycache.h</in>
+            <in>messagecell.cpp</in>
+            <in>messagecell.h</in>
+            <in>messagefilter.cpp</in>
+            <in>messagefilter.h</in>
+            <in>messagestore.cpp</in>
+            <in>messagestore.h</in>
+            <in>metro.cpp</in>
+            <in>metro.h</in>
+            <in>midi.h</in>
+            <in>number.cpp</in>
+            <in>number.h</in>
+            <in>oscarg.cpp</in>
+            <in>oscarg.h</in>
+            <in>oscin.cpp</in>
+            <in>oscin.h</in>
+            <in>oscinput.cpp</in>
+            <in>oscinput.h</in>
+            <in>oscout.cpp</in>
+            <in>oscout.h</in>
+            <in>osinterface.cpp</in>
+            <in>osinterface.h</in>
+            <in>ostypes.h</in>
+            <in>outlet.cpp</in>
+            <in>outlet.h</in>
+            <in>patch.cpp</in>
+            <in>patch.h</in>
+            <in>patchports.cpp</in>
+            <in>patchports.h</in>
+            <in>patchview.cpp</in>
+            <in>patchview.h</in>
+            <in>randomgen.cpp</in>
+            <in>randomgen.h</in>
+            <in>selector.cpp</in>
+            <in>selector.h</in>
+            <in>sequencer.cpp</in>
+            <in>sequencer.h</in>
+            <in>smerror.h</in>
+            <in>smfstl.cpp</in>
+            <in>smfstl.h</in>
+            <in>socket.cpp</in>
+            <in>socket.h</in>
+            <in>stdafx.h</in>
+            <in>stdmidiin.cpp</in>
+            <in>stdmidiin.h</in>
+            <in>stdmidiout.cpp</in>
+            <in>stdmidiout.h</in>
+            <in>switch.cpp</in>
+            <in>switch.h</in>
+            <in>sysexdriver.cpp</in>
+            <in>sysexdriver.h</in>
+            <in>table.cpp</in>
+            <in>table.h</in>
+            <in>tablepoints.cpp</in>
+            <in>tablepoints.h</in>
+            <in>timer.cpp</in>
+            <in>timer.h</in>
+            <in>toggle.cpp</in>
+            <in>toggle.h</in>
+            <in>trigger.cpp</in>
+            <in>trigger.h</in>
+            <in>typelist.cpp</in>
+            <in>typelist.h</in>
+            <in>windows_init.cpp</in>
+            <in>windowsmessages.h</in>
+          </df>
+          <df name="engineinterface">
+            <df name="PatchEditorInterface">
+              <df name="Jni">
+                <in>PatchEditor.h</in>
+              </df>
+              <df name="PatchEditorInterface">
+              </df>
+              <in>BaseShellInterface.cpp</in>
+              <in>ConnectorInterface.cpp</in>
+              <in>FileSendInterface.cpp</in>
+              <in>IdentityInterface.cpp</in>
+              <in>PatchEditorInterface.cpp</in>
+              <in>PatchInterface.cpp</in>
+              <in>ViewInterface.cpp</in>
+            </df>
+            <in>QUESTIONTASK.cpp</in>
+            <in>answertask.cpp</in>
+            <in>answertask.h</in>
+            <in>baseshellanswer.cpp</in>
+            <in>baseshellanswer.h</in>
+            <in>baseshellquestion.cpp</in>
+            <in>baseshellquestion.h</in>
+            <in>connectoranswer.cpp</in>
+            <in>connectoranswer.h</in>
+            <in>connectorquestion.cpp</in>
+            <in>connectorquestion.h</in>
+            <in>dllinterface.h</in>
+            <in>eventanswer.cpp</in>
+            <in>eventanswer.h</in>
+            <in>eventmessagequeue.cpp</in>
+            <in>eventmessagequeue.h</in>
+            <in>eventquestion.cpp</in>
+            <in>eventquestion.h</in>
+            <in>fileanswer.cpp</in>
+            <in>fileanswer.h</in>
+            <in>fileblock.cpp</in>
+            <in>fileblock.h</in>
+            <in>filequestion.cpp</in>
+            <in>filequestion.h</in>
+            <in>identityanswer.cpp</in>
+            <in>identityanswer.h</in>
+            <in>identityquestion.cpp</in>
+            <in>identityquestion.h</in>
+            <in>interfacebridge.h</in>
+            <in>interfacetypes.h</in>
+            <in>nvramstore.cpp</in>
+            <in>nvramstore.h</in>
+            <in>patchanswer.cpp</in>
+            <in>patchanswer.h</in>
+            <in>patchquestion.cpp</in>
+            <in>patchquestion.h</in>
+            <in>presentationanswer.cpp</in>
+            <in>presentationanswer.h</in>
+            <in>presentationquestion.cpp</in>
+            <in>presentationquestion.h</in>
+            <in>questiontask.h</in>
+            <in>sessionanswer.cpp</in>
+            <in>sessioninterface.h</in>
+            <in>sessionquestion.cpp</in>
+            <in>smutility.cpp</in>
+            <in>smutility.h</in>
+            <in>sysexfilequestion.cpp</in>
+            <in>sysexfilequestion.h</in>
+            <in>tempblock.h</in>
+            <in>typedefs.h</in>
+            <in>typenames.h</in>
+            <in>viewanswer.cpp</in>
+            <in>viewanswer.h</in>
+            <in>viewquestion.cpp</in>
+            <in>viewquestion.h</in>
+          </df>
+          <df name="hal_include">
+            <in>midioutput.h</in>
+            <in>scheduledobject.h</in>
+            <in>scheduler.cpp</in>
+            <in>scheduler.h</in>
+            <in>simulator.cpp</in>
+            <in>simulatorinterface.h</in>
+          </df>
+          <df name="hal_mac">
+            <in>macsimulator.cpp</in>
+            <in>scheduler.cpp</in>
+            <in>simulator.cpp</in>
+            <in>testsim.cpp</in>
+          </df>
+          <df name="hal_rtems_pc386">
+            <df name="config">
+            </df>
+            <df name="o-optimize">
+              <in>stack.cpp</in>
+            </df>
+            <in>bsp-cs8900.c</in>
+            <in>bsp-cs8900.h</in>
+            <in>commtasks.cpp</in>
+            <in>cs8900.c</in>
+            <in>cs8900.h</in>
+            <in>diags.c</in>
+            <in>fsmount.c</in>
+            <in>fsmount.h</in>
+            <in>init.c</in>
+            <in>midioutput.cpp</in>
+            <in>rtems_answer_task.cpp</in>
+            <in>rtems_init.cpp</in>
+            <in>rtems_simulator.cpp</in>
+            <in>rtemsactiveobject.cpp</in>
+            <in>scheduler.cpp</in>
+            <in>system.h</in>
+          </df>
+          <df name="hal_windows">
+            <in>midioutput.cpp</in>
+            <in>scheduler.cpp</in>
+            <in>test.cpp</in>
+            <in>windows_answer_task.cpp</in>
+            <in>winmain.cpp</in>
+            <in>winsimulator.cpp</in>
+          </df>
+          <df name="link_driver">
+            <df name="hal_mac">
+              <in>maccommport.cpp</in>
+              <in>maccommport.h</in>
+              <in>maccommstream.cpp</in>
+              <in>udpport.cpp</in>
+            </df>
+            <df name="hal_rtems">
+              <in>rtemscommport.cpp</in>
+              <in>rtemscommport.h</in>
+              <in>rtemscommstream.cpp</in>
+            </df>
+            <df name="hal_windows">
+              <df name="windows_driver">
+                <in>CommDriver.cpp</in>
+                <in>CommDriver.h</in>
+                <in>WindowsCommDriver.asm</in>
+                <in>WindowsCommDriver.cpp</in>
+                <in>stdafx.h</in>
+              </df>
+              <in>windowscommport.cpp</in>
+              <in>windowscommport.h</in>
+              <in>windowscommstream.cpp</in>
+              <in>windowsmidiport.cpp</in>
+              <in>windowsmidiport.h</in>
+            </df>
+            <in>OSC-common.h</in>
+            <in>commstream.h</in>
+            <in>controlfilter.h</in>
+            <in>crc32.cpp</in>
+            <in>crc32.h</in>
+            <in>htmsocket.c</in>
+            <in>htmsocket.h</in>
+            <in>linkdriver.cpp</in>
+            <in>linklayer.cpp</in>
+            <in>linklayer.h</in>
+            <in>linkprotocol.cpp</in>
+            <in>linkprotocol.h</in>
+            <in>networklayer.cpp</in>
+            <in>networklayer.h</in>
+            <in>ringqueue.h</in>
+            <in>staticvector.h</in>
+            <in>udpecho.cpp</in>
+            <in>udpport.cpp</in>
+            <in>udpport.h</in>
+          </df>
+        </df>
+      </df>
+      <df name="estl">
+        <in>e_stl.cpp</in>
+        <in>elist.h</in>
+        <in>emap.h</in>
+        <in>equeue.h</in>
+        <in>estring.h</in>
+        <in>evector.h</in>
+      </df>
+      <df name="JSmartController">
+        <df name="build">
+        </df>
+        <df name="classes">
+          <df name="Jni">
+          </df>
+          <df name="jsmartcontroller">
+          </df>
+          <df name="package cache">
+          </df>
+          <df name="ViewForms">
+            <df name="Graphics">
+            </df>
+          </df>
+        </df>
+        <df name="src">
+          <df name="Jni">
+          </df>
+          <df name="jsmartcontroller">
+          </df>
+          <df name="ViewForms">
+            <df name="Graphics">
+              <df name="test">
+              </df>
+            </df>
+          </df>
+        </df>
+      </df>
+      <df name="libOSC">
+        <in>OSC-client.c</in>
+        <in>OSC-client.h</in>
+        <in>OSC-timetag.c</in>
+        <in>OSC-timetag.h</in>
+        <in>htmsocket.c</in>
+        <in>htmsocket.h</in>
+        <in>test_OSC.c</in>
+        <in>test_OSC_timeTag.c</in>
+      </df>
+      <df name="midicontroller">
+        <df name="code">
+          <in>24LC256.h</in>
+          <in>MIDICFG.H</in>
+          <in>RS232D.h</in>
+          <in>SysexDrv.h</in>
+          <in>anain.h</in>
+          <in>anaout.h</in>
+          <in>cfgram.h</in>
+          <in>decmidi.h</in>
+          <in>digin.h</in>
+          <in>digout.c</in>
+          <in>digout.h</in>
+          <in>ds1803.h</in>
+          <in>extprom.h</in>
+          <in>iocard.c</in>
+          <in>lcd.c</in>
+          <in>lcd.h</in>
+          <in>max520.h</in>
+          <in>midicont.c</in>
+          <in>mididrv.h</in>
+          <in>midiin.c</in>
+          <in>midiin.h</in>
+          <in>midiout.h</in>
+          <in>midiproc.c</in>
+          <in>mirror.c</in>
+          <in>pla.c</in>
+          <in>pla_io.h</in>
+          <in>pla_out.h</in>
+          <in>proc_pla.h</in>
+          <in>procmidi.h</in>
+          <in>readprm.c</in>
+          <in>spi_read.h</in>
+          <in>sysex.h</in>
+          <in>sysexcommands.h</in>
+          <in>sysexout.h</in>
+          <in>testan.c</in>
+          <in>testdig.c</in>
+          <in>testmid.c</in>
+          <in>testpot.c</in>
+          <in>testprom.c</in>
+          <in>testread.c</in>
+          <in>testrom.c</in>
+          <in>testwrit.c</in>
+          <in>testwrite.c</in>
+          <in>watchdog.h</in>
+        </df>
+        <df name="model">
+        </df>
+      </df>
+      <df name="mididriver">
+        <df name="design">
+        </df>
+        <df name="hal_mac">
+          <df name="qtime">
+            <in>ComponentDispatchHelper.c</in>
+            <in>ImageCodec.h</in>
+            <in>ImageCodec.k.h</in>
+            <in>ImageCompression.h</in>
+            <in>ImageCompression.k.h</in>
+            <in>MediaHandlers.h</in>
+            <in>MediaHandlers.k.h</in>
+            <in>Movies.h</in>
+            <in>Movies.k.h</in>
+            <in>MoviesFormat.h</in>
+            <in>QTMusic.h</in>
+            <in>QTSMovie.h</in>
+            <in>QTSMovie.k.h</in>
+            <in>QTStreamingComponents.h</in>
+            <in>QTStreamingComponents.k.h</in>
+            <in>QuickTime.h</in>
+            <in>QuickTimeComponents.h</in>
+            <in>QuickTimeComponents.k.h</in>
+            <in>QuickTimeMusic.h</in>
+            <in>QuickTimeMusic.k.h</in>
+            <in>QuickTimeStreaming.h</in>
+            <in>QuickTimeVR.h</in>
+            <in>QuickTimeVRFormat.h</in>
+          </df>
+          <in>QTMusic.h</in>
+          <in>echo.cpp</in>
+          <in>macmidiinputdriver.cpp</in>
+          <in>macmidioutputdriver.cpp</in>
+          <in>testmid.cpp</in>
+        </df>
+        <df name="hal_rtems">
+          <in>filedriver.cpp</in>
+          <in>midibsp.h</in>
+          <in>rtemsmididriver.cpp</in>
+          <in>rtemsmididriver.h</in>
+          <in>rtemsmidiinputdriver.cpp</in>
+          <in>rtemsmidioutputdriver.cpp</in>
+        </df>
+        <df name="hal_windows">
+          <in>mididriver.cpp</in>
+          <in>nvramdriver.cpp</in>
+          <in>stdafx.h</in>
+          <in>windowsmidiinputdriver.cpp</in>
+          <in>windowsmidioutputdriver.cpp</in>
+        </df>
+        <df name="test">
+          <in>activethreads.cpp</in>
+          <in>stdafx.h</in>
+          <in>tasks.c</in>
+        </df>
+        <in>analogueinputvalue.cpp</in>
+        <in>analogueinputvalue.h</in>
+        <in>filedriver.cpp</in>
+        <in>filedriver.h</in>
+        <in>iodata.h</in>
+        <in>mididriver.h</in>
+        <in>mididrv.h</in>
+        <in>midiflags.h</in>
+        <in>midiinputdriver.h</in>
+        <in>midiinputsync.cpp</in>
+        <in>midiinputsync.h</in>
+        <in>midioutputdriver.h</in>
+        <in>midiutilities.h</in>
+        <in>rtemsmidioutputdriver.cpp</in>
+        <in>stdafx.h</in>
+      </df>
+      <df name="PatchEditor">
+        <df name="MidiController.jar Folder">
+          <df name="META-INF">
+          </df>
+        </df>
+        <in>configmsg.h</in>
+        <in>jnimidi.cpp</in>
+        <in>midicontrollerlibrary.cpp</in>
+        <in>midicontrollerlibrary.h</in>
+        <in>midiinputunit.cpp</in>
+        <in>midiinputunit.h</in>
+        <in>sysexwriter.cpp</in>
+        <in>sysexwriter.h</in>
+      </df>
+      <df name="threads">
+        <df name="source">
+          <df name="hal_mac">
+            <in>activethreads.cpp</in>
+            <in>macevent.cpp</in>
+            <in>macthread.cpp</in>
+            <in>stdafx.h</in>
+            <in>testlib.cpp</in>
+            <in>threadslib.cpp</in>
+          </df>
+          <df name="hal_rtems">
+            <in>rtemsevent.cpp</in>
+            <in>rtemsevent.h</in>
+            <in>rtemsthread.cpp</in>
+          </df>
+          <df name="hal_windows">
+            <in>activethreads.cpp</in>
+            <in>windowsevent.cpp</in>
+            <in>windowsevent.h</in>
+            <in>windowsthread.cpp</in>
+          </df>
+          <df name="test">
+            <in>activethreads.cpp</in>
+            <in>init.c</in>
+            <in>stdafx.h</in>
+            <in>tasks.c</in>
+          </df>
+          <in>activeobject.cpp</in>
+          <in>activeobject.h</in>
+          <in>event.h</in>
+          <in>multithread.h</in>
+        </df>
+      </df>
+      <df name="WinPatchEditor">
+        <df name="graphics">
+          <in>CommonFunctions.cpp</in>
+          <in>CommonFunctions.h</in>
+          <in>CursorsUnit.h</in>
+          <in>DragLine.cpp</in>
+          <in>DragLine.h</in>
+          <in>GraphicBoxFollow.cpp</in>
+          <in>GraphicBoxFollow.h</in>
+          <in>GraphicBoxUnit.cpp</in>
+          <in>GraphicBoxUnit.h</in>
+          <in>GraphicLine.cpp</in>
+          <in>GraphicLine.h</in>
+          <in>GraphicLineFollow.cpp</in>
+          <in>GraphicLineFollow.h</in>
+          <in>GraphicShape.cpp</in>
+          <in>GraphicShape.h</in>
+          <in>KillerUnit.cpp</in>
+          <in>KillerUnit.h</in>
+        </df>
+        <in>About.cpp</in>
+        <in>About.h</in>
+        <in>BaseShellsUnit.cpp</in>
+        <in>BaseShellsUnit.h</in>
+        <in>ComSetupUnit.cpp</in>
+        <in>ComSetupUnit.h</in>
+        <in>CommentFormUnit.cpp</in>
+        <in>CommentFormUnit.h</in>
+        <in>ConnectorEditUnit.cpp</in>
+        <in>ConnectorEditUnit.h</in>
+        <in>ConnectorLine.cpp</in>
+        <in>ConnectorLine.h</in>
+        <in>CursorsUnit.cpp</in>
+        <in>DragBaseShell.h</in>
+        <in>DragConnector.cpp</in>
+        <in>DragConnector.h</in>
+        <in>DragViewNode.h</in>
+        <in>EditPatchUnit.cpp</in>
+        <in>EditPatchUnit.h</in>
+        <in>ErrorUnit.cpp</in>
+        <in>ErrorUnit.h</in>
+        <in>FormRefresh.cpp</in>
+        <in>FormRefresh.h</in>
+        <in>Help.h</in>
+        <in>IdentityHook.cpp</in>
+        <in>IdentityHook.h</in>
+        <in>Main.cpp</in>
+        <in>Main.h</in>
+        <in>MidiOutControl.cpp</in>
+        <in>MidiOutControl.h</in>
+        <in>MidiSetupUnit.cpp</in>
+        <in>MidiSetupUnit.h</in>
+        <in>NewObjectsList.cpp</in>
+        <in>NewObjectsList.h</in>
+        <in>NumberBox.cpp</in>
+        <in>NumberBox.h</in>
+        <in>ObjectBox.cpp</in>
+        <in>ObjectBox.h</in>
+        <in>ObjectSocket.cpp</in>
+        <in>ObjectSocket.h</in>
+        <in>PatchUnit.cpp</in>
+        <in>PatchUnit.h</in>
+        <in>PerformanceView.cpp</in>
+        <in>PerformanceView.h</in>
+        <in>SaveChanged.cpp</in>
+        <in>SaveChanged.h</in>
+        <in>ShellDisplayParam.cpp</in>
+        <in>ShellDisplayParam.h</in>
+        <in>SmartController.cpp</in>
+        <in>TComment.cpp</in>
+        <in>TComment.h</in>
+        <in>TMAXMIDIIN.cpp</in>
+        <in>TMAXMIDIIN.h</in>
+        <in>ToggleBox.cpp</in>
+        <in>ToggleBox.h</in>
+        <in>TreeNodeFlasher.cpp</in>
+        <in>TreeNodeFlasher.h</in>
+        <in>TypeElementUnit.cpp</in>
+        <in>TypeElementUnit.h</in>
+        <in>VCLGLOBFUNC.cpp</in>
+        <in>VCLGLOBFUNC.h</in>
+        <in>VariableSizeBox.cpp</in>
+        <in>VariableSizeBox.h</in>
+        <in>ViewFormUnit.cpp</in>
+        <in>ViewFormUnit.h</in>
+        <in>ViewRefresh.cpp</in>
+        <in>ViewRefresh.h</in>
+        <in>WindowsMessages.h</in>
+        <in>maxmidi.h</in>
+        <in>mxdll.h</in>
+        <in>numberboxwindowunit.cpp</in>
+        <in>numberboxwindowunit.h</in>
+      </df>
+    </df>
+  </logicalFolder>
   <projectmakefile>controller/source/hal_windows/SmartController.mak</projectmakefile>
   <confs>
     <conf name="Default" type="0">
@@ -7,6 +594,18 @@
         <developmentServer>localhost</developmentServer>
         <platform>3</platform>
       </toolsSet>
+      <compile>
+        <compiledirpicklist>
+          <compiledirpicklistitem>.</compiledirpicklistitem>
+          <compiledirpicklistitem>${AUTO_FOLDER}</compiledirpicklistitem>
+        </compiledirpicklist>
+        <compiledir>${AUTO_FOLDER}</compiledir>
+        <compilecommandpicklist>
+          <compilecommandpicklistitem>${MAKE} ${ITEM_NAME}.o</compilecommandpicklistitem>
+          <compilecommandpicklistitem>${AUTO_COMPILE}</compilecommandpicklistitem>
+        </compilecommandpicklist>
+        <compilecommand>${AUTO_COMPILE}</compilecommand>
+      </compile>
       <dbx_gdbdebugger version="1">
         <gdb_pathmaps>
         </gdb_pathmaps>

@@ -38,9 +38,9 @@ $(LIB) : $(CPP_O_FILES)
 		ar -r -s  $@ $?
 
 clean:
-	rm *.o
-	rm *.a
-	rm *.class
+	-rm *.o
+	-rm *.a
+	-rm *.class
 
 .cpp.o :
 	cc $(JNI_INCLUDE) $(COMMON_DEFINES) $(COMMON_CPPFLAGS) -c $<

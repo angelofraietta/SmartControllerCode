@@ -250,7 +250,7 @@ bool PresentationQuestion::openfile (const char* filename)
 bool PresentationQuestion::SetInterfaceAddress (const char* address)
 {
   //## begin PresentationQuestion::SetInterfaceAddress%1082670125.body preserve=yes
-  snLayer->SetInterfaceAddress(address);
+  return snLayer->SetInterfaceAddress(address);
   //## end PresentationQuestion::SetInterfaceAddress%1082670125.body
 }
 

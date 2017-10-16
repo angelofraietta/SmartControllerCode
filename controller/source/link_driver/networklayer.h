@@ -91,6 +91,7 @@ class NetworkLayer
 
     // Additional Public Declarations
       //## begin NetworkLayer%4082F624037A.public preserve=yes
+      virtual ~NetworkLayer(){}
       //## end NetworkLayer%4082F624037A.public
 
   protected:

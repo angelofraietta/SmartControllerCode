@@ -34,6 +34,6 @@ $(TEST_EXE) : $(LIB) activethreads.o
 	g++  activethreads.o -o $(TEST_EXE) $(LINK_FLAGS)
 
 clean:
-	rm *.a
-	rm *.o
-	rm $(TEST_EXE)
+	-rm *.a
+	-rm *.o
+	-rm $(TEST_EXE)
