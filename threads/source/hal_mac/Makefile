@@ -7,7 +7,7 @@ TESTNAME=test.exe
 LIB=$(LIBNAME)
 TEST_EXE=$(TESTNAME)
 
-CC_PIECES = macthread macevent 
+CC_PIECES = macthread macevent macmutex
 #threadslib
 CC_FILES = $(CC_PIECES:%=%.cpp)
 CC_O_FILES = $(CC_PIECES:%=%.o)

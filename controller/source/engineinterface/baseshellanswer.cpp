@@ -96,7 +96,7 @@ class CBaseShellSend : public DelayLine  //## Inherits: <unnamed>%3A970CB8025D
 
     //## Other Operations (specified)
       //## Operation: OutputFunction%982978160; C++
-      void OutputFunction (DWORD receiver);
+      void OutputFunction (unsigned long receiver);
 
     // Additional Private Declarations
       //## begin CBaseShellSend%3A970A970173.private preserve=yes
@@ -164,7 +164,7 @@ class CBaseShellReset : public DelayLine  //## Inherits: <unnamed>%3A99A4F40171
 
     //## Other Operations (specified)
       //## Operation: OutputFunction%983336510; C++
-      void OutputFunction (DWORD receiver);
+      void OutputFunction (unsigned long receiver);
 
     // Additional Private Declarations
       //## begin CBaseShellReset%3A99A4C90256.private preserve=yes
@@ -525,7 +525,10 @@ unsigned BaseShellAnswer::Create (const BYTE* question, BYTE* answer, unsigned a
 	P_BASESHELL pObj;
 	if (pParent)
 		{
-			pObj = TypeList::Create(type, pParent);
+			BaseShell* pShell = TypeList::Create(type, pParent);
+                        unsigned key; 
+                        IdentityAnswer::AddIdentity(pShell, &key);
+                        pObj = key;
 		}
 
 	pObj.toBuf(answer);
@@ -1162,7 +1165,7 @@ bool CBaseShellSend::Send (BaseShell* receiver)
 
   if (hal_include::Scheduler::LockEngine ())
   {
-    ret = GoOneShot ((DWORD)receiver);
+    ret = GoOneShot ((unsigned long)receiver);
     hal_include::Scheduler::UnlockEngine ();
   }
   return ret;
@@ -1170,7 +1173,7 @@ bool CBaseShellSend::Send (BaseShell* receiver)
 }
 
 //## Operation: OutputFunction%982978160; C++
-void CBaseShellSend::OutputFunction (DWORD receiver)
+void CBaseShellSend::OutputFunction (unsigned long receiver)
 {
   BaseShell* pShell = (BaseShell*)receiver;
   pShell->DoDefaultAction();
@@ -1217,7 +1220,7 @@ bool CBaseShellReset::Reset (BaseShell* receiver)
 
   if (hal_include::Scheduler::LockEngine ())
   {
-    ret = GoOneShot ((DWORD)receiver);
+    ret = GoOneShot ((unsigned long)receiver);
     hal_include::Scheduler::UnlockEngine ();
   }
   return ret;
@@ -1226,7 +1229,7 @@ bool CBaseShellReset::Reset (BaseShell* receiver)
 }
 
 //## Operation: OutputFunction%983336510; C++
-void CBaseShellReset::OutputFunction (DWORD receiver)
+void CBaseShellReset::OutputFunction (unsigned long receiver)
 {
   BaseShell* pShell = (BaseShell*)receiver;
   pShell->Reset ();

@@ -22,7 +22,7 @@
 #include <string.h>
 #include "typedefs.h"
 #include "interfacetypes.h"
-
+#include "evector.h"
 //## end module%3ACAAFDE026B.includes
 
 // identity
@@ -34,13 +34,78 @@
 
 #include "emap.h"
 //## begin module%3ACAAFDE026B.declarations preserve=no
-using sm_str::map;
 
-map <DWORD, DWORD> valid_identities;
-typedef map<DWORD, DWORD>::value_type map_value_type;
 //## end module%3ACAAFDE026B.declarations
 
 //## begin module%3ACAAFDE026B.additionalDeclarations preserve=yes
+
+const int MAX_ID_ARRAY_SIZE = 1024;
+using sm_str::map;
+using sm_str::vector;
+
+map <Identity*, unsigned> valid_identities;
+typedef map<Identity*, unsigned>::value_type map_value_type;
+
+vector <Identity**> key_indexes;
+volatile unsigned g_next_index = 0;
+
+// Return a number that we will use as a key
+// we should put this in some sort of critical section
+unsigned addIdentityIndex(Identity* identity)
+{
+    unsigned buffer_num = g_next_index / MAX_ID_ARRAY_SIZE;
+    Identity** next_buffer;
+    
+    if (key_indexes.size() <= buffer_num)
+    {
+        // we need to add a buffer to fill arrays
+        next_buffer = new Identity*[MAX_ID_ARRAY_SIZE];
+        key_indexes.push_back(next_buffer);
+    }
+    else
+    {        
+        next_buffer = key_indexes[buffer_num];
+    }
+    
+    unsigned buf_index = g_next_index % MAX_ID_ARRAY_SIZE;
+    next_buffer[buf_index] = identity;
+    unsigned ret = g_next_index;
+    g_next_index++;
+    
+    return ret;
+}
+
+Identity* getIdentityFromIndex(unsigned key)
+{
+    Identity* ret = NULL;
+    
+    unsigned buffer_num = key / MAX_ID_ARRAY_SIZE;
+    unsigned buf_index = key % MAX_ID_ARRAY_SIZE;
+    
+    if (key_indexes.size() > buffer_num)
+    {
+       Identity ** next_buffer = key_indexes[buffer_num];
+       ret = next_buffer [buf_index];
+ 
+    }
+    
+    return ret;
+    
+}
+
+void eraseIdentityIndex (unsigned key)
+{
+    
+    unsigned buffer_num = key / MAX_ID_ARRAY_SIZE;
+    unsigned buf_index = key % MAX_ID_ARRAY_SIZE;
+    
+    if (key_indexes.size() > buffer_num)
+    {
+       Identity ** next_buffer = key_indexes[buffer_num];
+       next_buffer [buf_index] = NULL;
+ 
+    }   
+}
 //## end module%3ACAAFDE026B.additionalDeclarations
 
 
@@ -393,14 +458,14 @@ unsigned IdentityAnswer::SetParent (const BYTE* question, BYTE* answer, unsigned
 
 //## Operation: AddIdentity%1020302311
 //	Adds Identity to List of Valid Identies
-bool IdentityAnswer::AddIdentity (Identity* id)
+bool IdentityAnswer::AddIdentity (Identity* id, unsigned* ret_key)
 {
   //## begin IdentityAnswer::AddIdentity%1020302311.body preserve=yes
-  P_IDENTITY pid = P_IDENTITY (id);
-	
-	DWORD key = pid.Key();
-
-  valid_identities.insert (map_value_type(key, key));
+ 
+  unsigned next_key = addIdentityIndex(id);
+    
+  valid_identities.insert (map_value_type(id, next_key));
+  *ret_key = next_key;
   return true;
   //## end IdentityAnswer::AddIdentity%1020302311.body
 }
@@ -410,14 +475,15 @@ bool IdentityAnswer::AddIdentity (Identity* id)
 bool IdentityAnswer::RemoveIdentity (Identity* id)
 {
   //## begin IdentityAnswer::RemoveIdentity%1020302312.body preserve=yes
-  P_IDENTITY pid = P_IDENTITY (id);
   bool ret = false;
 
-  if (valid_identities.count(pid.Key()))
-  	{
-    valid_identities.erase (pid.Key());
+  if (valid_identities.count(id))
+  {
+    unsigned key_index = valid_identities[id];
+    eraseIdentityIndex(key_index);
+    valid_identities.erase (id);
     ret = true;
-  	}
+  }
 
   return ret;
   //## end IdentityAnswer::RemoveIdentity%1020302312.body
@@ -430,10 +496,10 @@ Identity* IdentityAnswer::GetIdentity (P_IDENTITY pid)
   //## begin IdentityAnswer::GetIdentity%1020302313.body preserve=yes
   Identity* ret = NULL;
 
-	if (valid_identities.count (pid.Key()))
-  {
-  	ret = *pid;
-  }
+  unsigned key = pid.Key();
+  
+  ret = getIdentityFromIndex(key);
+ 
   return ret;
 
   //## end IdentityAnswer::GetIdentity%1020302313.body

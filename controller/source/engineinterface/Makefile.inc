@@ -30,6 +30,7 @@ CC_PIECES= smutility \
  sysexfilequestion \
  viewanswer \
  fileblock \
+ interfacetypes \
  nvramstore
 
 CC_SIM_PIECES = baseshellquestion \
@@ -45,6 +46,7 @@ CC_SIM_PIECES = baseshellquestion \
  sysexfilequestion \
  viewquestion 
 
+CC_TEST_PIECES = testindex
 
 COMMON_DEFINES  = -D_E_STL 
 COMMON_CPPFLAGS += -I ../../../estl 
