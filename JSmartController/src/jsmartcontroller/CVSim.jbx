@@ -1,0 +1,16 @@
+[PropertyInfo]
+borderLayout1,BorderLayout,false,false, , ,false,<default>
+cardLayout1,CardLayout,false,false, , ,false,<default>
+cardLayout2,CardLayout,false,false, , ,false,<default>
+checkboxes,JCheckBox[],false,false, , ,false,<default>
+CVPanel,JPanel,false,false, , ,false,<default>
+DigPanel,JPanel,false,false, , ,false,<default>
+gridLayout1,GridLayout,false,false, , ,false,<default>
+gridLayout2,GridLayout,false,false, , ,false,<default>
+sim,CVSim,false,false, , ,false,<default>
+sliders,JSlider[],false,false, , ,false,<default>
+[IconNames]
+
+
+
+
