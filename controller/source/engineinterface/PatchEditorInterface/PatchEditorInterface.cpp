@@ -11,6 +11,8 @@
 //## end module%3ACAA73401AD.additionalDeclarations
 
 
+
+
 /*
  * Class:     PatchEditor
  * Method:    GetCurrentInterface
@@ -30,7 +32,9 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_PatchEditor_GetCurrentInterface
 extern "C" JNIEXPORT jboolean JNICALL Java_Jni_PatchEditor_Initialise
   (JNIEnv *, jclass)
 {
-	return SimulatorInitialise();
+	bool ret = SimulatorInitialise();
+        InitialisePresentation();
+        return ret;
 }
 
 /*
@@ -146,7 +150,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_PatchEditor_OpenSysexFile
 
   }
 
-  return (jint)sysex_question;
+  return (jint)addPresentationQuestion(sysex_question);
 
 
 }
@@ -163,11 +167,11 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_PatchEditor_CloseSysexFile
 
   bool ret = false;
 
-  PresentationQuestion* pQuestion = (PresentationQuestion*) presentation;
+  PresentationQuestion* pQuestion = getPresentation (presentation);
 
+  erasePresentationQuestion(presentation);
 
   if (pQuestion)
-
   {
 
     delete pQuestion;
@@ -326,14 +330,14 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_PatchEditor_SetInterfaceAddress
   const char* port_name = env->GetStringUTFChars(new_address, NULL);
 
 
-  PresentationQuestion* pQuestion = (PresentationQuestion*)presentation_interface;
+  PresentationQuestion* pQuestion = getPresentation (presentation_interface);
   return pQuestion->SetInterfaceAddress(port_name);
 }
 
 extern "C" JNIEXPORT void JNICALL Java_Jni_PatchEditor_SetCurrentInterface
   (JNIEnv *, jclass, jint presentation_interface)
 {
-    SetCurrentEngine((PresentationQuestion*)presentation_interface);
+    SetCurrentEngine(presentation_interface);
 }
 
 /*

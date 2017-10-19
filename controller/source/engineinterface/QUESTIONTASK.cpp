@@ -26,7 +26,6 @@
 // Event
 #include "event.h"
 //## begin module%3CFC0279023A.additionalDeclarations preserve=yes
-
 //## end module%3CFC0279023A.additionalDeclarations
 
 
@@ -35,11 +34,12 @@
 
 
 
+
 //## Operation: QuestionTask%1023147565
 //	Constructor
 QuestionTask::QuestionTask (StreamedQuestion* pQuestion)
   //## begin QuestionTask::QuestionTask%1023147565.hasinit preserve=no
-      : _pWaitEvent(Event::create()), _pQuestionEvent(Event::create()), _pQuestion(pQuestion)
+      : _timeout(2000), _pWaitEvent(Event::create()), _pQuestionEvent(Event::create()), _pQuestion(pQuestion)
   //## end QuestionTask::QuestionTask%1023147565.hasinit
   //## begin QuestionTask::QuestionTask%1023147565.initialization preserve=yes
   //## end QuestionTask::QuestionTask%1023147565.initialization
@@ -66,12 +66,14 @@ void QuestionTask::run ()
   //## begin QuestionTask::run%1023147566.body preserve=yes
   while (!Terminated())
   {
+    _pQuestionEvent->Wait(0); // clear any event currently here
+    
   	_pWaitEvent->Wait();
     if (!Terminated())
     {
-      if (_pQuestion->GetAnswer())
+      if (!_pQuestionEvent->Wait(_timeout))
       {
-        _pQuestionEvent->Release();
+        _pQuestion->Flush();
       }
     }
   }
@@ -83,28 +85,10 @@ void QuestionTask::run ()
 bool QuestionTask::go (int timeout)
 {
   //## begin QuestionTask::go%1023147567.body preserve=yes
-  bool ret;
-  // clear any event that is already there
-  _pQuestionEvent->Wait (0);
-  printf ("QuestionTask::go Wait %u\r\n", timeout);
-
-  unsigned long start_time = GetSchedulerTime();
-  // now perform wait
+  _timeout = timeout;
   _pWaitEvent->Release();
-  //printf("Wait %u\r\n", timeout);
-  ret = _pQuestionEvent->Wait (timeout);
-  if (!ret)
-  {
-    unsigned long end_time = GetSchedulerTime();
-    if (start_time + timeout < end_time)
-    {
-      printf ("Wait again Start %lu, End %lu\r\n", start_time, end_time);
-      ret = _pQuestionEvent->Wait (timeout);
-    }
-  }
 
-  printf ("QuestionTask::go success %u\r\n", ret?1:0);
-  return ret;
+  return true;
   //## end QuestionTask::go%1023147567.body
 }
 
@@ -117,6 +101,16 @@ void QuestionTask::flush ()
   _pWaitEvent->Release();
   _pQuestionEvent->Release();
   //## end QuestionTask::flush%1029987707.body
+}
+
+//## Operation: wait%1083901317
+//	Sets the event to preent the task from flushing the
+//	buffer
+void QuestionTask::wait ()
+{
+  //## begin QuestionTask::wait%1083901317.body preserve=yes
+  _pQuestionEvent->Release();
+  //## end QuestionTask::wait%1083901317.body
 }
 
 // Additional Declarations

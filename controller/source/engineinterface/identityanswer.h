@@ -102,7 +102,7 @@ class IdentityAnswer
       );
 
       //## Operation: AddIdentity%1020302311
-      static bool AddIdentity (Identity* id);
+      static bool AddIdentity (Identity* id, unsigned* ret_key);
 
       //## Operation: RemoveIdentity%1020302312
       static bool RemoveIdentity (Identity* id);

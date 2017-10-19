@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "interfacetypes.h"
 #include "viewquestion.h"
-
+#include "presentationquestion.h"
 
 /*
  * Class:     Jni_View
@@ -14,7 +14,7 @@
 extern "C" JNIEXPORT jint JNICALL Java_Jni_View_GetNumViews
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch)
 {
-  return ViewQuestion::GetNumViews((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return ViewQuestion::GetNumViews(getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch);
 }
@@ -27,7 +27,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_View_GetNumViews
 extern "C" JNIEXPORT jint JNICALL Java_Jni_View_GetNumViewObjects
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint view_index)
 {
-  return  ViewQuestion::GetNumViewObjects((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return  ViewQuestion::GetNumViewObjects(getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, view_index);
 }
@@ -40,7 +40,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_View_GetNumViewObjects
 extern "C" JNIEXPORT jint JNICALL Java_Jni_View_GetViewObject
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint view_index, jint object_index)
 {
-return  ViewQuestion::GetViewObject((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+return  ViewQuestion::GetViewObject(getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, view_index, object_index).Key();
 }
@@ -77,7 +77,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_View_GetViewObjectDisplayParams
     str_fields ("dwpShell", dwpShell)
   };
 
-  if (ViewQuestion::GetViewObjectDisplayParams((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  if (ViewQuestion::GetViewObjectDisplayParams(getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, view_index, object_index, &pShell, &top, &left, &height, &width, &tag))
   {
@@ -106,7 +106,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_View_GetViewObjectDisplayParams
 extern "C" JNIEXPORT jboolean JNICALL Java_Jni_View_AddViewObject
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint view_index, jint pShell, jint top, jint left, jint height, jint width, jint tag)
 {
-  return ViewQuestion::AddViewObject((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return ViewQuestion::AddViewObject(getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, view_index, pShell, top, left, height, width, tag);
 }
@@ -119,7 +119,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_View_AddViewObject
 extern "C" JNIEXPORT jboolean JNICALL Java_Jni_View_ClearView
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint view_index)
 {
-  return ViewQuestion::ClearView((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return ViewQuestion::ClearView(getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, view_index);
 }
@@ -134,7 +134,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_Jni_View_GetViewName
 {
   char buf [128];
 
-  if (ViewQuestion::GetViewName((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  if (ViewQuestion::GetViewName(getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, view_index, buf, sizeof(buf)))
   {
@@ -156,7 +156,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_View_SetViewName
 {
   const char* name = env->GetStringUTFChars(new_name, NULL);
 
-  return ViewQuestion::SetViewName((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return ViewQuestion::SetViewName(getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, view_index, name);
 
@@ -170,7 +170,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_View_SetViewName
 extern "C" JNIEXPORT jboolean JNICALL Java_Jni_View_ModifyViewObject
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint view_index, jint pShell, jint top, jint left, jint height, jint width, jint tag)
 {
-  return ViewQuestion::ModifyViewObject((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return ViewQuestion::ModifyViewObject(getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, view_index, pShell, top, left, height, width, tag);
 }
@@ -182,7 +182,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_View_ModifyViewObject
 extern "C" JNIEXPORT jint JNICALL Java_Jni_View_AddView
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch)
 {
-  return ViewQuestion::AddView((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return ViewQuestion::AddView(getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch);
 }
@@ -195,7 +195,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_View_AddView
 extern "C" JNIEXPORT void JNICALL Java_Jni_View_DeleteView
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint view_index)
 {
-  ViewQuestion::DeleteView((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  ViewQuestion::DeleteView(getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, view_index);
 }
@@ -207,8 +207,9 @@ extern "C" JNIEXPORT void JNICALL Java_Jni_View_DeleteView
  */
 extern "C" JNIEXPORT jint JNICALL Java_Jni_View_AddViewConnector
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint view_index, jint pCon)
-{
-  return ViewQuestion::AddViewConnector((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+
+{
+  return ViewQuestion::AddViewConnector(getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, view_index, pCon);
 }
@@ -220,8 +221,9 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_View_AddViewConnector
  */
 extern "C" JNIEXPORT jint JNICALL Java_Jni_View_GetNumViewConnectors
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint view_index)
-{
-  return  ViewQuestion::GetNumViewConnectors((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+
+{
+  return  ViewQuestion::GetNumViewConnectors(getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, view_index);
 }
@@ -234,12 +236,16 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_View_GetNumViewConnectors
  */
 extern "C" JNIEXPORT jint JNICALL Java_Jni_View_GetViewConnector
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint view_index, jint object_index)
-{
-  return  ViewQuestion::GetViewConnector((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
-      	// answer
+
+{
+
+  return  ViewQuestion::GetViewConnector(getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
+
+      	// answer
       (P_PATCH) dwpPatch, view_index, object_index).Key();
 
-}
+
+}
 
 /*
  * Class:     Jni_View
@@ -248,11 +254,15 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_View_GetViewConnector
  */
 extern "C" JNIEXPORT jint JNICALL Java_Jni_View_GetViewConnectorValue
   (JNIEnv *, jclass, int pQuestion, jint dwpPatch, jint view_index, jint object_index, jint value_index)
-{
-  return  ViewQuestion::GetViewConnectorValue((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
-      	// answer
+
+{
+
+  return  ViewQuestion::GetViewConnectorValue(getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
+
+      	// answer
       (P_PATCH) dwpPatch, view_index, object_index, value_index);
-}
+
+}
 
 /*
  * Class:     Jni_View
@@ -261,12 +271,16 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_View_GetViewConnectorValue
  */
 extern "C" JNIEXPORT jint JNICALL Java_Jni_View_GetNumViewConnectorValues
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint view_index, jint object_index)
-{
-  return  ViewQuestion::GetNumViewConnectorValues((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
-      	// answer
+
+{
+
+  return  ViewQuestion::GetNumViewConnectorValues(getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
+
+      	// answer
       (P_PATCH) dwpPatch, view_index, object_index);
 
-}
+
+}
 
 /*
  * Class:     Jni_View
@@ -275,10 +289,14 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_View_GetNumViewConnectorValues
  */
 extern "C" JNIEXPORT jboolean JNICALL Java_Jni_View_AddViewConnectorValue
   (JNIEnv *, jclass, int pQuestion, jint dwpPatch, jint view_index, jint object_index, jint new_value)
-{
-  return  ViewQuestion::AddViewConnectorValue((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
-      	// answer
+
+{
+
+  return  ViewQuestion::AddViewConnectorValue(getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
+
+      	// answer
       (P_PATCH) dwpPatch, view_index, object_index, new_value);
-}
+
+}
 
 

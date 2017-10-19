@@ -147,9 +147,13 @@ class PresentationQuestion
 
 //## begin module%3ADF3D6E03D8.epilog preserve=yes
 PresentationQuestion* GetSimulator ();
-PresentationQuestion* GetSelectedEngine ();
-void SetCurrentEngine (PresentationQuestion *new_engine);
-
+unsigned GetSelectedEngine ();
+void SetCurrentEngine (unsigned new_engine);
+void InitialisePresentation();
+PresentationQuestion* getPresentation (unsigned key);
+unsigned addPresentationQuestion(PresentationQuestion * pQuestion);
+void erasePresentationQuestion(unsigned key);
+PresentationQuestion* getPresentation (unsigned key);
 //## end module%3ADF3D6E03D8.epilog
 
 

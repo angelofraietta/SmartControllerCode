@@ -17,9 +17,12 @@ CPP_FLAGS += $(COMMON_DEFINES)
 CPP_FLAGS += -I/System/Library/Frameworks/JavaVM.framework/Headers
 
 
+
 LIB=$(LIBNAME)
 
 LINK_FLAGS = $(LIB)
+LINK_THREAD   +=  ../../../threads/source/hal_mac/sm_thread.a  
+
 
 all: $(LIB) $(SIMLIBNAME) $(CC_TEST_O_FILES) $(CC_O_FILES) $(CC_SIM_O_FILES) $(TEST_EXE)
 
@@ -36,7 +39,7 @@ $(LIB) : $(CC_O_FILES)
 	ar -r -s  $@ $?
 
 $(TEST_EXE) : $(LIB) testindex.o
-	g++  testindex.o -o $(TEST_EXE) $(LINK_FLAGS)
+	g++  testindex.o -o $(TEST_EXE) $(LINK_FLAGS) $(LINK_THREAD)
 clean:
 	-rm *.a
 	-rm *.o

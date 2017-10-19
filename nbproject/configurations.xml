@@ -151,6 +151,7 @@
             <in>identityanswer.h</in>
             <in>identityquestion.cpp</in>
             <in>identityquestion.h</in>
+            <in>indexserver.h</in>
             <in>interfacebridge.h</in>
             <in>interfacetypes.h</in>
             <in>nvramstore.cpp</in>
@@ -1680,6 +1681,11 @@
         </ccTool>
       </item>
       <item path="controller/source/engineinterface/identityquestion.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/indexserver.h"
             ex="false"
             tool="3"
             flavor2="0">

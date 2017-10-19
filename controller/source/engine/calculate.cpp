@@ -29,7 +29,7 @@ const BaseShell* Calculate::GetReference() const
 typedef struct 
 {
   int value;
-  char* name;
+  const char* name;
 }str_name_map;
 
 static const str_name_map OperatorMap [Calculate::wNumOperators] =
@@ -251,11 +251,13 @@ double Calculate::Exp()const
 
 double Calculate::Pow()const
 {
+  double ret = 0;
+    
   try
   {
     if (dLValue != 0)
     {
-        return pow(dLValue, dRValue);
+        ret = pow(dLValue, dRValue);
     }
     else
     {
@@ -268,6 +270,7 @@ double Calculate::Pow()const
       Error (eInvalidDataValue, this);
 
     }
+  return ret;
 }
   
 void Calculate::Reset ()

@@ -102,20 +102,23 @@ class PatchView: public Identity
     unsigned GetNumValues ()const {return _values.size();}
 
     void Clear () {_values.erase(_values.begin(), _values.end());}
+    
     int GetValue (unsigned index) const
-      {
+    {
       int i = 0;
       if (index < GetNumValues())
       {
-        i = _values[index];
+        // we need to make temporary variable so we don't get a compiler warning
+        const int i_val = _values[index];
+        i = i_val;
       }
       return i;
-      }
+    }
 
-		sm_ptr::vector <int> _values;
-		static const char *const StartBlock;
-		Connector *_pCon;
-	}; //end class class ViewConnector
+        sm_ptr::vector <int> _values;
+        static const char *const StartBlock;
+        Connector *_pCon;
+}; //end class class ViewConnector
 
 	static const char*const szType;
 

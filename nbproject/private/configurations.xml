@@ -157,7 +157,9 @@
             <in>identityanswer.h</in>
             <in>identityquestion.cpp</in>
             <in>identityquestion.h</in>
+            <in>indexserver.h</in>
             <in>interfacebridge.h</in>
+            <in>interfacetypes.cpp</in>
             <in>interfacetypes.h</in>
             <in>nvramstore.cpp</in>
             <in>nvramstore.h</in>
@@ -169,6 +171,7 @@
             <in>presentationanswer.h</in>
             <in>presentationquestion.cpp</in>
             <in>presentationquestion.h</in>
+            <in>questiontask.cpp</in>
             <in>questiontask.h</in>
             <in>sessionanswer.cpp</in>
             <in>sessioninterface.h</in>
@@ -178,6 +181,7 @@
             <in>sysexfilequestion.cpp</in>
             <in>sysexfilequestion.h</in>
             <in>tempblock.h</in>
+            <in>testindex.cpp</in>
             <in>typedefs.h</in>
             <in>typenames.h</in>
             <in>viewanswer.cpp</in>
@@ -287,6 +291,8 @@
         <in>evector.h</in>
       </df>
       <df name="JSmartController">
+        <df name=".idea">
+        </df>
         <df name="build">
         </df>
         <df name="classes">
@@ -298,6 +304,16 @@
           </df>
           <df name="ViewForms">
             <df name="Graphics">
+            </df>
+          </df>
+        </df>
+        <df name="out">
+          <df name="production">
+            <df name="JSmartController">
+              <df name="jsmartcontroller">
+              </df>
+              <df name="ViewForms">
+              </df>
             </df>
           </df>
         </df>
@@ -464,6 +480,7 @@
           <df name="hal_mac">
             <in>activethreads.cpp</in>
             <in>macevent.cpp</in>
+            <in>macmutex.cpp</in>
             <in>macthread.cpp</in>
             <in>stdafx.h</in>
             <in>testlib.cpp</in>
@@ -490,6 +507,7 @@
           <in>activeobject.h</in>
           <in>event.h</in>
           <in>multithread.h</in>
+          <in>mutex.h</in>
         </df>
       </df>
       <df name="WinPatchEditor">

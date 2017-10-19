@@ -27,7 +27,7 @@ public:
     IndexServer(unsigned array_size = 1024) :
     _array_size(array_size), _next_index (0)
     {
-        //_mutex = Mutex::create();
+        _mutex = Mutex::create();
     }
     
     unsigned addIndex(T* identity);
@@ -39,13 +39,15 @@ private:
     const unsigned _array_size;
     vector <T**> _key_indexes;
     volatile unsigned _next_index;
-    //Mutex* _mutex;
+    Mutex* _mutex;
 };
 
 
 template <class T>
     IndexServer<T>::~IndexServer()
     {
+        _mutex->Obtain();
+    
         for(unsigned i = 0; i < _key_indexes.size(); i++)
         {
             T ** next_buffer = _key_indexes[i];
@@ -53,6 +55,9 @@ template <class T>
         }
         
         _key_indexes.clear();
+        
+        _mutex->Release();
+        delete _mutex;
     }
 
     // Return a number that we will use as a key
@@ -63,6 +68,7 @@ template <class T>
         unsigned buffer_num = _next_index / _array_size;
         
         T** next_buffer;
+        _mutex->Obtain();
 
         if (_key_indexes.size() <= buffer_num)
         {
@@ -80,6 +86,7 @@ template <class T>
         unsigned ret = _next_index;
         _next_index++;
 
+        _mutex->Release();
         return ret;
     }
     
@@ -91,6 +98,8 @@ T* IndexServer<T>::getIdentityFromIndex(unsigned key)
     unsigned buffer_num = key / _array_size;
     unsigned buf_index = key % _array_size;
     
+    _mutex->Obtain();
+    
     if (_key_indexes.size() > buffer_num)
     {
        T ** next_buffer = _key_indexes[buffer_num];
@@ -98,6 +107,7 @@ T* IndexServer<T>::getIdentityFromIndex(unsigned key)
  
     }
     
+    _mutex->Release();
     return ret;
     
 }
@@ -109,12 +119,15 @@ void IndexServer<T>::eraseIndex (unsigned key)
     unsigned buffer_num = key / _array_size;
     unsigned buf_index = key % _array_size;
     
+    _mutex->Obtain();
     if (_key_indexes.size() > buffer_num)
     {
        T ** next_buffer = _key_indexes[buffer_num];
        next_buffer [buf_index] = NULL;
  
     }   
+    
+    _mutex->Release();
 }
 #endif /* INDEXSERVER_H */
 

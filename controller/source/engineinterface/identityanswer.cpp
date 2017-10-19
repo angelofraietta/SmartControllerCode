@@ -31,7 +31,7 @@
 #include "identityanswer.h"
 // PatchAnswer
 #include "patchanswer.h"
-
+#include "indexserver.h"
 #include "emap.h"
 //## begin module%3ACAAFDE026B.declarations preserve=no
 
@@ -46,65 +46,23 @@ using sm_str::vector;
 map <Identity*, unsigned> valid_identities;
 typedef map<Identity*, unsigned>::value_type map_value_type;
 
-vector <Identity**> key_indexes;
-volatile unsigned g_next_index = 0;
+IndexServer <Identity> index_server;
 
 // Return a number that we will use as a key
 // we should put this in some sort of critical section
 unsigned addIdentityIndex(Identity* identity)
 {
-    unsigned buffer_num = g_next_index / MAX_ID_ARRAY_SIZE;
-    Identity** next_buffer;
-    
-    if (key_indexes.size() <= buffer_num)
-    {
-        // we need to add a buffer to fill arrays
-        next_buffer = new Identity*[MAX_ID_ARRAY_SIZE];
-        key_indexes.push_back(next_buffer);
-    }
-    else
-    {        
-        next_buffer = key_indexes[buffer_num];
-    }
-    
-    unsigned buf_index = g_next_index % MAX_ID_ARRAY_SIZE;
-    next_buffer[buf_index] = identity;
-    unsigned ret = g_next_index;
-    g_next_index++;
-    
-    return ret;
+    return index_server.addIndex(identity);
 }
 
 Identity* getIdentityFromIndex(unsigned key)
 {
-    Identity* ret = NULL;
-    
-    unsigned buffer_num = key / MAX_ID_ARRAY_SIZE;
-    unsigned buf_index = key % MAX_ID_ARRAY_SIZE;
-    
-    if (key_indexes.size() > buffer_num)
-    {
-       Identity ** next_buffer = key_indexes[buffer_num];
-       ret = next_buffer [buf_index];
- 
-    }
-    
-    return ret;
-    
+    return index_server.getIdentityFromIndex(key);
 }
 
 void eraseIdentityIndex (unsigned key)
 {
-    
-    unsigned buffer_num = key / MAX_ID_ARRAY_SIZE;
-    unsigned buf_index = key % MAX_ID_ARRAY_SIZE;
-    
-    if (key_indexes.size() > buffer_num)
-    {
-       Identity ** next_buffer = key_indexes[buffer_num];
-       next_buffer [buf_index] = NULL;
- 
-    }   
+    index_server.eraseIndex(key);
 }
 //## end module%3ACAAFDE026B.additionalDeclarations
 

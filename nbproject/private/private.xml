@@ -10,13 +10,39 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/estl/elist.h</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/outlet.h</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engineinterface/PatchEditorInterface/IdentityInterface.cpp</file>
             <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engineinterface/PatchEditorInterface/BaseShellInterface.cpp</file>
-            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engineinterface/presentationquestion.cpp</file>
-            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engineinterface/interfacetypes.h</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/oscin.cpp</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/socket.cpp</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engineinterface/PatchEditorInterface/PatchInterface.cpp</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/link_driver/Makefile.inc</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engineinterface/PatchEditorInterface/FileSendInterface.cpp</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engineinterface/PatchEditorInterface/PatchEditorInterface.cpp</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/patchview.cpp</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engineinterface/identityanswer.cpp</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engineinterface/Makefile.rtems</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/outlet.cpp</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/oscin.h</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/estl/elist.h</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/delay.cpp</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engineinterface/Makefile.mac</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/link_driver/udpport.h</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/delay.h</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/calculate.cpp</file>
             <file>file:/Users/angelo/Documents/develop/SmartControllerCode/estl/emap.h</file>
-            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/threads/source/hal_mac/activethreads.cpp</file>
-            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/threads/source/hal_mac/testlib.cpp</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engineinterface/PatchEditorInterface/ConnectorInterface.cpp</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engineinterface/PatchEditorInterface/ViewInterface.cpp</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/link_driver/udpport.cpp</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/hal_mac/Makefile</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/patchview.h</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engineinterface/presentationquestion.cpp</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/calculate.h</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engineinterface/presentationquestion.h</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/link_driver/Makefile.mac</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/estl/evector.h</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/socket.h</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/tablepoints.cpp</file>
         </group>
     </open-files>
 </project-private>

@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "control.h"
 #include "identityquestion.h"
-
+#include "presentationquestion.h"
 /*
  * Class:     Jni_Identity
  * Method:    GetDefaultAttribute
@@ -15,7 +15,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_Jni_Identity_GetDefaultAttribute
 {
   char buf [256];
 
-  IdentityQuestion::GetDefaultAttribute ((PresentationQuestion* )pQuestion, 	// Pointer to the Presentation Question used to get the
+  IdentityQuestion::GetDefaultAttribute (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_IDENTITY) objKey, 	// The key associated with the Identity
       buf, 	// This has the attribute value returned as a null
@@ -37,7 +37,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_Jni_Identity_GetName
 {
   char buf [256];
 
-  IdentityQuestion::GetName ((PresentationQuestion* )pQuestion, 	// Pointer to the Presentation Question used to get the
+  IdentityQuestion::GetName (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_IDENTITY) objKey, 	// The key associated with the Identity
       buf, 	// This has the attribute value returned as a null
@@ -60,7 +60,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_Jni_Identity_GetComment
 {
   char buf [256];
 
-  IdentityQuestion::GetComment ((PresentationQuestion* )pQuestion, 	// Pointer to the Presentation Question used to get the
+  IdentityQuestion::GetComment (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_IDENTITY) objKey, 	// The key associated with the Identity
       buf, 	// This has the attribute value returned as a null
@@ -83,7 +83,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_Jni_Identity_GetType
 {
   char buf [256];
 
-  IdentityQuestion::GetType ((PresentationQuestion* )pQuestion, 	// Pointer to the Presentation Question used to get the
+  IdentityQuestion::GetType (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_IDENTITY) objKey, 	// The key associated with the Identity
       buf, 	// This has the attribute value returned as a null
@@ -106,7 +106,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_Identity_SetName
 {
   const char* new_value = env->GetStringUTFChars(at_value, NULL);
   
-  return IdentityQuestion::SetName ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return IdentityQuestion::SetName (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_IDENTITY) objKey, 	// The key associated with the Identity
       new_value	// This has the attribute value returned as a null
@@ -124,7 +124,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_Identity_SetComment
 {
   const char* new_value = env->GetStringUTFChars(at_value, NULL);
   
-  return IdentityQuestion::SetComment ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return IdentityQuestion::SetComment (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_IDENTITY) objKey, 	// The key associated with the Identity
       new_value	// This has the attribute value returned as a null
@@ -141,7 +141,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_Identity_SetComment
 extern "C" JNIEXPORT jboolean JNICALL Java_Jni_Identity_GetModified
   (JNIEnv *, jclass, jint pQuestion, jint objKey)
 {
-  return  IdentityQuestion::GetModified ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return  IdentityQuestion::GetModified (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_IDENTITY) objKey);
 }
@@ -156,7 +156,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_Identity_SetDefaultAttribute
 {
   const char* new_value = env->GetStringUTFChars(at_value, NULL);
   
-  return IdentityQuestion::SetDefaultAttribute ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return IdentityQuestion::SetDefaultAttribute (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_IDENTITY) objKey, 	// The key associated with the Identity
       new_value	// This has the attribute value returned as a null
@@ -173,7 +173,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_Identity_SetDefaultAttribute
 extern "C" JNIEXPORT jboolean JNICALL Java_Jni_Identity_CanSave
   (JNIEnv *, jclass, jint pQuestion, jint objKey)
 {
-  return  IdentityQuestion::CanSave ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return  IdentityQuestion::CanSave (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_IDENTITY) objKey);
 }
@@ -186,7 +186,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_Identity_CanSave
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Identity_GetParent
   (JNIEnv *, jclass, jint pQuestion, jint objKey)
 {
-  P_PATCH pParent = IdentityQuestion::GetParent ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  P_PATCH pParent = IdentityQuestion::GetParent (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_IDENTITY) objKey);
   return pParent.Key();
@@ -200,7 +200,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_Identity_GetParent
 extern "C" JNIEXPORT void JNICALL Java_Jni_Identity_SetParent
   (JNIEnv *, jclass, jint pQuestion, jint objKey, jint pPatch)
 {
-  IdentityQuestion::SetParent ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  IdentityQuestion::SetParent (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_IDENTITY) objKey, (P_PATCH) pPatch);
 }

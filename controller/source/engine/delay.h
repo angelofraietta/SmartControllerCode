@@ -42,8 +42,8 @@ class Delay: public BaseShell, DelayLine
  private:
   unsigned wResetInterval;
   bool fStopProcess;
-  void OutputFunction(DWORD);
-  void PurgeItem(DWORD);
+  void OutputFunction(unsigned long);
+  void PurgeItem(unsigned long);
   void DelayVoid();
   void DelayInt(int);
   void DelayString(const char*);
