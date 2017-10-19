@@ -7,7 +7,7 @@ TESTNAME=test.exe
 LIB=$(LIBNAME)
 TEST_EXE=$(TESTNAME)
 
-CC_PIECES = macthread macevent 
+CC_PIECES = macthread macevent macmutex
 #threadslib
 CC_FILES = $(CC_PIECES:%=%.cpp)
 CC_O_FILES = $(CC_PIECES:%=%.o)
@@ -34,6 +34,6 @@ $(TEST_EXE) : $(LIB) activethreads.o
 	g++  activethreads.o -o $(TEST_EXE) $(LINK_FLAGS)
 
 clean:
-	rm *.a
-	rm *.o
-	rm $(TEST_EXE)
+	-rm *.a
+	-rm *.o
+	-rm $(TEST_EXE)

@@ -7,6 +7,7 @@
 #include "interfacetypes.h"
 #include "connectorquestion.h"
 
+#include "presentationquestion.h"
 /*
  * Class:     Jni_Connector
  * Method:    IsValid
@@ -15,7 +16,7 @@
 extern "C" JNIEXPORT jboolean JNICALL Java_Jni_Connector_IsValid
   (JNIEnv *, jclass, jint pQuestion, jint dwpCon)
 {
-  return ConnectorQuestion::IsValid ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return ConnectorQuestion::IsValid (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_CONNECTOR) dwpCon);
   }
@@ -28,7 +29,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_Connector_IsValid
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Connector_Create
   (JNIEnv *, jclass, jint pQuestion)
 {
-  P_CONNECTOR pCon = ConnectorQuestion::Create((PresentationQuestion*) pQuestion);
+  P_CONNECTOR pCon = ConnectorQuestion::Create(getPresentation (pQuestion));
   return pCon.Key();
   
 }
@@ -41,7 +42,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_Connector_Create
 extern "C" JNIEXPORT void JNICALL Java_Jni_Connector_Delete
   (JNIEnv *, jclass, jint pQuestion, jint dwpCon)
 {
-  ConnectorQuestion::Delete ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  ConnectorQuestion::Delete (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_CONNECTOR) dwpCon);
 }
@@ -54,7 +55,7 @@ extern "C" JNIEXPORT void JNICALL Java_Jni_Connector_Delete
 extern "C" JNIEXPORT void JNICALL Java_Jni_Connector_SetOutletNum
   (JNIEnv *, jclass, jint pQuestion, jint dwpCon, jint wSocketNum)
 {
-  ConnectorQuestion::SetOutletNum ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  ConnectorQuestion::SetOutletNum (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_CONNECTOR) dwpCon, wSocketNum);
 }
@@ -67,7 +68,7 @@ extern "C" JNIEXPORT void JNICALL Java_Jni_Connector_SetOutletNum
 extern "C" JNIEXPORT void JNICALL Java_Jni_Connector_SetOutletBase
   (JNIEnv *, jclass, jint pQuestion, jint dwpCon, jint dwpShell)
 {
-  ConnectorQuestion::SetOutletBase ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  ConnectorQuestion::SetOutletBase (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_CONNECTOR) dwpCon, (P_BASESHELL) dwpShell);
 }
@@ -80,7 +81,7 @@ extern "C" JNIEXPORT void JNICALL Java_Jni_Connector_SetOutletBase
 extern "C" JNIEXPORT void JNICALL Java_Jni_Connector_SetInletNum
   (JNIEnv *, jclass, jint pQuestion, jint dwpCon, jint wSocketNum)
 {
-  ConnectorQuestion::SetInletNum ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  ConnectorQuestion::SetInletNum (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_CONNECTOR) dwpCon, wSocketNum);
 }
@@ -92,7 +93,7 @@ extern "C" JNIEXPORT void JNICALL Java_Jni_Connector_SetInletNum
 extern "C" JNIEXPORT void JNICALL Java_Jni_Connector_SetInletBase
   (JNIEnv *, jclass, jint pQuestion, jint dwpCon, jint dwpShell)
 {
-  ConnectorQuestion::SetInletBase ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  ConnectorQuestion::SetInletBase (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_CONNECTOR) dwpCon, (P_BASESHELL) dwpShell);
 }
@@ -105,7 +106,7 @@ extern "C" JNIEXPORT void JNICALL Java_Jni_Connector_SetInletBase
 extern "C" JNIEXPORT jboolean JNICALL Java_Jni_Connector_MakeConnection
   (JNIEnv *, jclass, jint pQuestion, jint dwpCon)
 {
-  return ConnectorQuestion::MakeConnection ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return ConnectorQuestion::MakeConnection (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_CONNECTOR) dwpCon);
 }
@@ -118,7 +119,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_Connector_MakeConnection
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Connector_GetOutletNum
   (JNIEnv *, jclass, jint pQuestion, jint dwpCon)
 {
-  return ConnectorQuestion::GetOutletNum ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return ConnectorQuestion::GetOutletNum (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_CONNECTOR) dwpCon);
 }
@@ -131,7 +132,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_Connector_GetOutletNum
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Connector_GetOutletIndex
   (JNIEnv *, jclass, jint pQuestion, jint dwpCon)
 {
-  return ConnectorQuestion::GetOutletIndex ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return ConnectorQuestion::GetOutletIndex (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_CONNECTOR) dwpCon);
 }
@@ -145,7 +146,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_Connector_GetOutletIndex
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Connector_GetInletNum
   (JNIEnv *, jclass, jint pQuestion, jint dwpCon)
 {
-  return ConnectorQuestion::GetInletNum ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return ConnectorQuestion::GetInletNum (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_CONNECTOR) dwpCon);
 }
@@ -158,7 +159,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_Connector_GetInletNum
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Connector_GetOutletBase
   (JNIEnv *, jclass, jint pQuestion, jint dwpCon)
 {
-  P_BASESHELL dwpShell = ConnectorQuestion::GetOutletBase ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  P_BASESHELL dwpShell = ConnectorQuestion::GetOutletBase (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_CONNECTOR) dwpCon);
 
@@ -174,7 +175,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_Connector_GetOutletBase
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Connector_GetInletBase
   (JNIEnv *, jclass, jint pQuestion, jint dwpCon)
 {
-  P_BASESHELL dwpShell = ConnectorQuestion::GetInletBase ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  P_BASESHELL dwpShell = ConnectorQuestion::GetInletBase (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_CONNECTOR) dwpCon);
 

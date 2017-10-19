@@ -34,6 +34,6 @@ $(LIB) : $(CC_O_FILES)
 
 
 clean:
-	rm *.a
-	rm *.o
-	rm $(TEST_EXE)
+	-rm *.a
+	-rm *.o
+	-rm $(TEST_EXE)

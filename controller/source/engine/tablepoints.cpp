@@ -3,7 +3,7 @@
 #include "identity.h"
 #include "tablepoints.h"
 #include <stdio.h>
-#include <float>
+#include <float.h>
 
 #include "funcdec.h"
 

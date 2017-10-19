@@ -13,7 +13,7 @@ C_PIECES=
 CC_PIECES= linkprotocol \
 	linklayer \
 	crc32 \
-	UDPPort \
+	udpport \
 	networklayer
 
 

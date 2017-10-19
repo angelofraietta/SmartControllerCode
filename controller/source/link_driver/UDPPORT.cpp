@@ -176,7 +176,7 @@ unsigned long UDPPort::ReadBuffer (unsigned  char* lpBuf, unsigned long dwToRead
 {
   //## begin UDPPort::ReadBuffer%1080675292.body preserve=yes
 
-    int size_from = sizeof(_from);
+    socklen_t size_from = sizeof(_from);
     int n;
 	  if ((n = recvfrom(_fd, (char*)lpBuf, dwToRead, 0, (sockaddr*)&_from, &size_from)) >0)
 	  {
@@ -286,7 +286,7 @@ void UDPPort::flush ()
   static int flush_num = 0;
   sockaddr_in flush_to;
   sockaddr_in flush_from;
-  int size_from = sizeof(flush_from);
+  socklen_t size_from = sizeof(flush_from);
 
   char flush_end_buf [64];
   char ret_buf [1024];

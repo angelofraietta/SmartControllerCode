@@ -164,7 +164,7 @@ int PatchView::GetConnectorValue (unsigned index, unsigned value_num)
   int ret = 0;
   if (index < connector_list.size())
   {
-    if (value_num < connector_list[index]->GetNumValues());
+    if (value_num < connector_list[index]->GetNumValues())
     {
       ret = connector_list[index]->GetValue (value_num);
     }

@@ -1,6 +1,7 @@
 
 #include "activeobject.h"
 #include "event.h"
+#include "mutex.h"
 
 #include <stdio.h>
 
@@ -63,19 +64,33 @@ void TestThread::Purge()
 
 int main ()
 {
+  Mutex* mutex = Mutex::create();
+  
   std::cout<<"TestThread App2"<<std::endl;
 
 
+  int int_size = sizeof(int);
+  int long_size = sizeof(long);
+  int* ptr = &int_size;
+  int ptr_size = sizeof(ptr);
+  
+    std::cout<<"Int Size"<<int_size<<std::endl;
+    std::cout<<"Long Size"<<long_size<<std::endl;
 
+    std::cout<<"Pointer Size"<<ptr_size<<std::endl;
+
+  
   TestThread* t = new TestThread;
   t->start();
 
 	// last two should fail
 	for (unsigned i = 0; i < 6; i++)
 		{
-		  std::cout<<"TestThread Main"<<i<<std::endl;
-			Sleep (i);
-			t->Go();
+                std::cout<<"TestThread Main"<<i<<std::endl;
+                mutex->Obtain();
+                Sleep (i);
+                t->Go();
+                mutex->Release();
 		}
 
 

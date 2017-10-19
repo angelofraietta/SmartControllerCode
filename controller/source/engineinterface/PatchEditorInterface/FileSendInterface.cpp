@@ -3,9 +3,11 @@
 
 #include "stdafx.h"
 #include "smutility.h"
-#include "fileQuestion.h"
+#include "filequestion.h"
 #include <sys/stat.h>
 #include "crc32.h"
+
+#include "presentationquestion.h"
 
 /* Header for class Jni_FileSend */
 
@@ -18,7 +20,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_FileSend_SendFile
   (JNIEnv * env, jclass, jint presentation, jstring jfile_name, jstring jSource_file_name)
 {
   bool ret = false;
-  PresentationQuestion* pQuestion = (PresentationQuestion*) presentation;
+  PresentationQuestion* pQuestion = getPresentation (presentation);
   const char* filename = env->GetStringUTFChars(jfile_name, NULL);
   const char* source_filename = env->GetStringUTFChars(jSource_file_name, NULL);
 
@@ -36,7 +38,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_FileSend_SendFile
 
     fstat(fileno(in_file), &statbuf);
 
-    printf ("Opened file %s of %u bytes\r\n", filename, statbuf.st_size);
+    printf ("Opened file %s of %lld bytes\r\n", filename, statbuf.st_size);
 
     BYTE data_buf [64];
 
@@ -90,7 +92,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_FileSend_SendFile
 extern "C" JNIEXPORT jint JNICALL Java_Jni_FileSend_SaveNVRAM
   (JNIEnv *, jclass, jint presentation)
 {
-  FileQuestion::SaveNVRAM((PresentationQuestion*)presentation);
+  FileQuestion::SaveNVRAM(getPresentation (presentation));
   return 0;
 }
 
@@ -102,7 +104,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_FileSend_SaveNVRAM
 extern "C" JNIEXPORT jint JNICALL Java_Jni_FileSend_EraseNVRAM
   (JNIEnv *, jclass, jint presentation)
 {
-  FileQuestion::EraseNVRAM((PresentationQuestion*)presentation);
+  FileQuestion::EraseNVRAM(getPresentation (presentation));
   return 0;
 }
 
@@ -115,7 +117,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_FileSend_SaveToIde
   (JNIEnv * env, jclass, jint presentation, jstring jfile_name, jstring jSource_file_name)
 {
   bool ret = false;
-  PresentationQuestion* pQuestion = (PresentationQuestion*) presentation;
+  PresentationQuestion* pQuestion = getPresentation (presentation);
   const char* filename = env->GetStringUTFChars(jfile_name, NULL);
   const char* source_filename = env->GetStringUTFChars(jSource_file_name, NULL);
 

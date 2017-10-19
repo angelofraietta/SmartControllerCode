@@ -20,7 +20,9 @@
 #include "smutility.h"
 #include "control.h"
 #include <string.h>
-#include "emap.h"
+#include "typedefs.h"
+#include "interfacetypes.h"
+#include "evector.h"
 //## end module%3ACAAFDE026B.includes
 
 // identity
@@ -29,16 +31,39 @@
 #include "identityanswer.h"
 // PatchAnswer
 #include "patchanswer.h"
-
-
+#include "indexserver.h"
+#include "emap.h"
 //## begin module%3ACAAFDE026B.declarations preserve=no
-using sm_str::map;
 
-map <DWORD, DWORD> valid_identities;
-typedef map<DWORD, DWORD>::value_type map_value_type;
 //## end module%3ACAAFDE026B.declarations
 
 //## begin module%3ACAAFDE026B.additionalDeclarations preserve=yes
+
+const int MAX_ID_ARRAY_SIZE = 1024;
+using sm_str::map;
+using sm_str::vector;
+
+map <Identity*, unsigned> valid_identities;
+typedef map<Identity*, unsigned>::value_type map_value_type;
+
+IndexServer <Identity> index_server;
+
+// Return a number that we will use as a key
+// we should put this in some sort of critical section
+unsigned addIdentityIndex(Identity* identity)
+{
+    return index_server.addIndex(identity);
+}
+
+Identity* getIdentityFromIndex(unsigned key)
+{
+    return index_server.getIdentityFromIndex(key);
+}
+
+void eraseIdentityIndex (unsigned key)
+{
+    index_server.eraseIndex(key);
+}
 //## end module%3ACAAFDE026B.additionalDeclarations
 
 
@@ -391,14 +416,14 @@ unsigned IdentityAnswer::SetParent (const BYTE* question, BYTE* answer, unsigned
 
 //## Operation: AddIdentity%1020302311
 //	Adds Identity to List of Valid Identies
-bool IdentityAnswer::AddIdentity (Identity* id)
+bool IdentityAnswer::AddIdentity (Identity* id, unsigned* ret_key)
 {
   //## begin IdentityAnswer::AddIdentity%1020302311.body preserve=yes
-  P_IDENTITY pid = P_IDENTITY (id);
-	
-	DWORD key = pid.Key();
-
-  valid_identities.insert (map_value_type(key, key));
+ 
+  unsigned next_key = addIdentityIndex(id);
+    
+  valid_identities.insert (map_value_type(id, next_key));
+  *ret_key = next_key;
   return true;
   //## end IdentityAnswer::AddIdentity%1020302311.body
 }
@@ -408,14 +433,15 @@ bool IdentityAnswer::AddIdentity (Identity* id)
 bool IdentityAnswer::RemoveIdentity (Identity* id)
 {
   //## begin IdentityAnswer::RemoveIdentity%1020302312.body preserve=yes
-  P_IDENTITY pid = P_IDENTITY (id);
   bool ret = false;
 
-  if (valid_identities.count(pid.Key()))
-  	{
-    valid_identities.erase (pid.Key());
+  if (valid_identities.count(id))
+  {
+    unsigned key_index = valid_identities[id];
+    eraseIdentityIndex(key_index);
+    valid_identities.erase (id);
     ret = true;
-  	}
+  }
 
   return ret;
   //## end IdentityAnswer::RemoveIdentity%1020302312.body
@@ -428,10 +454,10 @@ Identity* IdentityAnswer::GetIdentity (P_IDENTITY pid)
   //## begin IdentityAnswer::GetIdentity%1020302313.body preserve=yes
   Identity* ret = NULL;
 
-	if (valid_identities.count (pid.Key()))
-  {
-  	ret = *pid;
-  }
+  unsigned key = pid.Key();
+  
+  ret = getIdentityFromIndex(key);
+ 
   return ret;
 
   //## end IdentityAnswer::GetIdentity%1020302313.body

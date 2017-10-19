@@ -56,8 +56,7 @@ namespace sm_str {
     public: // if is this is not here some compilers make the iterator private
     //## end sm_str::list%3A8C9EC80306.initialDeclarations
 
-    class iterator;
-
+    
     public:
       //## begin sm_str::list::e_node%3A8C9F21023C.preface preserve=yes
       class iterator;

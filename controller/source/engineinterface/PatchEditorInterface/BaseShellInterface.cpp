@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "smutility.h"
 #include "baseshellquestion.h"
+#include "presentationquestion.h"
 /* implmentation for class BaseShellInterface */
 
 /*
@@ -13,7 +14,7 @@
 extern "C" JNIEXPORT jint JNICALL Java_Jni_BaseShell_GetNumAttributes
   (JNIEnv *, jclass, jint pQuestion, jint objKey)
 {
-  return BaseShellQuestion::GetNumAttributes ((PresentationQuestion* )pQuestion, 	// Pointer to the Presentation Question used to get the
+  return BaseShellQuestion::GetNumAttributes (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) objKey	// The key associated with the Identity
       );
@@ -31,7 +32,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_Jni_BaseShell_GetAttributeName
   char buf [256];
   *buf = 0;
   
-  BaseShellQuestion::GetAttributeName ((PresentationQuestion* )pQuestion, 	// Pointer to the Presentation Question used to get the
+  BaseShellQuestion::GetAttributeName (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) objKey, 	// The key associated with the Identity
       (unsigned) attribute_key, 	// The key associated with the attribute
@@ -56,7 +57,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_Jni_BaseShell_GetAttribute
   *buf = 0;
   jstring ret = 0;
   
-  if (BaseShellQuestion::GetAttribute ((PresentationQuestion* )pQuestion, 	// Pointer to the Presentation Question used to get the
+  if (BaseShellQuestion::GetAttribute (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) objKey, 	// The key associated with the Identity
       (unsigned) attribute_key, 	// The key associated with the attribute
@@ -80,7 +81,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_BaseShell_SetAttribute
   (JNIEnv *env, jclass, jint pQuestion, jint objKey, jint attribute_key, jstring at_value)
 {
   const char* new_value = env->GetStringUTFChars(at_value, NULL);
-  return BaseShellQuestion::SetAttribute ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return BaseShellQuestion::SetAttribute (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) objKey, 	// The key associated with the Identity
       (unsigned) attribute_key, 	// The key associated with the attribute
@@ -97,7 +98,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_BaseShell_SetAttribute
 extern "C" JNIEXPORT jint JNICALL Java_Jni_BaseShell_GetNumResetAttributes
   (JNIEnv *, jclass, jint pQuestion, jint objKey)
 {
-  return BaseShellQuestion::GetNumResetAttributes ((PresentationQuestion* )pQuestion, 	// Pointer to the Presentation Question used to get the
+  return BaseShellQuestion::GetNumResetAttributes (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) objKey	// The key associated with the Identity
       );
@@ -114,7 +115,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_Jni_BaseShell_GetResetAttributeName
   char buf [256];
   *buf = 0;
 
-  BaseShellQuestion::GetResetAttributeName ((PresentationQuestion* )pQuestion, 	// Pointer to the Presentation Question used to get the
+  BaseShellQuestion::GetResetAttributeName (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) objKey, 	// The key associated with the Identity
       (unsigned) attribute_key, 	// The key associated with the attribute
@@ -139,7 +140,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_Jni_BaseShell_GetResetAttribute
   *buf = 0;
   jstring ret = 0;
 
-  if (BaseShellQuestion::GetResetAttribute ((PresentationQuestion* )pQuestion, 	// Pointer to the Presentation Question used to get the
+  if (BaseShellQuestion::GetResetAttribute (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) objKey, 	// The key associated with the Identity
       (unsigned) attribute_key, 	// The key associated with the attribute
@@ -163,7 +164,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_BaseShell_SetResetAttribute
   (JNIEnv *env, jclass, jint pQuestion, jint objKey, jint attribute_key, jstring at_value)
 {
   const char* new_value = env->GetStringUTFChars(at_value, NULL);
-  return BaseShellQuestion::SetResetAttribute ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return BaseShellQuestion::SetResetAttribute (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) objKey, 	// The key associated with the Identity
       (unsigned) attribute_key, 	// The key associated with the attribute
@@ -180,7 +181,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_BaseShell_SetResetAttribute
 extern "C" JNIEXPORT void JNICALL Java_Jni_BaseShell_Reset
   (JNIEnv *, jclass, jint pQuestion, jint objKey)
 {
-  BaseShellQuestion::Reset ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  BaseShellQuestion::Reset (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) objKey);
 }
@@ -193,7 +194,7 @@ extern "C" JNIEXPORT void JNICALL Java_Jni_BaseShell_Reset
 extern "C" JNIEXPORT void JNICALL Java_Jni_BaseShell_Send
   (JNIEnv *, jclass, jint pQuestion, jint objKey)
 {
-  BaseShellQuestion::Send ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  BaseShellQuestion::Send (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) objKey);
 }
@@ -209,7 +210,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_BaseShell_Create
 {
     const char* object_type = env->GetStringUTFChars(j_type, NULL);
     
-    P_BASESHELL ret = BaseShellQuestion::Create ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+    P_BASESHELL ret = BaseShellQuestion::Create (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       object_type, (P_PATCH) pParent);
 
@@ -224,7 +225,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_BaseShell_Create
 extern "C" JNIEXPORT jint JNICALL Java_Jni_BaseShell_GetNumInlets
   (JNIEnv *, jclass, jint pQuestion, jint dwpShell)
 {
-  return BaseShellQuestion::GetNumInlets ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return BaseShellQuestion::GetNumInlets (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) dwpShell);
   }
@@ -237,7 +238,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_BaseShell_GetNumInlets
 extern "C" JNIEXPORT jint JNICALL Java_Jni_BaseShell_GetNumOutlets
   (JNIEnv *, jclass, jint pQuestion, jint dwpShell)
 {
-  return BaseShellQuestion::GetNumOutlets ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return BaseShellQuestion::GetNumOutlets (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) dwpShell);
   }
@@ -253,7 +254,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_Jni_BaseShell_GetInletName
 {
   char buf [256];
 
-  BaseShellQuestion::GetInletName ((PresentationQuestion* )pQuestion, 	// Pointer to the Presentation Question used to get the
+  BaseShellQuestion::GetInletName (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) objKey, 	// The key associated with the Identity
       (unsigned) inlet_num, 	// The key associated with the attribute
@@ -274,10 +275,11 @@ extern "C" JNIEXPORT jstring JNICALL Java_Jni_BaseShell_GetInletName
  */
 extern "C" JNIEXPORT jstring JNICALL Java_Jni_BaseShell_GetOutletName
   (JNIEnv * env, jclass, jint pQuestion, jint objKey, jint outlet_num)
-{
+
+{
   char buf [256];
 
-  BaseShellQuestion::GetOutletName ((PresentationQuestion* )pQuestion, 	// Pointer to the Presentation Question used to get the
+  BaseShellQuestion::GetOutletName (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) objKey, 	// The key associated with the Identity
       (unsigned) outlet_num, 	// The key associated with the attribute
@@ -299,7 +301,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_Jni_BaseShell_GetOutletName
 extern "C" JNIEXPORT jint JNICALL Java_Jni_BaseShell_GetNumInletConnectors
   (JNIEnv *, jclass, jint pQuestion, jint objKey, jint inlet_num)
 {
-  return BaseShellQuestion::GetNumInletConnectors ((PresentationQuestion* )pQuestion, 	// Pointer to the Presentation Question used to get the
+  return BaseShellQuestion::GetNumInletConnectors (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) objKey, 	// The key associated with the Identity
       (unsigned) inlet_num 	// The key associated with the attribute
@@ -315,7 +317,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_BaseShell_GetNumInletConnectors
 extern "C" JNIEXPORT jint JNICALL Java_Jni_BaseShell_GetNumOutletConnectors
   (JNIEnv *, jclass, jint pQuestion, jint objKey, jint outlet_num)
 {
-  return BaseShellQuestion::GetNumOutletConnectors ((PresentationQuestion* )pQuestion, 	// Pointer to the Presentation Question used to get the
+  return BaseShellQuestion::GetNumOutletConnectors (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) objKey, 	// The key associated with the Identity
       (unsigned) outlet_num 	// The key associated with the attribute
@@ -332,7 +334,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_BaseShell_GetNumOutletConnectors
 extern "C" JNIEXPORT jboolean JNICALL Java_Jni_BaseShell_CanConnectInlet
   (JNIEnv *, jclass, jint pQuestion, jint dwpShell, jint wSocketNum, jint dwpCon)
 {
-  return BaseShellQuestion::CanConnectInlet ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return BaseShellQuestion::CanConnectInlet (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) dwpShell, wSocketNum, (P_CONNECTOR) dwpCon);
 }
@@ -345,7 +347,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_BaseShell_CanConnectInlet
 extern "C" JNIEXPORT jboolean JNICALL Java_Jni_BaseShell_CanConnectOutlet
   (JNIEnv *, jclass, jint pQuestion, jint dwpShell, jint wSocketNum, jint dwpCon)
 {
-  return BaseShellQuestion::CanConnectOutlet ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return BaseShellQuestion::CanConnectOutlet (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) dwpShell, wSocketNum, (P_CONNECTOR) dwpCon);
 }
@@ -358,7 +360,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_BaseShell_CanConnectOutlet
 extern "C" JNIEXPORT jint JNICALL Java_Jni_BaseShell_GetInletConnector
   (JNIEnv *, jclass, jint pQuestion, jint dwpShell, jint wSocketNum, jint Index)
 {
-  P_CONNECTOR pCon = BaseShellQuestion::GetInletConnector ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  P_CONNECTOR pCon = BaseShellQuestion::GetInletConnector (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) dwpShell, wSocketNum, Index);
 
@@ -373,7 +375,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_BaseShell_GetInletConnector
 extern "C" JNIEXPORT jint JNICALL Java_Jni_BaseShell_GetOutletConnector
   (JNIEnv *, jclass, jint pQuestion, jint dwpShell, jint wSocketNum, jint Index)
 {
-  P_CONNECTOR pCon = BaseShellQuestion::GetOutletConnector ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  P_CONNECTOR pCon = BaseShellQuestion::GetOutletConnector (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) dwpShell, wSocketNum, Index);
 
@@ -389,7 +391,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_BaseShell_GetOutletConnector
 extern "C" JNIEXPORT jint JNICALL Java_Jni_BaseShell_FindInletConnectorIndex
   (JNIEnv *, jclass, jint pQuestion, jint dwpShell, jint wSocketNum, jint dwpCon)
 {
-  return BaseShellQuestion::FindInletConnectorIndex ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return BaseShellQuestion::FindInletConnectorIndex (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) dwpShell, wSocketNum, (P_CONNECTOR) dwpCon);
 }
@@ -402,7 +404,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_BaseShell_FindInletConnectorIndex
 extern "C" JNIEXPORT jint JNICALL Java_Jni_BaseShell_FindOutletConnectorIndex
   (JNIEnv *, jclass, jint pQuestion, jint dwpShell, jint wSocketNum, jint dwpCon)
 {
-  return BaseShellQuestion::FindOutletConnectorIndex ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return BaseShellQuestion::FindOutletConnectorIndex (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) dwpShell, wSocketNum, (P_CONNECTOR) dwpCon);
 }
@@ -415,7 +417,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_BaseShell_FindOutletConnectorIndex
 extern "C" JNIEXPORT void JNICALL Java_Jni_BaseShell_SwapOutletConnector
   (JNIEnv *, jclass, jint pQuestion, jint dwpShell, jint outlet_number, jint connector1_index, jint connector2_index)
 {
-  BaseShellQuestion::SwapOutletConnector ((PresentationQuestion*) pQuestion, 	
+  BaseShellQuestion::SwapOutletConnector (getPresentation (pQuestion), 	
       (P_BASESHELL) dwpShell, 	// The BaseShell key
       outlet_number, 	// The outlet number containg the connectors
       connector1_index, 	// The index of the first connector within the outlet
@@ -427,7 +429,7 @@ extern "C" JNIEXPORT void JNICALL Java_Jni_BaseShell_SwapOutletConnector
 extern "C" JNIEXPORT jint JNICALL Java_Jni_BaseShell_GetNumObjectTypes
   (JNIEnv *, jclass, jint pQuestion)
 {
-  return BaseShellQuestion::GetNumObjectTypes ((PresentationQuestion* )pQuestion 	// Pointer to the Presentation Question used to get the
+  return BaseShellQuestion::GetNumObjectTypes (getPresentation (pQuestion) 	// Pointer to the Presentation Question used to get the
       	// answer
       );
 }
@@ -438,7 +440,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_Jni_BaseShell_GetObjectType
 {
   char buf [256];
 
-  BaseShellQuestion::GetObjectType ((PresentationQuestion* )pQuestion, 	// Pointer to the Presentation Question used to get the
+  BaseShellQuestion::GetObjectType (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (unsigned) attribute_key, 	// The key associated with the attribute
       buf, 	// This has the attribute value returned as a null
@@ -453,7 +455,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_Jni_BaseShell_GetObjectType
 extern "C" JNIEXPORT jboolean JNICALL Java_Jni_BaseShell_CanHaveChildren
   (JNIEnv *, jclass, jint pQuestion, jint dwpShell)
 {
-	return   BaseShellQuestion::CanHaveChildren ((PresentationQuestion*) pQuestion, 	
+	return   BaseShellQuestion::CanHaveChildren (getPresentation (pQuestion), 	
 																									 (P_BASESHELL) dwpShell);
 
 }
@@ -466,7 +468,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_BaseShell_CanHaveChildren
 extern "C" JNIEXPORT jboolean JNICALL Java_Jni_BaseShell_CanChangeSize
   (JNIEnv *, jclass, jint pQuestion, jint dwpShell)
 {
-	return   BaseShellQuestion::CanChangeSize ((PresentationQuestion*) pQuestion, 	
+	return   BaseShellQuestion::CanChangeSize (getPresentation (pQuestion), 	
 																									 (P_BASESHELL) dwpShell);
 
 }
@@ -478,7 +480,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_Jni_BaseShell_GetDefaultAttribute
   *buf = 0;
   jstring ret = 0;
 
-  if (BaseShellQuestion::GetDefaultAttribute ((PresentationQuestion* )pQuestion, 	// Pointer to the Presentation Question used to get the
+  if (BaseShellQuestion::GetDefaultAttribute (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) objKey, 	// The key associated with the Identity
       buf, 	// This has the attribute value returned as a null

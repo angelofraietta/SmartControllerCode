@@ -26,3 +26,7 @@ $(LIB) : $(CC_O_FILES)
 
 $(TESTNAME) : $(LIB) udpecho.cpp
 	g++ -I$(INC_PATH) udpecho.cpp -o $(TESTNAME) $(LIB) $(LINK_FILES)
+
+clean:
+	-rm *.a
+	-rm *.o

@@ -19,7 +19,7 @@ class OutletContainer	:public SocketContainer  // base class for inlets
   void ProduceOutput (int iVal);
   void ProduceOutput (double dVal);
   void ProduceOutput (const MessageCell& TheMessage);
-	void SaveConnectors (FILE*)const;
+  void SaveConnectors (FILE*);
  private:
   bool _mutex;
   bool DeleteConnectors();

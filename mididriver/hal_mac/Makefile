@@ -44,6 +44,6 @@ $(DEMONAME) : echo.o
 demo : $(DEMONAME) 
 
 clean:
-	rm *.a
-	rm *.o
-	rm $(TEST_EXE)
+	-rm *.a
+	-rm *.o
+	-rm $(TEST_EXE)

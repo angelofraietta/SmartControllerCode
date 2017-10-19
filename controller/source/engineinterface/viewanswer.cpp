@@ -141,8 +141,8 @@ unsigned ViewAnswer::GetViewObjectDisplayParams (const BYTE* question, BYTE* ans
 			BaseShell* pShell;
       unsigned top, left, height, width, tag;
 
-      if (pView->GetObjectParams (object_index, &pShell, &top, &left, &height, &width, &tag));
-				{
+      if (pView->GetObjectParams (object_index, &pShell, &top, &left, &height, &width, &tag))
+      {
         P_BASESHELL dwpShell(pShell);
         answer =  dwpShell.toBuf (answer);
         answer = SMUtility::IntToBuf ((short) top, answer);
@@ -150,8 +150,8 @@ unsigned ViewAnswer::GetViewObjectDisplayParams (const BYTE* question, BYTE* ans
         answer = SMUtility::IntToBuf ((short) height, answer);
         answer = SMUtility::IntToBuf ((short) width, answer);
         SMUtility::IntToBuf ((short) tag, answer);
-				ret = ret_size;
-        }
+	ret = ret_size;
+      }
 
 
 		}

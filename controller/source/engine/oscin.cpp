@@ -431,7 +431,7 @@ bool OSCIn::GetDefaultAttribute (char* ret_value, unsigned buff_len)const
 
     if (buff_len > 2)
     {
-       ret_value [new_start] = ': '; // place a Char IN
+       ret_value [new_start] = ':'; // place a Char IN
        ret = OSCAddress ( ret_value + new_start + 1, buff_len -1);
     }
 

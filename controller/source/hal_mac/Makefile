@@ -37,6 +37,7 @@ CPPFLAGS += -I ../../../mididriver
 CPPFLAGS += -I ../../../mididriver/hal_rtems
 
 CPPFLAGS += $(DEFINES)
+CPPFLAGS += -I/System/Library/Frameworks/JavaVM.framework/Headers
 
 FRAMEWORKS += -framework CoreMidi -framework CoreServices -framework JavaVM
 
@@ -56,8 +57,8 @@ all: $(CC_O_FILES) $(CJ_O_FILES) $(JAVLIB)
 
 
 clean:
-	rm *.o
-	rm *.jnilib
+	-rm *.o
+	-rm *.jnilib
 
 
 install:

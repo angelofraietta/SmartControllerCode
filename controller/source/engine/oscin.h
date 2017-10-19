@@ -25,7 +25,7 @@ class OSCIn :public BaseShell
   void IntInlet(unsigned, int);
   void StringInlet(unsigned, const char*);
 
-  static void OSCIn::ProcessInput(int port, const char* osc_address, const char* client_address, unsigned num_args, OSCArg* args);
+  static void ProcessInput(int port, const char* osc_address, const char* client_address, unsigned num_args, OSCArg* args);
   void GenerateOutput(int port, const char* osc_address, const char* client_address, unsigned num_args, OSCArg* args);
 
   static bool AcceptOSCMessage (int port, const char* osc_address);

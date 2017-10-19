@@ -5,7 +5,7 @@
 #include "interfacetypes.h"
 #include "patchquestion.h"
 #include <stdio.h>
-
+#include "presentationquestion.h"
 /*
  * Class:     Jni_Patch
  * Method:    DetachBaseShellObject
@@ -14,7 +14,7 @@
 extern "C" JNIEXPORT void JNICALL Java_Jni_Patch_DetachBaseShellObject
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint dwpShell)
 {
-  PatchQuestion::DetachBaseShellObject ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  PatchQuestion::DetachBaseShellObject (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, (P_BASESHELL) dwpShell);
 }
@@ -27,7 +27,7 @@ extern "C" JNIEXPORT void JNICALL Java_Jni_Patch_DetachBaseShellObject
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_FindBaseShellPosition
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint dwpShell)
 {
-  return PatchQuestion::FindBaseShellPosition ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return PatchQuestion::FindBaseShellPosition (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, (P_BASESHELL) dwpShell);
 }
@@ -40,7 +40,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_FindBaseShellPosition
 extern "C" JNIEXPORT void JNICALL Java_Jni_Patch_AddBaseShell
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint dwpShell)
 {
-  PatchQuestion::AddBaseShell ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  PatchQuestion::AddBaseShell (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, (P_BASESHELL) dwpShell);
 }
@@ -53,7 +53,7 @@ extern "C" JNIEXPORT void JNICALL Java_Jni_Patch_AddBaseShell
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_NumberBaseShells
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch)
 {
-  return  PatchQuestion::NumberBaseShells ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return  PatchQuestion::NumberBaseShells (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch);
 }
@@ -66,7 +66,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_NumberBaseShells
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_FindBaseShell
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint index)
 {
-  P_BASESHELL pShell = PatchQuestion::FindBaseShell ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  P_BASESHELL pShell = PatchQuestion::FindBaseShell (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, index);
 
@@ -80,7 +80,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_FindBaseShell
 extern "C" JNIEXPORT void JNICALL Java_Jni_Patch_DetachConnector
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint dwpCon)
 {
-  PatchQuestion::DetachConnector ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  PatchQuestion::DetachConnector (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, (P_CONNECTOR) dwpCon);
 }
@@ -93,7 +93,7 @@ extern "C" JNIEXPORT void JNICALL Java_Jni_Patch_DetachConnector
 extern "C" JNIEXPORT void JNICALL Java_Jni_Patch_AddConnector
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint dwpCon)
 {
-  PatchQuestion::AddConnector ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  PatchQuestion::AddConnector (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, (P_CONNECTOR) dwpCon);
 }
@@ -107,7 +107,7 @@ extern "C" JNIEXPORT void JNICALL Java_Jni_Patch_AddConnector
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_NumberConnectors
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch)
 {
-  return  PatchQuestion::NumberConnectors ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return  PatchQuestion::NumberConnectors (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch);
 }
@@ -121,7 +121,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_NumberConnectors
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_FindConnector
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint index)
 {
-  P_CONNECTOR pCon = PatchQuestion::FindConnector ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  P_CONNECTOR pCon = PatchQuestion::FindConnector (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, index);
 
@@ -137,7 +137,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_FindConnector
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_GetDeadConnector
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch)
 {
-  P_CONNECTOR pCon = PatchQuestion::GetDeadConnector ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  P_CONNECTOR pCon = PatchQuestion::GetDeadConnector (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch);
 
@@ -153,7 +153,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_GetDeadConnector
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_AddInlet
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch)
 {
-  P_BASESHELL pShell = PatchQuestion::AddInlet ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  P_BASESHELL pShell = PatchQuestion::AddInlet (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch);
 
@@ -169,7 +169,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_AddInlet
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_AddOutlet
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch)
 {
-  P_BASESHELL pShell = PatchQuestion::AddOutlet ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  P_BASESHELL pShell = PatchQuestion::AddOutlet (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch);
 
@@ -186,7 +186,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_MakeNew
   (JNIEnv *env, jclass, jint pQuestion, jstring at_value)
 {
   const char* name = env->GetStringUTFChars(at_value, NULL);
-  P_PATCH pPatch =  PatchQuestion::MakeNew ((PresentationQuestion*) pQuestion,
+  P_PATCH pPatch =  PatchQuestion::MakeNew (getPresentation (pQuestion),
   name);
 
   return pPatch.Key();
@@ -203,7 +203,7 @@ extern "C" JNIEXPORT void JNICALL Java_Jni_Patch_SetFileName
 {
   const char* name = env->GetStringUTFChars(at_value, NULL);
 
-  PatchQuestion::SetFileName((PresentationQuestion*) pQuestion,
+  PatchQuestion::SetFileName(getPresentation (pQuestion),
   (P_PATCH) pPatch, name);
 }
 
@@ -216,7 +216,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_LoadPatchFile
   (JNIEnv *env, jclass, jint pQuestion, jstring file_name, jint dwpParent)
 {
   const char* name = env->GetStringUTFChars(file_name, NULL);
-  P_PATCH pPatch = PatchQuestion::LoadPatchFile ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  P_PATCH pPatch = PatchQuestion::LoadPatchFile (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       name, (P_PATCH) dwpParent);
   printf ("Patch Key %u\r\n", pPatch.Key());
@@ -232,7 +232,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_Jni_Patch_GetFileName
 {
   char buf [256];
 
-  PatchQuestion::GetFileName ((PresentationQuestion* )pQuestion, 	// Pointer to the Presentation Question used to get the
+  PatchQuestion::GetFileName (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) objKey, 	// The key associated with the Identity
       buf, 	// This has the attribute value returned as a null
@@ -255,7 +255,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_Patch_Save
 {
     const char* name = env->GetStringUTFChars(file_name, NULL);
 
-    return PatchQuestion::Save ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+    return PatchQuestion::Save (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, name);
 
@@ -269,7 +269,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_Patch_Save
 extern "C" JNIEXPORT void JNICALL Java_Jni_Patch_Destroy
   (JNIEnv *, jclass, jint pQuestion, jint pPatch)
 {
-  PatchQuestion::Destroy((PresentationQuestion*) pQuestion,
+  PatchQuestion::Destroy(getPresentation (pQuestion),
   (P_PATCH) pPatch);
 }
 
@@ -282,7 +282,7 @@ extern "C" JNIEXPORT void JNICALL Java_Jni_Patch_Destroy
 extern "C" JNIEXPORT void JNICALL Java_Jni_Patch_SwapOutlets
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint Outlet1, jint Outlet2)
 {
-  PatchQuestion::SwapOutlets ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  PatchQuestion::SwapOutlets (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, Outlet1, Outlet2);
 }
@@ -295,7 +295,7 @@ extern "C" JNIEXPORT void JNICALL Java_Jni_Patch_SwapOutlets
 extern "C" JNIEXPORT void JNICALL Java_Jni_Patch_SwapInlets
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint inlet1, jint inlet2)
 {
-  PatchQuestion::SwapInlets ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  PatchQuestion::SwapInlets (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, inlet1, inlet2);
 }
@@ -309,7 +309,7 @@ extern "C" JNIEXPORT void JNICALL Java_Jni_Patch_SwapInlets
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_GetInlet
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint SocketNum)
 {
-  P_BASESHELL pShell = PatchQuestion::GetInlet ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  P_BASESHELL pShell = PatchQuestion::GetInlet (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, SocketNum);
   return pShell.Key();
@@ -322,7 +322,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_GetInlet
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_GetOutlet
   (JNIEnv *, jclass, jint pQuestion, jint dwpPatch, jint SocketNum)
 {
-  P_BASESHELL pShell = PatchQuestion::GetOutlet ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  P_BASESHELL pShell = PatchQuestion::GetOutlet (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_PATCH) dwpPatch, SocketNum);
   return pShell.Key();
@@ -336,7 +336,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_GetOutlet
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_GetOutletPortNumber
   (JNIEnv *, jclass, jint pQuestion, jint dwpShell)
 {
-  return  PatchQuestion::GetOutletPortNumber ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return  PatchQuestion::GetOutletPortNumber (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) dwpShell);
 }
@@ -349,7 +349,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_GetOutletPortNumber
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_GetInletPortNumber
   (JNIEnv *, jclass, jint pQuestion, jint dwpShell)
 {
-  return  PatchQuestion::GetInletPortNumber ((PresentationQuestion*) pQuestion, 	// Pointer to the Presentation Question used to get the
+  return  PatchQuestion::GetInletPortNumber (getPresentation (pQuestion), 	// Pointer to the Presentation Question used to get the
       	// answer
       (P_BASESHELL) dwpShell);
 }
@@ -363,7 +363,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_GetInletPortNumber
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_NumberPatches
   (JNIEnv *, jclass, jint pQuestion)
 {
-  return PatchQuestion::NumberPatches((PresentationQuestion*) pQuestion);
+  return PatchQuestion::NumberPatches(getPresentation (pQuestion));
 }
 
 /*
@@ -374,7 +374,7 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_NumberPatches
 extern "C" JNIEXPORT jint JNICALL Java_Jni_Patch_GetPatch
   (JNIEnv *, jclass, jint pQuestion, jint index)
 {
-  P_PATCH pPatch = PatchQuestion::GetPatch((PresentationQuestion*) pQuestion, index);
+  P_PATCH pPatch = PatchQuestion::GetPatch(getPresentation (pQuestion), index);
   return pPatch.Key();
 }
 

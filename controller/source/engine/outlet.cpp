@@ -8,7 +8,7 @@ OutletContainer::~OutletContainer()
   DeleteConnectors();
 }
 
-void  OutletContainer::SaveConnectors (FILE* OutFile)const
+void  OutletContainer::SaveConnectors (FILE* OutFile)
 {
   for (unsigned wCon = 0;
        wCon < GetNumConnectors();

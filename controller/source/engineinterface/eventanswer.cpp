@@ -62,6 +62,7 @@ EventAnswer::~EventAnswer()
 const EventAnswer & EventAnswer::operator=(const EventAnswer &right)
 {
   //## begin EventAnswer::operator=%.body preserve=yes
+    return *this;
   //## end EventAnswer::operator=%.body
 }
 
@@ -69,12 +70,14 @@ const EventAnswer & EventAnswer::operator=(const EventAnswer &right)
 int EventAnswer::operator==(const EventAnswer &right) const
 {
   //## begin EventAnswer::operator==%.body preserve=yes
+    return 0;
   //## end EventAnswer::operator==%.body
 }
 
 int EventAnswer::operator!=(const EventAnswer &right) const
 {
   //## begin EventAnswer::operator!=%.body preserve=yes
+    return 0;
   //## end EventAnswer::operator!=%.body
 }
 
@@ -86,6 +89,7 @@ int EventAnswer::operator!=(const EventAnswer &right) const
 bool EventAnswer::eventReady ()
 {
   //## begin EventAnswer::eventReady%985819702.body preserve=yes
+    return false;
   //## end EventAnswer::eventReady%985819702.body
 }
 
@@ -94,6 +98,7 @@ bool EventAnswer::eventReady ()
 unsigned EventAnswer::GetEvent (const BYTE* question, BYTE* answer, unsigned answer_size)
 {
   //## begin EventAnswer::GetEvent%985819708.body preserve=yes
+    return 0;
   //## end EventAnswer::GetEvent%985819708.body
 }
 

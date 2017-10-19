@@ -136,7 +136,7 @@ void Delay::DelayVoid()
       if (pDelayedMessage)
 				{
 					//send to the delay
-					if (!GoOneShot((DWORD)pDelayedMessage))
+					if (!GoOneShot((unsigned long)pDelayedMessage))
 						{
 							Error (eDelayError, this);
 							delete pDelayedMessage;
@@ -157,7 +157,7 @@ void Delay::DelayInt(int i)
       MessageCell* pDelayedMessage = new MessageCell(i);
       if (pDelayedMessage)
 				{
-					if (!GoOneShot((DWORD)pDelayedMessage))
+					if (!GoOneShot((unsigned long)pDelayedMessage))
 						{
 							Error (eDelayError, this);
 							delete pDelayedMessage;
@@ -178,7 +178,7 @@ void Delay::DelayString(const char* s)
       MessageCell* pDelayedMessage = new MessageCell(s);
       if (pDelayedMessage)
 				{
-					if (!GoOneShot((DWORD)pDelayedMessage))
+					if (!GoOneShot((unsigned long)pDelayedMessage))
 						{
 							Error (eDelayError, this);
 							delete pDelayedMessage;
@@ -200,7 +200,7 @@ void Delay::DelayDouble(double d)
       
       if (pDelayedMessage)
 				{
-					if (!GoOneShot((DWORD)pDelayedMessage))
+					if (!GoOneShot((unsigned long)pDelayedMessage))
 						{
 							Error (eDelayError, this);
 							delete pDelayedMessage;
@@ -214,7 +214,7 @@ void Delay::DelayDouble(double d)
     }
 }
 
-void Delay::OutputFunction(DWORD ReturnMessage)
+void Delay::OutputFunction(unsigned long ReturnMessage)
 {
   MessageCell* TheMessage = (MessageCell*)ReturnMessage;
   SendMessage(*TheMessage);
@@ -227,7 +227,7 @@ void Delay::SendMessage (MessageCell& TheMessage)
 	tpOutlet[0]->ProduceOutput(TheMessage);
 }
 
-void Delay::PurgeItem(DWORD pMessage)
+void Delay::PurgeItem(unsigned long pMessage)
 {
   MessageCell* PurgeMessage = (MessageCell*) pMessage;
   delete PurgeMessage;

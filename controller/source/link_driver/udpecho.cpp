@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "activeobject.h"
-#include "UDPPort.h"
+#include "udpport.h"
 #include "event.h"
 
 #define RESPOND_PORT_NUMBER 7700

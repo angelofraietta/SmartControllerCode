@@ -34,7 +34,8 @@ Identity::Identity (Patch* parent, const char* Name,
       strcpy (NewComment, Comment);
       szComment = NewComment;
     }
-  IdentityAnswer::AddIdentity (this);
+  unsigned key;
+  IdentityAnswer::AddIdentity (this, &key);
 }
 
 Identity::~Identity()

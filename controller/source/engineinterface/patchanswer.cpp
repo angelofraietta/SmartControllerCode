@@ -92,7 +92,7 @@ class DetachBaseShell : public DelayLine  //## Inherits: <unnamed>%3A99F0520020
 
     //## Other Operations (specified)
       //## Operation: OutputFunction%983336553; C++
-      void OutputFunction (DWORD receiver);
+      void OutputFunction (unsigned long receiver);
 
     // Additional Private Declarations
       //## begin DetachBaseShell%3A99EED80225.private preserve=yes
@@ -158,7 +158,7 @@ class PatchDeleter : public DelayLine  //## Inherits: <unnamed>%3A99EB3D01EC
 
     //## Other Operations (specified)
       //## Operation: OutputFunction%983336475; C++
-      void OutputFunction (DWORD receiver);
+      void OutputFunction (unsigned long receiver);
 
     // Additional Private Declarations
       //## begin PatchDeleter%3A99EB1401F7.private preserve=yes
@@ -233,14 +233,14 @@ DetachBaseShell::~DetachBaseShell()
 //	if request was successful
 bool DetachBaseShell::Send (BaseShell* receiver)
 {
-  return GoOneShot ((DWORD)receiver);
+  return GoOneShot ((unsigned long)receiver);
 
   //## begin DetachBaseShell::Send%983336552.body preserve=yes
   //## end DetachBaseShell::Send%983336552.body
 }
 
 //## Operation: OutputFunction%983336553; C++
-void DetachBaseShell::OutputFunction (DWORD receiver)
+void DetachBaseShell::OutputFunction (unsigned long receiver)
 {
   BaseShell* pShell = (BaseShell*)receiver;
   Patch* pPatch = pShell->GetParent ();
@@ -1032,7 +1032,7 @@ bool PatchDeleter::Send (Patch* receiver)
 
   if (hal_include::Scheduler::LockEngine ())
   {
-    ret = GoOneShot ((DWORD)receiver);
+    ret = GoOneShot ((unsigned long)receiver);
     hal_include::Scheduler::UnlockEngine ();
   }
   return ret;
@@ -1041,7 +1041,7 @@ bool PatchDeleter::Send (Patch* receiver)
 }
 
 //## Operation: OutputFunction%983336475; C++
-void PatchDeleter::OutputFunction (DWORD receiver)
+void PatchDeleter::OutputFunction (unsigned long receiver)
 {
   Patch* pPatch = (Patch*)receiver;
 	if (pPatch)

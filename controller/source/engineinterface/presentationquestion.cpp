@@ -35,20 +35,41 @@
 // SMUtility
 #include "smutility.h"
 
+#include "indexserver.h"
 
 //## begin module%3AC3CD4901CE.declarations preserve=no
 //## end module%3AC3CD4901CE.declarations
 
 //## begin module%3AC3CD4901CE.additionalDeclarations preserve=yes
 static PresentationQuestion simulator ("simulator");
-static PresentationQuestion *current_interface = &simulator;
+static unsigned current_interface = 0;
 
-PresentationQuestion* GetSelectedEngine ()
+static IndexServer <PresentationQuestion> presentation_index_server;
+
+PresentationQuestion* getPresentation (unsigned key)
 {
-	return current_interface;
+    return presentation_index_server.getIdentityFromIndex(key);
 }
 
-void SetCurrentEngine (PresentationQuestion *new_engine)
+unsigned addPresentationQuestion(PresentationQuestion * pQuestion)
+{
+    return presentation_index_server.addIndex(pQuestion);
+}
+void InitialisePresentation()
+{
+    current_interface = presentation_index_server.addIndex(&simulator);
+}
+
+void erasePresentationQuestion(unsigned key)
+{
+    presentation_index_server.eraseIndex(key);
+}
+unsigned GetSelectedEngine ()
+{
+    return current_interface;
+}
+
+void SetCurrentEngine (unsigned new_engine)
 {
 	current_interface = new_engine;
 }
@@ -250,7 +271,7 @@ bool PresentationQuestion::openfile (const char* filename)
 bool PresentationQuestion::SetInterfaceAddress (const char* address)
 {
   //## begin PresentationQuestion::SetInterfaceAddress%1082670125.body preserve=yes
-  snLayer->SetInterfaceAddress(address);
+  return snLayer->SetInterfaceAddress(address);
   //## end PresentationQuestion::SetInterfaceAddress%1082670125.body
 }
 

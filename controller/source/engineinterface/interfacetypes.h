@@ -73,7 +73,7 @@ class KeyBaseType
       }
 
       //## Operation: KeyBaseType%983397788
-      KeyBaseType (unsigned long val = 0)
+      KeyBaseType (unsigned val = 0)
         //## begin KeyBaseType::KeyBaseType%983397788.hasinit preserve=no
         //## end KeyBaseType::KeyBaseType%983397788.hasinit
         //## begin KeyBaseType::KeyBaseType%983397788.initialization preserve=yes
@@ -102,7 +102,7 @@ class KeyBaseType
 
     //## Other Operations (specified)
       //## Operation: operator =%983397786
-      KeyBaseType& operator = (unsigned long right)
+      KeyBaseType& operator = (unsigned right)
       {
         key = right;
         return *this;
@@ -115,7 +115,7 @@ class KeyBaseType
       void toString (char* ret_buf	// return buffer where the string will be written
       ) const
       {
-        sprintf (ret_buf, "%lu", key);
+        sprintf (ret_buf, "%u", key);
 
         //## begin KeyBaseType::toString%983397787.body preserve=yes
         //## end KeyBaseType::toString%983397787.body
@@ -200,7 +200,7 @@ class KeyBaseType
 
       //## Attribute: key%3A9DAF04003E
       //## begin KeyBaseType::key%3A9DAF04003E.attr preserve=no  protected: unsigned long {U} 
-      unsigned long key;
+      unsigned key;
       //## end KeyBaseType::key%3A9DAF04003E.attr
 
     // Additional Protected Declarations
@@ -258,7 +258,7 @@ class P_IDENTITY : public KeyBaseType  //## Inherits: <unnamed>%3A9DACB70240
       }
 
       //## Operation: P_IDENTITY%983397790
-      P_IDENTITY (unsigned long val = 0)
+      P_IDENTITY (unsigned val = 0)
         //## begin P_IDENTITY::P_IDENTITY%983397790.hasinit preserve=no
         //## end P_IDENTITY::P_IDENTITY%983397790.hasinit
         //## begin P_IDENTITY::P_IDENTITY%983397790.initialization preserve=yes
@@ -269,34 +269,14 @@ class P_IDENTITY : public KeyBaseType  //## Inherits: <unnamed>%3A9DACB70240
         //## end P_IDENTITY::P_IDENTITY%983397790.body
       }
 
+      
       //## Operation: P_IDENTITY%983922934
-      P_IDENTITY (Identity* val)
-        //## begin P_IDENTITY::P_IDENTITY%983922934.hasinit preserve=no
-        //## end P_IDENTITY::P_IDENTITY%983922934.hasinit
-        //## begin P_IDENTITY::P_IDENTITY%983922934.initialization preserve=yes
-				:KeyBaseType ((unsigned long) val)
-        //## end P_IDENTITY::P_IDENTITY%983922934.initialization
-      {
-        //## begin P_IDENTITY::P_IDENTITY%983922934.body preserve=yes
-        //## end P_IDENTITY::P_IDENTITY%983922934.body
-      }
-
-    //## Indirection Operation (generated)
-      Identity* operator->() const
-      {
-        //## begin P_IDENTITY::operator->.body preserve=yes
-				return (Identity*)key;
-        //## end P_IDENTITY::operator->.body
-      }
-
-    //## Dereference Operation (generated)
-      Identity* operator*() const
-      {
-        //## begin P_IDENTITY::operator*.body preserve=yes
-				return (Identity*)key;
-        //## end P_IDENTITY::operator*.body
-      }
-
+      P_IDENTITY (Identity* val);
+      
+      Identity* operator->() const;
+      
+      Identity* operator*() const;
+      
     // Additional Public Declarations
       //## begin P_IDENTITY%3A99CCB200C7.public preserve=yes
       //## end P_IDENTITY%3A99CCB200C7.public
@@ -353,7 +333,7 @@ class P_BASESHELL : public P_IDENTITY  //## Inherits: <unnamed>%3AA6C34103DA
       }
 
       //## Operation: P_BASESHELL%983397792
-      P_BASESHELL (unsigned long val = 0)
+      P_BASESHELL (unsigned val = 0)
         //## begin P_BASESHELL::P_BASESHELL%983397792.hasinit preserve=no
         //## end P_BASESHELL::P_BASESHELL%983397792.hasinit
         //## begin P_BASESHELL::P_BASESHELL%983397792.initialization preserve=yes
@@ -364,26 +344,13 @@ class P_BASESHELL : public P_IDENTITY  //## Inherits: <unnamed>%3AA6C34103DA
         //## end P_BASESHELL::P_BASESHELL%983397792.body
       }
 
+      
       //## Operation: P_BASESHELL%983397798
-      P_BASESHELL (BaseShell* val)
-        //## begin P_BASESHELL::P_BASESHELL%983397798.hasinit preserve=no
-        //## end P_BASESHELL::P_BASESHELL%983397798.hasinit
-        //## begin P_BASESHELL::P_BASESHELL%983397798.initialization preserve=yes
-				:P_IDENTITY ((unsigned long) val)
-        //## end P_BASESHELL::P_BASESHELL%983397798.initialization
-      {
-        //## begin P_BASESHELL::P_BASESHELL%983397798.body preserve=yes
-        //## end P_BASESHELL::P_BASESHELL%983397798.body
-      }
+      P_BASESHELL (BaseShell* val);
 
     //## Dereference Operation (generated)
-      BaseShell* operator*() const
-      {
-        //## begin P_BASESHELL::operator*.body preserve=yes
-	return (BaseShell*)key;
-        //## end P_BASESHELL::operator*.body
-      }
-
+      BaseShell* operator*() const;
+      
     // Additional Public Declarations
       //## begin P_BASESHELL%3A99CCB201A3.public preserve=yes
       //## end P_BASESHELL%3A99CCB201A3.public
@@ -440,7 +407,7 @@ class P_PATCH : public P_BASESHELL  //## Inherits: <unnamed>%3AA6C34E00FE
       }
 
       //## Operation: P_PATCH%983397794
-      P_PATCH (unsigned long val = 0)
+      P_PATCH (unsigned val = 0)
         //## begin P_PATCH::P_PATCH%983397794.hasinit preserve=no
         //## end P_PATCH::P_PATCH%983397794.hasinit
         //## begin P_PATCH::P_PATCH%983397794.initialization preserve=yes
@@ -452,16 +419,7 @@ class P_PATCH : public P_BASESHELL  //## Inherits: <unnamed>%3AA6C34E00FE
       }
 
       //## Operation: P_PATCH%983397799
-      P_PATCH (Patch* val)
-        //## begin P_PATCH::P_PATCH%983397799.hasinit preserve=no
-        //## end P_PATCH::P_PATCH%983397799.hasinit
-        //## begin P_PATCH::P_PATCH%983397799.initialization preserve=yes
-				:P_BASESHELL ((unsigned long) val)
-        //## end P_PATCH::P_PATCH%983397799.initialization
-      {
-        //## begin P_PATCH::P_PATCH%983397799.body preserve=yes
-        //## end P_PATCH::P_PATCH%983397799.body
-      }
+      P_PATCH (Patch* val);
 
       //## Operation: P_PATCH%986437488
       P_PATCH (P_BASESHELL val)
@@ -475,14 +433,9 @@ class P_PATCH : public P_BASESHELL  //## Inherits: <unnamed>%3AA6C34E00FE
         //## end P_PATCH::P_PATCH%986437488.body
       }
 
-    //## Dereference Operation (generated)
-      Patch* operator*() const
-      {
-        //## begin P_PATCH::operator*.body preserve=yes
-	return (Patch*)key;
-        //## end P_PATCH::operator*.body
-      }
-
+      //## Dereference Operation (generated)
+      Patch* operator*() const;
+      
     // Additional Public Declarations
       //## begin P_PATCH%3A99CCB201C1.public preserve=yes
       //## end P_PATCH%3A99CCB201C1.public
@@ -539,7 +492,7 @@ class P_CONNECTOR : public P_IDENTITY  //## Inherits: <unnamed>%3AA6C3600230
       }
 
       //## Operation: P_CONNECTOR%983397796
-      P_CONNECTOR (unsigned long val = 0)
+      P_CONNECTOR (unsigned val = 0)
         //## begin P_CONNECTOR::P_CONNECTOR%983397796.hasinit preserve=no
         //## end P_CONNECTOR::P_CONNECTOR%983397796.hasinit
         //## begin P_CONNECTOR::P_CONNECTOR%983397796.initialization preserve=yes
@@ -551,25 +504,12 @@ class P_CONNECTOR : public P_IDENTITY  //## Inherits: <unnamed>%3AA6C3600230
       }
 
       //## Operation: P_CONNECTOR%983397800
-      P_CONNECTOR (Connector* val)
-        //## begin P_CONNECTOR::P_CONNECTOR%983397800.hasinit preserve=no
-        //## end P_CONNECTOR::P_CONNECTOR%983397800.hasinit
-        //## begin P_CONNECTOR::P_CONNECTOR%983397800.initialization preserve=yes
-				:P_IDENTITY ((unsigned long) val)
-        //## end P_CONNECTOR::P_CONNECTOR%983397800.initialization
-      {
-        //## begin P_CONNECTOR::P_CONNECTOR%983397800.body preserve=yes
-        //## end P_CONNECTOR::P_CONNECTOR%983397800.body
-      }
-
+      P_CONNECTOR (Connector* val);
+      
+      
     //## Dereference Operation (generated)
-      Connector* operator*() const
-      {
-        //## begin P_CONNECTOR::operator*.body preserve=yes
-				return (Connector*)key;
-        //## end P_CONNECTOR::operator*.body
-      }
-
+      Connector* operator*() const;
+      
     // Additional Public Declarations
       //## begin P_CONNECTOR%3A99CCB201FD.public preserve=yes
       //## end P_CONNECTOR%3A99CCB201FD.public
@@ -629,7 +569,7 @@ class P_EVENTQ : public KeyBaseType  //## Inherits: <unnamed>%3AC90FB90318
       }
 
       //## Operation: P_EVENTQ%986253845
-      P_EVENTQ (unsigned long val = 0)
+      P_EVENTQ (unsigned val = 0)
         //## begin P_EVENTQ::P_EVENTQ%986253845.hasinit preserve=no
         //## end P_EVENTQ::P_EVENTQ%986253845.hasinit
         //## begin P_EVENTQ::P_EVENTQ%986253845.initialization preserve=yes
@@ -639,7 +579,7 @@ class P_EVENTQ : public KeyBaseType  //## Inherits: <unnamed>%3AC90FB90318
         //## begin P_EVENTQ::P_EVENTQ%986253845.body preserve=yes
         //## end P_EVENTQ::P_EVENTQ%986253845.body
       }
-
+/*
       //## Operation: P_EVENTQ%986253846
       P_EVENTQ (EventAnswer* val)
         //## begin P_EVENTQ::P_EVENTQ%986253846.hasinit preserve=no
@@ -659,7 +599,7 @@ class P_EVENTQ : public KeyBaseType  //## Inherits: <unnamed>%3AC90FB90318
 				return (EventAnswer*)key;
         //## end P_EVENTQ::operator*.body
       }
-
+*/
     // Additional Public Declarations
       //## begin P_EVENTQ%3AC90FA503A6.public preserve=yes
       //## end P_EVENTQ%3AC90FA503A6.public

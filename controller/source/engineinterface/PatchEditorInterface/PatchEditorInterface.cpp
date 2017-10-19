@@ -4,11 +4,13 @@
 #include "stdafx.h"
 #include "smutility.h"
 #include <stdio.h>
-#include <windows.h>
+//#include <windows.h>
 
 #include "presentationquestion.h"
 
 //## end module%3ACAA73401AD.additionalDeclarations
+
+
 
 
 /*
@@ -30,7 +32,9 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_PatchEditor_GetCurrentInterface
 extern "C" JNIEXPORT jboolean JNICALL Java_Jni_PatchEditor_Initialise
   (JNIEnv *, jclass)
 {
-	return SimulatorInitialise();
+	bool ret = SimulatorInitialise();
+        InitialisePresentation();
+        return ret;
 }
 
 /*
@@ -129,18 +133,27 @@ extern "C" JNIEXPORT jstring JNICALL Java_Jni_PatchEditor_GetDefaultDirectory
  */
 extern "C" JNIEXPORT jint JNICALL Java_Jni_PatchEditor_OpenSysexFile
   (JNIEnv * env, jclass, jstring sysex_file)
-{
+
+{
   const char* filename = env->GetStringUTFChars(sysex_file, NULL);
 
-  PresentationQuestion* sysex_question = new PresentationQuestion;
-  if(!sysex_question->openfile(filename))
-  {
-    delete sysex_question;
-    sysex_question = NULL;
-  }
-  return (jint)sysex_question;
 
-}
+  PresentationQuestion* sysex_question = new PresentationQuestion;
+
+  if(!sysex_question->openfile(filename))
+
+  {
+
+    delete sysex_question;
+
+    sysex_question = NULL;
+
+  }
+
+  return (jint)addPresentationQuestion(sysex_question);
+
+
+}
 
 /*
  * Class:     Jni_PatchEditor
@@ -149,18 +162,28 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_PatchEditor_OpenSysexFile
  */
 extern "C" JNIEXPORT jboolean JNICALL Java_Jni_PatchEditor_CloseSysexFile
   (JNIEnv *, jclass, jint presentation)
-{
-  bool ret = false;
-  PresentationQuestion* pQuestion = (PresentationQuestion*) presentation;
 
-  if (pQuestion)
-  {
-    delete pQuestion;
-    ret = true;
-  }
+{
 
-  return ret;
-}
+  bool ret = false;
+
+  PresentationQuestion* pQuestion = getPresentation (presentation);
+
+  erasePresentationQuestion(presentation);
+
+  if (pQuestion)
+  {
+
+    delete pQuestion;
+
+    ret = true;
+
+  }
+
+
+  return ret;
+
+}
 
 /*
  * Class:     Jni_PatchEditor
@@ -169,32 +192,44 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_PatchEditor_CloseSysexFile
  */
 extern "C" JNIEXPORT jint JNICALL Java_Jni_PatchEditor_PrepareTxSysexFile
   (JNIEnv * env, jclass, jstring sysex_file)
-{
+
+{
   const char* filename = env->GetStringUTFChars(sysex_file, NULL);
 
-  return OpenSysexSendFile (filename);
-}
+
+  return OpenSysexSendFile (filename);
+
+}
 
 
 extern "C" JNIEXPORT jboolean JNICALL Java_Jni_PatchEditor_TxSysexData
   (JNIEnv * , jclass, jint key, jint midi_port, jint num_bytes)
-{
 
-  return TransmitSysexData (key, midi_port, num_bytes);
-}
+{
+
+
+  return TransmitSysexData (key, midi_port, num_bytes);
+
+}
 
 extern "C" JNIEXPORT jboolean JNICALL Java_Jni_PatchEditor_CloseTxSysexFile
   (JNIEnv * , jclass, jint key)
-{
 
-  return CloseSysexData (key);
-}
+{
+
+
+  return CloseSysexData (key);
+
+}
 
 extern "C" JNIEXPORT jint JNICALL Java_Jni_PatchEditor_NumMidiOut
   (JNIEnv *, jclass)
-{
-    return GetNumMidiOutDevices();
-}
+
+{
+
+    return GetNumMidiOutDevices();
+
+}
 
 /*
  * Class:     Jni_PatchEditor
@@ -203,10 +238,14 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_PatchEditor_NumMidiOut
  */
 extern "C" JNIEXPORT jint JNICALL Java_Jni_PatchEditor_NumMidiIn
   (JNIEnv *, jclass)
-{
-  printf ("Java_Jni_PatchEditor_NumMidiIn\r\n");
-  return GetNumMidiInDevices();
-}
+
+{
+
+  printf ("Java_Jni_PatchEditor_NumMidiIn\r\n");
+
+  return GetNumMidiInDevices();
+
+}
 
 /*
  * Class:     Jni_PatchEditor
@@ -215,7 +254,8 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_PatchEditor_NumMidiIn
  */
 extern "C" JNIEXPORT jstring JNICALL Java_Jni_PatchEditor_MidOutName
   (JNIEnv * env, jclass, jint index)
-{
+
+{
   char buf [256];
   jstring ret = 0;
 
@@ -253,15 +293,20 @@ extern "C" JNIEXPORT jstring JNICALL Java_Jni_PatchEditor_MidInName
  */
 extern "C" JNIEXPORT jint JNICALL Java_Jni_PatchEditor_OpenInterface
   (JNIEnv * env, jclass, jstring device_name, jint port_param)
-{
 
-  unsigned long ret = 0;
+{
 
-  printf ("Java_PatchEditor_OpenInterface\r\n");
 
-  const char* port_name = env->GetStringUTFChars(device_name, NULL);
+  unsigned long ret = 0;
 
-  PresentationQuestion* pQuestion = new PresentationQuestion(port_name, port_param);
+
+  printf ("Java_PatchEditor_OpenInterface\r\n");
+
+
+  const char* port_name = env->GetStringUTFChars(device_name, NULL);
+
+
+  PresentationQuestion* pQuestion = new PresentationQuestion(port_name, port_param);
   if (pQuestion->IsOpen())
   {
     ret = (unsigned long)pQuestion;
@@ -284,14 +329,15 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_PatchEditor_SetInterfaceAddress
 {
   const char* port_name = env->GetStringUTFChars(new_address, NULL);
 
-  PresentationQuestion* pQuestion = (PresentationQuestion*)presentation_interface;
+
+  PresentationQuestion* pQuestion = getPresentation (presentation_interface);
   return pQuestion->SetInterfaceAddress(port_name);
 }
 
 extern "C" JNIEXPORT void JNICALL Java_Jni_PatchEditor_SetCurrentInterface
   (JNIEnv *, jclass, jint presentation_interface)
 {
-    SetCurrentEngine((PresentationQuestion*)presentation_interface);
+    SetCurrentEngine(presentation_interface);
 }
 
 /*
@@ -301,10 +347,14 @@ extern "C" JNIEXPORT void JNICALL Java_Jni_PatchEditor_SetCurrentInterface
  */
 extern "C" JNIEXPORT void JNICALL Java_Jni_PatchEditor_AddAnalogueValue
   (JNIEnv *, jclass, jint chan, jfloat val)
-{
-  float int_val = 1023 * val;
-  AddAnalogueValue (chan, (unsigned)int_val);
-}
+
+{
+
+  float int_val = 1023 * val;
+
+  AddAnalogueValue (chan, (unsigned)int_val);
+
+}
 
 /*
  * Class:     PatchEditor
@@ -313,9 +363,12 @@ extern "C" JNIEXPORT void JNICALL Java_Jni_PatchEditor_AddAnalogueValue
  */
 extern "C" JNIEXPORT void JNICALL Java_Jni_PatchEditor_AddDigitalValue
   (JNIEnv *, jclass, jint chan, jboolean val)
-{
-  AddDigitalValue (chan, val);
-}
+
+{
+
+  AddDigitalValue (chan, val);
+
+}
 
 /*
  * Class:     PatchEditor
@@ -324,9 +377,12 @@ extern "C" JNIEXPORT void JNICALL Java_Jni_PatchEditor_AddDigitalValue
  */
 extern "C" JNIEXPORT jboolean JNICALL Java_Jni_PatchEditor_GetDigitalValue
   (JNIEnv *, jclass, jint chan)
-{
-  return GetDigitalValue(chan);
-}
+
+{
+
+  return GetDigitalValue(chan);
+
+}
 
 /*
  * Class:     PatchEditor
@@ -335,8 +391,12 @@ extern "C" JNIEXPORT jboolean JNICALL Java_Jni_PatchEditor_GetDigitalValue
  */
 extern "C" JNIEXPORT jfloat JNICALL Java_Jni_PatchEditor_GetAnalogueValue
   (JNIEnv *, jclass, jint chan)
-{
-  float ret = GetAnalogueValue(chan);
-  return  ret / 256;
-}
+
+{
+
+  float ret = GetAnalogueValue(chan);
+
+  return  ret / 256;
+
+}
 
