@@ -35,6 +35,7 @@ Identity::Identity (Patch* parent, const char* Name,
       szComment = NewComment;
     }
   unsigned key;
+  //printf ("Identity::Identity AddIdentity %lu\r\n", this);
   IdentityAnswer::AddIdentity (this, &key);
 }
 

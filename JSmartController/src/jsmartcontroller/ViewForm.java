@@ -129,6 +129,7 @@ public class ViewForm extends ViewFormPanel {
       if (!_object_map.containsKey(pHook))
       {
         BaseShellTreeNode pNode = _patch_form.GetObjectNode(pHook);
+
         BaseShellBox object_box = BaseShellBox.create(this, pNode._pHook);
         object_box.setLocation(view_object.left, view_object.top);
 

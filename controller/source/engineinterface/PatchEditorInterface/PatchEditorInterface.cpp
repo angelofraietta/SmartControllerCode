@@ -32,6 +32,8 @@ extern "C" JNIEXPORT jint JNICALL Java_Jni_PatchEditor_GetCurrentInterface
 extern "C" JNIEXPORT jboolean JNICALL Java_Jni_PatchEditor_Initialise
   (JNIEnv *, jclass)
 {
+    printf("Java_Jni_PatchEditor_Initialise\r\n");
+    
 	bool ret = SimulatorInitialise();
         InitialisePresentation();
         return ret;

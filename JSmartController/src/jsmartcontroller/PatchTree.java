@@ -19,12 +19,12 @@ import Jni.*;
 public class PatchTree extends BaseShellTreeNode {
     int _patch = 0;
     int _p_interface = 0;
-    ObjectsNode _objects_node;
+    ObjectsNode _objects_node = null;
     ConnectorsNode _connectors_node = null;
-    PatchForm _patch_form;
+    PatchForm _patch_form = null;
     //DefaultMutableTreeNode _views_node = null;
     DefaultTreeModel _tree_model = null;
-    ViewsNode _views_node;
+    ViewsNode _views_node = null;
 
     /**
        @roseuid 3E7E69B30361

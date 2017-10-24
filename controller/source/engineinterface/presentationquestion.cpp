@@ -181,7 +181,7 @@ bool PresentationQuestion::AskQuestion (unsigned target_class, const BYTE* quest
         {
           if (snLayer->AskQuestion (app_question, question_size, app_answer, answer_size))
             {
-              printf("snLayer->AskQuestion %u", num_attempts);
+              //printf("snLayer->AskQuestion %u", num_attempts);
               const BYTE* cursor = app_answer;
               const BYTE ret_sequence = *cursor;
               cursor++;
@@ -196,11 +196,11 @@ bool PresentationQuestion::AskQuestion (unsigned target_class, const BYTE* quest
                   if (event_waiting)
                     {
                       // prompt EventQuestion to ask a question
-                      printf("EventQuestion::EventWaiting");
+                      //printf("EventQuestion::EventWaiting");
                       EventQuestion::EventWaiting();
                     }
 
-                  printf("PresentationQuestion::AskQuestion BYTES %u", num_rx_bytes);
+                  //printf("PresentationQuestion::AskQuestion BYTES %u %u\r\n", num_rx_bytes, r_size);
                   if (num_rx_bytes <= r_size)
                     {
                       // Cursor is wRONG HERE
@@ -222,12 +222,12 @@ bool PresentationQuestion::AskQuestion (unsigned target_class, const BYTE* quest
                 }
               else
               {
-                  printf("snLayer->AskQuestion Invalid answer");
+                  //printf("snLayer->AskQuestion Invalid answer");
               }
             }
           else
           {
-           printf("PresentationQuestion::AskQuestion layer fail attempt %u", num_attempts);   
+           //printf("PresentationQuestion::AskQuestion layer fail attempt %u", num_attempts);   
           }
           num_attempts++;
         } while (!valid_answer && _retries >= num_attempts);

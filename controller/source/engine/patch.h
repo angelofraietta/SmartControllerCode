@@ -50,6 +50,7 @@ class Patch :public BaseShell {
 	Patch (const char* name = "NewPatch");
   ~Patch();
   
+  // These all need to be BaseShell* because of array
   static BaseShell* Create(Patch* = NULL);
   static BaseShell* CreatePatchFile(Patch* = NULL);
   static BaseShell* LoadPatchFile(const char*, Patch* = NULL);

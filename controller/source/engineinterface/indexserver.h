@@ -28,6 +28,8 @@ public:
     _array_size(array_size), _next_index (0)
     {
         _mutex = Mutex::create();
+        // we do not want an index of zero
+        addIndex(NULL);
     }
     
     unsigned addIndex(T* identity);

@@ -80,7 +80,9 @@ Patch::~Patch()
 
 BaseShell* Patch::Create(Patch* Parent)
 {
-	Patch* ret = new Patch(Parent, 0,0, "", "", "");
+  Patch* ret = new Patch(Parent, 0,0, "", "", "");
+  
+  printf ("Patch::Create %lu\r\n", ret);
   if (!Parent)
   {
     AddPatch(ret);
@@ -206,7 +208,10 @@ void Patch::RemoveOutlet(PatchOutletPort* pOldOutlet)
 const char* Patch::GetInletName(unsigned InletNumber)const
 {
   if (InletNumber < GetNumInlets())
-    return ptInletPort[InletNumber]->GetName();
+  {
+    const PatchInletPort* port = ptInletPort[InletNumber]; 
+    return port->GetName();
+  }
   else
     return NULL;
 }
@@ -749,6 +754,7 @@ BaseShell* Patch::LoadPatchFile(const char* FileName, Patch* Parent)
   if (!infile)
     {
       Error(eUnableToOpenPatch, Parent, filepath);
+      printf ("Patch* Patch::LoadPatchFile Unable to load Patch %s", filepath);
       return NULL;
     }
 
@@ -788,7 +794,7 @@ BaseShell* Patch::LoadPatchFile(const char* FileName, Patch* Parent)
 
 BaseShell* Patch::CreatePatchFile(Patch* Parent)
 {
-	Patch* pPatch = new Patch(Parent, 0,0, "", "", "");
+  Patch* pPatch = new Patch(Parent, 0,0, "", "", "");
   return pPatch;
 }
 
@@ -882,6 +888,7 @@ int Patch::NumConnectors()const{return ConnectorList.size();}
 
 bool Patch::GetFileName(char* buf, unsigned buf_len)const 
 {
+    printf ("Patch::GetFileName\r\n");
 	bool ret = false;
 	if (strlen (sFileName.c_str()) < buf_len)
 		{

@@ -15,9 +15,7 @@ class EventAnswer;
 P_IDENTITY::P_IDENTITY (Identity* val)
 {
   //## begin P_IDENTITY::P_IDENTITY%983922934.body preserve=yes
-    unsigned new_key; 
-    IdentityAnswer::AddIdentity(val, &new_key);
-    key = new_key;
+    key = IdentityAnswer::GetIdentityKey(val);
   //## end P_IDENTITY::P_IDENTITY%983922934.body
 }
 

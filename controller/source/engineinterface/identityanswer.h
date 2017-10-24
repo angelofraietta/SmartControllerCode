@@ -110,6 +110,8 @@ class IdentityAnswer
       //## Operation: GetIdentity%1020302313
       static Identity* GetIdentity (P_IDENTITY pid);
 
+      static unsigned GetIdentityKey (Identity* id);
+
   public:
     // Additional Public Declarations
       //## begin IdentityAnswer%3A99D27700DE.public preserve=yes

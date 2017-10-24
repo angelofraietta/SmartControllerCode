@@ -521,14 +521,20 @@ unsigned BaseShellAnswer::Create (const BYTE* question, BYTE* answer, unsigned a
 	const BYTE* cursor = question;
 	const char* type = (const char*)cursor;
 	cursor += strlen (type) + 1;
-	Patch* pParent = PatchAnswer::GetPatch (&cursor);
+        P_PATCH p_patch (&cursor);
+	Patch* pParent = (Patch*) IdentityAnswer::GetIdentity(p_patch);
+        printf ("aseShellAnswer::Create Parent first %u\r\n", p_patch.Key());
+        
 	P_BASESHELL pObj;
 	if (pParent)
 		{
+                        P_PATCH p_key(pParent);
+            
+                        printf ("aseShellAnswer::Create Parent %u\r\n", p_key.Key());
 			BaseShell* pShell = TypeList::Create(type, pParent);
-                        unsigned key; 
-                        IdentityAnswer::AddIdentity(pShell, &key);
-                        pObj = key;
+                        //unsigned key; 
+                        //IdentityAnswer::AddIdentity(pShell, &key);
+                        pObj = P_BASESHELL(pShell);
 		}
 
 	pObj.toBuf(answer);

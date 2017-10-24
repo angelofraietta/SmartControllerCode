@@ -35,14 +35,14 @@ int main ()
 
     std::cout<<"Pointer Size"<<ptr_size<<std::endl;
 
-    for (unsigned i = 0; i < num_elements; i++)
+    for (unsigned i = 1; i <= num_elements; i++)
     {
         unsigned i_val = i * i;
         TestClass* new_class = new TestClass (i_val);
         server.addIndex(new_class);
     }
   
-    for (unsigned i = 0; i < num_elements; i++)
+    for (unsigned i = 1; i <= num_elements; i++)
     {
         unsigned i_val = i * i;
         TestClass* new_class = server.getIdentityFromIndex(i);

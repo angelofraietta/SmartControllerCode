@@ -664,8 +664,9 @@ unsigned PatchAnswer::LoadPatchFile (const BYTE* question, BYTE* answer, unsigne
 	if (!found || (pParent))
 	{
 		printf("LoadPatchFile  %s\r\n", name); 
-		
-		P_PATCH dwpPatch  = ((Patch*)(Patch::LoadPatchFile(name, pParent)));
+		BaseShell * p =  Patch::LoadPatchFile(name, pParent);
+                        
+		P_PATCH dwpPatch  = P_PATCH(p);
     if ((answer) && answer_size >= sizeof (P_PATCH))
     {
       dwpPatch.toBuf(answer);
@@ -686,15 +687,20 @@ unsigned PatchAnswer::LoadPatchFile (const BYTE* question, BYTE* answer, unsigne
 unsigned PatchAnswer::GetFileName (const BYTE* question, BYTE* answer, unsigned answer_size)
 {
   //## begin PatchAnswer::GetFileName%983336491.body preserve=yes
+    
 	const BYTE* cursor = question;
 	unsigned ret_bytes = 0;
 	Patch* pPatch = GetPatch (&cursor);
 	if (pPatch)
-		{
-			char* filename = (char*)answer;
-			pPatch->GetFileName (filename, answer_size-1 );
-			ret_bytes = strlen (filename) + 1;
-		}
+	{
+            char* filename = (char*)answer;
+            pPatch->GetFileName (filename, answer_size-1 );
+            ret_bytes = strlen (filename) + 1;
+	}
+        else
+        {
+            printf ("PatchAnswer::GetFileName No Patch \r\n");
+        }
 	return ret_bytes;
 
   //## end PatchAnswer::GetFileName%983336491.body
@@ -877,6 +883,9 @@ Patch* PatchAnswer::GetPatch (const BYTE** buf)
  	const BYTE* cursor = *buf;
 	P_PATCH pId (&cursor);
 	*buf = cursor;
+        
+        printf ("PatchAnswer::GetPatch %u \r\n", pId.Key());
+
 	return (Patch*) IdentityAnswer::GetIdentity (pId);
 
   //## end PatchAnswer::GetPatch%983336498.body

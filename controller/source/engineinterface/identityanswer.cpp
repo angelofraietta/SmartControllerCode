@@ -375,20 +375,28 @@ unsigned IdentityAnswer::GetParent (const BYTE* question, BYTE* answer, unsigned
 {
   //## begin IdentityAnswer::GetParent%986947732.body preserve=yes
 
+    printf("IdentityAnswer::GetParent\r\n");
 	if (answer_size < sizeof (P_PATCH))
 		{
 			return 0;
 		}
 
 	const BYTE* cursor = question;
- 	Identity* pId = GetIdentity (&cursor);
+        
+        Identity* pId = GetIdentity (&cursor);
+        
+        
 	if (pId)
 		{
+                    
 			P_PATCH pPatch (pId->GetParent());
+                        
 			pPatch.toBuf(answer);
+                        printf("IdentityAnswer::GetParent %u\r\n", pPatch.Key());
 		}
 	else
 		{
+            printf("IdentityAnswer::GetParent No PID\r\n");
 			P_PATCH pPatch;
 			pPatch.toBuf(answer);
 		}
@@ -438,6 +446,7 @@ bool IdentityAnswer::AddIdentity (Identity* id, unsigned* ret_key)
   //## end IdentityAnswer::AddIdentity%1020302311.body
 }
 
+
 //## Operation: RemoveIdentity%1020302312
 //	RemovesIdentity to List of Valid Identies
 bool IdentityAnswer::RemoveIdentity (Identity* id)
@@ -457,6 +466,11 @@ bool IdentityAnswer::RemoveIdentity (Identity* id)
   //## end IdentityAnswer::RemoveIdentity%1020302312.body
 }
 
+unsigned IdentityAnswer::GetIdentityKey (Identity* id)
+{
+    unsigned key_index = valid_identities[id];
+    return key_index;
+}
 //## Operation: GetIdentity%1020302313
 //	Returns Identity Given a P_IDENTITY
 Identity* IdentityAnswer::GetIdentity (P_IDENTITY pid)
