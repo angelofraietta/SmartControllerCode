@@ -12,7 +12,7 @@ CPP_FLAGS += $(COMMON_DEFINES)
 LIB=$(LIBNAME)
 
 
-all: $(LIB) $(CC_O_FILES) $(TESTNAME)
+all: $(LIB) $(CC_O_FILES) 
 
 lib :$(LIB)
 

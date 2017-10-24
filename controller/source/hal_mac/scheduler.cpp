@@ -186,6 +186,7 @@ namespace hal_include {
     delete schedule_event;
 		pthread_mutex_destroy(&_schedule_mutex);
 		pthread_mutex_destroy(&_engine_mutex);
+                return true;
     //## end hal_include::Scheduler::deinitialise%981603323.body
   }
 

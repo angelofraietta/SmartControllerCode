@@ -153,6 +153,7 @@
             <in>identityquestion.h</in>
             <in>indexserver.h</in>
             <in>interfacebridge.h</in>
+            <in>interfacetypes.cpp</in>
             <in>interfacetypes.h</in>
             <in>nvramstore.cpp</in>
             <in>nvramstore.h</in>
@@ -164,6 +165,7 @@
             <in>presentationanswer.h</in>
             <in>presentationquestion.cpp</in>
             <in>presentationquestion.h</in>
+            <in>questiontask.cpp</in>
             <in>questiontask.h</in>
             <in>sessionanswer.cpp</in>
             <in>sessioninterface.h</in>
@@ -173,6 +175,7 @@
             <in>sysexfilequestion.cpp</in>
             <in>sysexfilequestion.h</in>
             <in>tempblock.h</in>
+            <in>testindex.cpp</in>
             <in>typedefs.h</in>
             <in>typenames.h</in>
             <in>viewanswer.cpp</in>
@@ -421,6 +424,7 @@
           <df name="hal_mac">
             <in>activethreads.cpp</in>
             <in>macevent.cpp</in>
+            <in>macmutex.cpp</in>
             <in>macthread.cpp</in>
             <in>stdafx.h</in>
             <in>testlib.cpp</in>
@@ -447,6 +451,7 @@
           <in>activeobject.h</in>
           <in>event.h</in>
           <in>multithread.h</in>
+          <in>mutex.h</in>
         </df>
       </df>
       <df name="WinPatchEditor">
@@ -566,9 +571,9 @@
       </codeAssistance>
       <makefileType>
         <makeTool>
-          <buildCommandWorkingDir>controller/source/hal_windows</buildCommandWorkingDir>
-          <buildCommand>${MAKE} -f SmartController.mak</buildCommand>
-          <cleanCommand>${MAKE} -f SmartController.mak clean</cleanCommand>
+          <buildCommandWorkingDir>controller/source/hal_mac</buildCommandWorkingDir>
+          <buildCommand>bit_mac</buildCommand>
+          <cleanCommand>bit_mac clean</cleanCommand>
           <executablePath></executablePath>
         </makeTool>
         <preBuild>
@@ -2964,6 +2969,1808 @@
       <item path="threads/source/test/stdafx.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="threads/source/test/tasks.c" ex="false" tool="0" flavor2="2">
+      </item>
+    </conf>
+    <conf name="NewConfiguration" type="0">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>false</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <codeAssistance>
+      </codeAssistance>
+      <makefileType>
+        <makeTool>
+          <buildCommandWorkingDir>controller/source/hal_mac</buildCommandWorkingDir>
+          <buildCommand>${MAKE}</buildCommand>
+          <cleanCommand>${MAKE} clean</cleanCommand>
+          <executablePath>controller/source/hal_mac/smart.exe</executablePath>
+        </makeTool>
+        <preBuild>
+          <preBuildCommandWorkingDir>.</preBuildCommandWorkingDir>
+          <preBuildCommand></preBuildCommand>
+        </preBuild>
+      </makefileType>
+      <item path="PatchEditor/configmsg.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PatchEditor/jnimidi.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PatchEditor/midicontrollerlibrary.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="PatchEditor/midicontrollerlibrary.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="PatchEditor/midiinputunit.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PatchEditor/midiinputunit.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PatchEditor/sysexwriter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PatchEditor/sysexwriter.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/About.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/About.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/BaseShellsUnit.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/BaseShellsUnit.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/ComSetupUnit.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/ComSetupUnit.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/CommentFormUnit.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/CommentFormUnit.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/ConnectorEditUnit.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="WinPatchEditor/ConnectorEditUnit.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/ConnectorLine.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/ConnectorLine.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/CursorsUnit.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/DragBaseShell.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/DragConnector.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/DragConnector.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/DragViewNode.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/EditPatchUnit.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/EditPatchUnit.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/ErrorUnit.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/ErrorUnit.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/FormRefresh.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/FormRefresh.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/Help.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/IdentityHook.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/IdentityHook.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/Main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/Main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/MidiOutControl.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/MidiOutControl.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/MidiSetupUnit.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/MidiSetupUnit.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/NewObjectsList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/NewObjectsList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/NumberBox.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/NumberBox.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/ObjectBox.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/ObjectBox.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/ObjectSocket.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/ObjectSocket.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/PatchUnit.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/PatchUnit.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/PerformanceView.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/PerformanceView.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/SaveChanged.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/SaveChanged.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/ShellDisplayParam.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="WinPatchEditor/ShellDisplayParam.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/SmartController.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/TComment.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/TComment.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/TMAXMIDIIN.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/TMAXMIDIIN.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/ToggleBox.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/ToggleBox.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/TreeNodeFlasher.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/TreeNodeFlasher.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/TypeElementUnit.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/TypeElementUnit.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/VCLGLOBFUNC.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/VCLGLOBFUNC.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/VariableSizeBox.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/VariableSizeBox.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/ViewFormUnit.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/ViewFormUnit.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/ViewRefresh.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/ViewRefresh.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/WindowsMessages.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/graphics/CommonFunctions.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="WinPatchEditor/graphics/CommonFunctions.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="WinPatchEditor/graphics/CursorsUnit.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="WinPatchEditor/graphics/DragLine.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="WinPatchEditor/graphics/DragLine.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/graphics/GraphicBoxFollow.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="WinPatchEditor/graphics/GraphicBoxFollow.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="WinPatchEditor/graphics/GraphicBoxUnit.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="WinPatchEditor/graphics/GraphicBoxUnit.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="WinPatchEditor/graphics/GraphicLine.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="WinPatchEditor/graphics/GraphicLine.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="WinPatchEditor/graphics/GraphicLineFollow.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="WinPatchEditor/graphics/GraphicLineFollow.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="WinPatchEditor/graphics/GraphicShape.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="WinPatchEditor/graphics/GraphicShape.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="WinPatchEditor/graphics/KillerUnit.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="WinPatchEditor/graphics/KillerUnit.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="WinPatchEditor/maxmidi.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/mxdll.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinPatchEditor/numberboxwindowunit.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="WinPatchEditor/numberboxwindowunit.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/analogin.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/analogin.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/analogout.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/analogout.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/baseshel.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/baseshel.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/calculate.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/calculate.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/clock.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/connect.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/connect.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/connectormessage.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/control.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/convertmidi.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/counter.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/counter.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/delay.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="controller/source/engine/delay.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/deltatime.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/deltatime.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/digitalin.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/digitalin.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/digitalout.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/digitalout.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/display.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/display.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/engine.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/enginedatainput.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/enginedatainput.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/error_messages.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/flipflop.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/flipflop.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/funcdec.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/globals.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/globfunc.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/identity.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/identity.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/mainline.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/memorycache.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/memorycache.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/messagecell.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/messagecell.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/messagefilter.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/messagefilter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/messagestore.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/messagestore.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/metro.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="controller/source/engine/metro.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/midi.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/number.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/number.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/oscarg.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/oscarg.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/oscin.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="controller/source/engine/oscin.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/oscinput.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/oscinput.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/oscout.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/oscout.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/osinterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/osinterface.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/ostypes.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/outlet.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/outlet.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/patch.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="controller/source/engine/patch.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/patchports.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/patchports.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/patchview.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/patchview.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/randomgen.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/randomgen.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/selector.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/selector.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/sequencer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/sequencer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/smerror.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/smfstl.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/smfstl.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/socket.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/socket.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/stdafx.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/stdmidiin.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/stdmidiin.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/stdmidiout.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/stdmidiout.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/switch.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/switch.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/sysexdriver.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/sysexdriver.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/table.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="controller/source/engine/table.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/tablepoints.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/tablepoints.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/timer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="controller/source/engine/timer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/toggle.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/toggle.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/trigger.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/trigger.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="controller/source/engine/typelist.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/typelist.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/windows_init.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engine/windowsmessages.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/PatchEditorInterface/BaseShellInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/PatchEditorInterface/ConnectorInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/PatchEditorInterface/FileSendInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/PatchEditorInterface/IdentityInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/PatchEditorInterface/Jni/PatchEditor.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/PatchEditorInterface/PatchEditorInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/PatchEditorInterface/PatchInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/PatchEditorInterface/ViewInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/QUESTIONTASK.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/answertask.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/answertask.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/baseshellanswer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/baseshellanswer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/baseshellquestion.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/baseshellquestion.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/connectoranswer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/connectoranswer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/connectorquestion.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/connectorquestion.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/dllinterface.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/eventanswer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/eventanswer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/eventmessagequeue.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/eventmessagequeue.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/eventquestion.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/eventquestion.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/fileanswer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/fileanswer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/fileblock.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/fileblock.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/filequestion.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/filequestion.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/identityanswer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/identityanswer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/identityquestion.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/identityquestion.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/indexserver.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/interfacebridge.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/interfacetypes.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/interfacetypes.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/nvramstore.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/nvramstore.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/patchanswer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/patchanswer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/patchquestion.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/patchquestion.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/presentationanswer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/presentationanswer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/presentationquestion.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/presentationquestion.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/questiontask.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/questiontask.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/sessionanswer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/sessioninterface.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/sessionquestion.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/smutility.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/smutility.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/sysexfilequestion.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/sysexfilequestion.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/tempblock.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/testindex.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/typedefs.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/typenames.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/viewanswer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/viewanswer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/viewquestion.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/engineinterface/viewquestion.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_include/midioutput.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_include/scheduledobject.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_include/scheduler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_include/scheduler.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_include/simulator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_include/simulatorinterface.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_mac/macsimulator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_mac/scheduler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_mac/simulator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_mac/testsim.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_rtems_pc386/bsp-cs8900.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_rtems_pc386/bsp-cs8900.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_rtems_pc386/commtasks.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_rtems_pc386/cs8900.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_rtems_pc386/cs8900.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_rtems_pc386/diags.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_rtems_pc386/fsmount.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_rtems_pc386/fsmount.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_rtems_pc386/init.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_rtems_pc386/midioutput.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_rtems_pc386/o-optimize/stack.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_rtems_pc386/rtems_answer_task.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_rtems_pc386/rtems_init.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_rtems_pc386/rtems_simulator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_rtems_pc386/rtemsactiveobject.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_rtems_pc386/scheduler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_rtems_pc386/system.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_windows/midioutput.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_windows/scheduler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_windows/test.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_windows/windows_answer_task.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_windows/winmain.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_windows/winsimulator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/OSC-common.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/commstream.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/controlfilter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/crc32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/crc32.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_mac/maccommport.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_mac/maccommport.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_mac/maccommstream.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_mac/udpport.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_rtems/rtemscommport.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_rtems/rtemscommport.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_rtems/rtemscommstream.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_windows/windows_driver/CommDriver.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_windows/windows_driver/CommDriver.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_windows/windows_driver/WindowsCommDriver.asm"
+            ex="false"
+            tool="4"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_windows/windows_driver/WindowsCommDriver.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_windows/windows_driver/stdafx.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_windows/windowscommport.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_windows/windowscommport.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_windows/windowscommstream.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_windows/windowsmidiport.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_windows/windowsmidiport.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/htmsocket.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/htmsocket.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/linkdriver.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/linklayer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/linklayer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/linkprotocol.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/linkprotocol.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/networklayer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/networklayer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/ringqueue.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/staticvector.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/udpecho.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/udpport.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/udpport.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="estl/e_stl.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="estl/elist.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="estl/emap.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="estl/equeue.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="estl/estring.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="estl/evector.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="libOSC/OSC-client.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="libOSC/OSC-client.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="libOSC/OSC-timetag.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="libOSC/OSC-timetag.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="libOSC/htmsocket.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="libOSC/htmsocket.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="libOSC/test_OSC.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="libOSC/test_OSC_timeTag.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="midicontroller/code/24LC256.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/MIDICFG.H" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/RS232D.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/SysexDrv.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/anain.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/anaout.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/cfgram.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/decmidi.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/digin.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/digout.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="midicontroller/code/digout.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/ds1803.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/extprom.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/iocard.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="midicontroller/code/lcd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="midicontroller/code/lcd.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/max520.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/midicont.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="midicontroller/code/mididrv.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/midiin.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="midicontroller/code/midiin.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/midiout.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/midiproc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="midicontroller/code/mirror.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="midicontroller/code/pla.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="midicontroller/code/pla_io.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/pla_out.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/proc_pla.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/procmidi.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/readprm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="midicontroller/code/spi_read.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/sysex.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/sysexcommands.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="midicontroller/code/sysexout.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="midicontroller/code/testan.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="midicontroller/code/testdig.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="midicontroller/code/testmid.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="midicontroller/code/testpot.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="midicontroller/code/testprom.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="midicontroller/code/testread.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="midicontroller/code/testrom.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="midicontroller/code/testwrit.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="midicontroller/code/testwrite.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="midicontroller/code/watchdog.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="mididriver/analogueinputvalue.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="mididriver/analogueinputvalue.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="mididriver/filedriver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="mididriver/filedriver.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/QTMusic.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/echo.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/macmidiinputdriver.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/macmidioutputdriver.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/ComponentDispatchHelper.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/ImageCodec.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/ImageCodec.k.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/ImageCompression.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/ImageCompression.k.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/MediaHandlers.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/MediaHandlers.k.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/Movies.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/Movies.k.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/MoviesFormat.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/QTMusic.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/QTSMovie.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/QTSMovie.k.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/QTStreamingComponents.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/QTStreamingComponents.k.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/QuickTime.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/QuickTimeComponents.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/QuickTimeComponents.k.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/QuickTimeMusic.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/QuickTimeMusic.k.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/QuickTimeStreaming.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/QuickTimeVR.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/qtime/QuickTimeVRFormat.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_mac/testmid.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="mididriver/hal_rtems/filedriver.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_rtems/midibsp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="mididriver/hal_rtems/rtemsmididriver.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_rtems/rtemsmididriver.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_rtems/rtemsmidiinputdriver.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_rtems/rtemsmidioutputdriver.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_windows/mididriver.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_windows/nvramdriver.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_windows/stdafx.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="mididriver/hal_windows/windowsmidiinputdriver.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="mididriver/hal_windows/windowsmidioutputdriver.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="mididriver/iodata.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="mididriver/mididriver.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="mididriver/mididrv.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="mididriver/midiflags.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="mididriver/midiinputdriver.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="mididriver/midiinputsync.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="mididriver/midiinputsync.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="mididriver/midioutputdriver.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="mididriver/midiutilities.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="mididriver/rtemsmidioutputdriver.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="mididriver/stdafx.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="mididriver/test/activethreads.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="mididriver/test/stdafx.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="mididriver/test/tasks.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="threads/source/activeobject.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="threads/source/activeobject.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="threads/source/event.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="threads/source/hal_mac/activethreads.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="threads/source/hal_mac/macevent.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="threads/source/hal_mac/macmutex.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="threads/source/hal_mac/macthread.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="threads/source/hal_mac/stdafx.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="threads/source/hal_mac/testlib.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="threads/source/hal_mac/threadslib.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="threads/source/hal_rtems/rtemsevent.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="threads/source/hal_rtems/rtemsevent.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="threads/source/hal_rtems/rtemsthread.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="threads/source/hal_windows/activethreads.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="threads/source/hal_windows/windowsevent.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="threads/source/hal_windows/windowsevent.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="threads/source/hal_windows/windowsthread.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="threads/source/multithread.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="threads/source/mutex.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="threads/source/test/activethreads.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="threads/source/test/init.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="threads/source/test/stdafx.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="threads/source/test/tasks.c" ex="false" tool="0" flavor2="0">
       </item>
     </conf>
   </confs>

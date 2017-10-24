@@ -13,12 +13,22 @@ extern "C"
 
 int main()
 {
+    char buff [256];
+    
+    printf ("Start Simulator");
 
 	InitialiseEngine();
+        InitialisePresentation();
 
-	PresentationQuestion* p = GetSelectedEngine();
-	PatchQuestion::LoadPatchFile(p, "dummy.smp", (Patch*)0);
+	unsigned p_key = GetSelectedEngine();
+        
+        PresentationQuestion* p = getPresentation(p_key);
+        
+	P_PATCH p_val = PatchQuestion::LoadPatchFile(p, "dummy.smp", (Patch*)0);
 
+        PatchQuestion::GetFileName(p, p_val, buff, sizeof(buff));
+        
+        printf ("P VAL and name %u %s\r\n", p_val.Key(), buff);
 	//cout<<"Press c to exit..."<<endl;
 
 	char c;

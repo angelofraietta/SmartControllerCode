@@ -46,23 +46,33 @@ using sm_str::vector;
 map <Identity*, unsigned> valid_identities;
 typedef map<Identity*, unsigned>::value_type map_value_type;
 
-IndexServer <Identity> index_server;
+static IndexServer <Identity> *index_server = NULL;
 
+void createIndexServer()
+{
+    if (!index_server)
+    {
+        index_server = new IndexServer <Identity>();
+    }
+}
 // Return a number that we will use as a key
 // we should put this in some sort of critical section
 unsigned addIdentityIndex(Identity* identity)
 {
-    return index_server.addIndex(identity);
+    createIndexServer();
+    return index_server->addIndex(identity);
 }
 
 Identity* getIdentityFromIndex(unsigned key)
 {
-    return index_server.getIdentityFromIndex(key);
+    createIndexServer();
+    return index_server->getIdentityFromIndex(key);
 }
 
 void eraseIdentityIndex (unsigned key)
 {
-    index_server.eraseIndex(key);
+    createIndexServer();
+    index_server->eraseIndex(key);
 }
 //## end module%3ACAAFDE026B.additionalDeclarations
 

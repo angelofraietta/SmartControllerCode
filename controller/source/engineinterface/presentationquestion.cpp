@@ -44,26 +44,37 @@
 static PresentationQuestion simulator ("simulator");
 static unsigned current_interface = 0;
 
-static IndexServer <PresentationQuestion> presentation_index_server;
+static IndexServer <PresentationQuestion> *presentation_index_server = NULL;
+
+void createPresentationIndexServer()
+{
+    if (!presentation_index_server)
+    {
+        presentation_index_server = new IndexServer <PresentationQuestion>();
+    }
+}
 
 PresentationQuestion* getPresentation (unsigned key)
 {
-    return presentation_index_server.getIdentityFromIndex(key);
+    return presentation_index_server->getIdentityFromIndex(key);
 }
 
 unsigned addPresentationQuestion(PresentationQuestion * pQuestion)
 {
-    return presentation_index_server.addIndex(pQuestion);
+    return presentation_index_server->addIndex(pQuestion);
 }
 void InitialisePresentation()
 {
-    current_interface = presentation_index_server.addIndex(&simulator);
+    createPresentationIndexServer();
+    current_interface = presentation_index_server->addIndex(&simulator);
 }
 
 void erasePresentationQuestion(unsigned key)
 {
-    presentation_index_server.eraseIndex(key);
+    createPresentationIndexServer();
+    presentation_index_server->eraseIndex(key);
 }
+
 unsigned GetSelectedEngine ()
 {
     return current_interface;
@@ -161,6 +172,7 @@ bool PresentationQuestion::AskQuestion (unsigned target_class, const BYTE* quest
 
   SMUtility::DwordToBuf (crc, cursor);
 
+  
   if (snLayer)
     {
       bool valid_answer = false; // we test for a valid answer by testing sequence number
@@ -169,6 +181,7 @@ bool PresentationQuestion::AskQuestion (unsigned target_class, const BYTE* quest
         {
           if (snLayer->AskQuestion (app_question, question_size, app_answer, answer_size))
             {
+              printf("snLayer->AskQuestion %u", num_attempts);
               const BYTE* cursor = app_answer;
               const BYTE ret_sequence = *cursor;
               cursor++;
@@ -183,9 +196,11 @@ bool PresentationQuestion::AskQuestion (unsigned target_class, const BYTE* quest
                   if (event_waiting)
                     {
                       // prompt EventQuestion to ask a question
+                      printf("EventQuestion::EventWaiting");
                       EventQuestion::EventWaiting();
                     }
 
+                  printf("PresentationQuestion::AskQuestion BYTES %u", num_rx_bytes);
                   if (num_rx_bytes <= r_size)
                     {
                       // Cursor is wRONG HERE
@@ -205,8 +220,15 @@ bool PresentationQuestion::AskQuestion (unsigned target_class, const BYTE* quest
                       }
                     }
                 }
-
+              else
+              {
+                  printf("snLayer->AskQuestion Invalid answer");
+              }
             }
+          else
+          {
+           printf("PresentationQuestion::AskQuestion layer fail attempt %u", num_attempts);   
+          }
           num_attempts++;
         } while (!valid_answer && _retries >= num_attempts);
 

@@ -11,7 +11,8 @@ TEST_EXE=smart.exe
 
 
 # C++ source names, if any, go here -- minus the .cc
-CC_PIECES=  scheduler 
+CC_PIECES=  scheduler \
+ ../hal_include/simulator	
 
 CC_JPIECES =  ../engineinterface/PatchEditorInterface/PatchEditorInterface \
   ../engineinterface/PatchEditorInterface/BaseShellInterface \
@@ -20,11 +21,13 @@ CC_JPIECES =  ../engineinterface/PatchEditorInterface/PatchEditorInterface \
   ../engineinterface/PatchEditorInterface/IdentityInterface \
   ../engineinterface/PatchEditorInterface/PatchInterface \
   ../engineinterface/PatchEditorInterface/ViewInterface \
-  ../hal_include/simulator	
+ 
+CC_SIM_PIECES=testsim
 
 CC_FILES = $(CC_PIECES:%=%.cpp)
 CC_O_FILES = $(CC_PIECES:%=%.o)
 CJ_O_FILES = $(CC_JPIECES:%=%.o)
+CC_SIM_O_FILES = $(CC_SIM_PIECES:%=%.o)	
 
 DEFINES  += -D_E_STL 
 CPPFLAGS += -I ../../../estl 
@@ -39,7 +42,8 @@ CPPFLAGS += -I ../../../mididriver/hal_rtems
 CPPFLAGS += $(DEFINES)
 CPPFLAGS += -I/System/Library/Frameworks/JavaVM.framework/Headers
 
-FRAMEWORKS += -framework CoreMidi -framework CoreServices -framework JavaVM
+FRAMEWORKS += -framework CoreMidi -framework CoreServices 
+J_FRAMEWORKS = -framework JavaVM
 
 LD_LIBS   +=  ../engine/sm_engine.a  
 LD_LIBS   +=  ../engineinterface/sm_engineinterface.a  
@@ -48,22 +52,24 @@ LD_LIBS   +=  ../link_driver/hal_mac/sm_comm.a
 LD_LIBS   +=  ../../../threads/source/hal_mac/sm_thread.a  
 LD_LIBS   +=  ../../../mididriver/hal_mac/sm_MIDI.a
 LD_LIBS   +=  ../../../libOSC/libosc.a
+LD_LIBS   +=  ../engineinterface/sm_question.a  
 #LD_LIBS   += -lstdc++ -v
 
 J_LIBS   =  ../engineinterface/PatchEditorInterface/patcheditorinterface.a
-J_LIBS   +=  ../engineinterface/sm_question.a  
-
-all: $(CC_O_FILES) $(CJ_O_FILES) $(JAVLIB) 
 
 
+all: $(CC_O_FILES) $(CJ_O_FILES) $(CC_SIM_O_FILES) $(JAVLIB) $(TEST_EXE)
+
+sim: $(TEST_EXE)
+	
 clean:
 	-rm *.o
 	-rm *.jnilib
 
 
 install:
-	cp $(JAVLIB) /Users/angelofraietta/JavaPatchEditor/
-	cp $(JAVLIB) /Users/angelofraietta/Desktop/MacSmartcontrollerFolder/
+	cp $(JAVLIB) ../../../JSmartcontroller
+	#cp $(JAVLIB) /Users/angelofraietta/Desktop/MacSmartcontrollerFolder/
 
 
 .cpp.o :
@@ -72,7 +78,11 @@ install:
 
 $(JAVLIB) : $(CJ_O_FILES) $(CC_O_FILES) $(LD_LIBS)
 	echo MAKEJAVA
-	g++ -dynamiclib -o $(JAVLIB) $(CJ_O_FILES)  $(J_LIBS) $(CC_O_FILES) $(LD_LIBS) $(FRAMEWORKS) 
+	g++ -dynamiclib -o $(JAVLIB) $(CJ_O_FILES)  $(J_LIBS) $(CC_O_FILES) $(LD_LIBS) $(FRAMEWORKS) $(J_FRAMEWORKS)
+
+$(TEST_EXE) : $(CC_SIM_O_FILES) $(CC_O_FILES) $(LD_LIBS) 
+	echo MakeSim
+	g++  -o $(TEST_EXE) $(CC_SIM_O_FILES) $(CC_O_FILES) $(LD_LIBS) $(FRAMEWORKS)
 
 
 

@@ -25,7 +25,7 @@ These are the standard include files dependant upon each system
 using sm_str::string;
 
 #endif
-
+#include <stdio.h>
 #include "typedefs.h"
 #include "error_messages.h"
 
