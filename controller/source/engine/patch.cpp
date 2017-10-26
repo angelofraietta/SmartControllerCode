@@ -978,25 +978,30 @@ void Patch::AddPatch (Patch* pPatch)
 
 void Patch::RemovePatch (Patch* pPatch)
 {
-	bool found = false;
+    bool found = false;
+    printf ("Patch::RemovePatch \r\n");
+    
+    for (unsigned i = 0; i < pPatchList.size() && !found; i++)
+    {
+        // Get reference to data element in array
+        Patch*& data = pPatchList[i];
 
-	for (unsigned i = 0; i < pPatchList.size() && !found; i++)
-  {
-  	// Get reference to data element in array
-  	Patch*& data = pPatchList[i];
-
-    if (data == pPatch)
+        if (data == pPatch)
     	{
-			pPatchList.erase(&data);
-      found = true;
+            pPatchList.erase(&data);
+            found = true;
 
-			if (!_load_error)
-				{
-					IOData out_data = (IOData) (IO_FLAGS * 0x100 | (IO_NO_PATCH));
-					MidiOutputDriver::TransmitIoData (out_data);
-				}
-      }
-  }
+            if (!_load_error)
+            {
+                IOData out_data = (IOData) (IO_FLAGS * 0x100 | (IO_NO_PATCH));
+                MidiOutputDriver::TransmitIoData (out_data);
+           }
+        }
+    }
+    if (!found)
+    {
+        printf ("Patch::RemovePatch - Patch not found\r\n");
+    }
 }
 
 unsigned Patch::NumPatches()

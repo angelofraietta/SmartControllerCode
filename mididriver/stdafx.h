@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-typedef unsigned int DWORD;
+//typedef unsigned int DWORD;
 typedef  unsigned char BYTE;
 
 

@@ -127,7 +127,7 @@ unsigned StreamedAnswer::GetQuestion (const BYTE** question)
 
 //## Operation: open%985819701
 //	Opens the lower layer device
-bool StreamedAnswer::open (const char* name, DWORD port_speed, unsigned buf_size)
+bool StreamedAnswer::open (const char* name, unsigned port_speed, unsigned buf_size)
 {
   //## begin StreamedAnswer::open%985819701.body preserve=yes
   _buf = new BYTE [buf_size];

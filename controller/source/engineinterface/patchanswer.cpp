@@ -644,41 +644,41 @@ unsigned PatchAnswer::LoadPatchFile (const BYTE* question, BYTE* answer, unsigne
 	unsigned i = 0;
 
 	while (!found && i < num_patches)
-		{
-			Patch* pPatch = Patch::GetPatch (i);
-			if(!strcmp (name, pPatch->GetFileName()))
-				{
-					found = true;
-					P_PATCH dwpPatch ((Patch*)NULL);
+	{
+            Patch* pPatch = Patch::GetPatch (i);
+            if(!strcmp (name, pPatch->GetFileName()))
+            {
+                found = true;
+                P_PATCH dwpPatch ((Patch*)NULL);
 
-          if ((answer) && answer_size >= sizeof (P_PATCH))
-          {
-            dwpPatch.toBuf(answer);
-          }
+                if ((answer) && answer_size >= sizeof (P_PATCH))
+                {
+                  dwpPatch.toBuf(answer);
+                }
 
 
-				}
-			i++;
-		}
+            }
+            i++;
+        }
 
 	if (!found || (pParent))
 	{
-		printf("LoadPatchFile  %s\r\n", name); 
-		BaseShell * p =  Patch::LoadPatchFile(name, pParent);
-                        
-		P_PATCH dwpPatch  = P_PATCH(p);
-    if ((answer) && answer_size >= sizeof (P_PATCH))
-    {
-      dwpPatch.toBuf(answer);
-    }
+            printf("LoadPatchFile  %s\r\n", name); 
+            BaseShell * p =  Patch::LoadPatchFile(name, pParent);
+
+            P_PATCH dwpPatch  = P_PATCH(p);
+            if ((answer) && answer_size >= sizeof (P_PATCH))
+            {
+              dwpPatch.toBuf(answer);
+            }
 
 	}
 
-  if (answer_size >= sizeof (P_PATCH))
-  {
-  	ret = sizeof (P_PATCH);
-  }
-  return ret;
+        if (answer_size >= sizeof (P_PATCH))
+        {
+              ret = sizeof (P_PATCH);
+        }
+      return ret;
   //## end PatchAnswer::LoadPatchFile%983336490.body
 }
 
@@ -753,22 +753,24 @@ unsigned PatchAnswer::Save (const BYTE* question, BYTE* answer, unsigned answer_
 unsigned PatchAnswer::Destroy (const BYTE* question, BYTE* answer, unsigned answer_size)
 {
   //## begin PatchAnswer::Destroy%983336493.body preserve=yes
-	const BYTE* cursor = question;	
-	Patch* pPatch = GetPatch (&cursor);
-	if (pPatch)
-		{
-			_PatchDelete.Send (pPatch);
-		}
-	else
-		{
-			// delete default patch
-			_PatchDelete.Send (0);
+    
+    
+    const BYTE* cursor = question;	
+    Patch* pPatch = GetPatch (&cursor);
+    if (pPatch)
+    {        
+        _PatchDelete.Send (pPatch);
+    }
+    else
+    {
+        // delete default patch
+        _PatchDelete.Send (0);
 
-		}
+    }
 
-	UNREFERENCED_PARAMETER (answer);
-	UNREFERENCED_PARAMETER (answer_size);
-	return 0;
+    UNREFERENCED_PARAMETER (answer);
+    UNREFERENCED_PARAMETER (answer_size);
+    return 0;
 
   //## end PatchAnswer::Destroy%983336493.body
 }
@@ -1041,8 +1043,14 @@ bool PatchDeleter::Send (Patch* receiver)
 
   if (hal_include::Scheduler::LockEngine ())
   {
+    printf ("PatchAnswer::Destroy send %lu\r\n", (unsigned long)receiver);
+    
     ret = GoOneShot ((unsigned long)receiver);
     hal_include::Scheduler::UnlockEngine ();
+  }
+  else
+  {
+     printf ("PatchDeleter::Send Unable to lock engine\r\n"); 
   }
   return ret;
 
@@ -1052,6 +1060,7 @@ bool PatchDeleter::Send (Patch* receiver)
 //## Operation: OutputFunction%983336475; C++
 void PatchDeleter::OutputFunction (unsigned long receiver)
 {
+  printf("PatchDeleter::OutputFunction %lu\r\n", receiver);
   Patch* pPatch = (Patch*)receiver;
 	if (pPatch)
 		{

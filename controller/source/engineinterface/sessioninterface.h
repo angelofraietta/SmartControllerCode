@@ -72,7 +72,7 @@ class SessionQuestion
       ) = 0;
 
       //## Operation: create%985819688
-      static SessionQuestion* create (const char* name, DWORD port_speed	// The speed at which to open the port
+      static SessionQuestion* create (const char* name, unsigned port_speed	// The speed at which to open the port
       );
 
       //## Operation: destroy%985819711
@@ -205,7 +205,7 @@ class StreamedQuestion : public SessionQuestion  //## Inherits: <unnamed>%3AC016
     //## Other Operations (specified)
       //## Operation: open%985819699
       bool open (const char* dev_name, 	// name to pass to lower layer
-      DWORD port_speed	// The speed at which to open the port
+      unsigned  port_speed	// The speed at which to open the port
       );
 
       //## Operation: AskQuestion%985819713
@@ -253,7 +253,7 @@ class StreamedQuestion : public SessionQuestion  //## Inherits: <unnamed>%3AC016
       //## Attribute: _bytes_read%3CFC0C5C02D0
       //	The number of bytes returned from ;ower lay question
       //## begin StreamedQuestion::_bytes_read%3CFC0C5C02D0.attr preserve=no  private: DWORD {UT} 0
-      volatile DWORD  _bytes_read;
+      volatile unsigned  _bytes_read;
       //## end StreamedQuestion::_bytes_read%3CFC0C5C02D0.attr
 
       //## Attribute: _answer_buf%3CFC0C8A00B9
@@ -374,7 +374,7 @@ class StreamedAnswer
 
       //## Operation: open%985819701
       bool open (const char* name, 	// the name of the stream to open
-      DWORD port_speed, 	// The speed at which to open the port
+      unsigned port_speed, 	// The speed at which to open the port
       unsigned buf_size	// The size of the buffer to maintain
       );
 

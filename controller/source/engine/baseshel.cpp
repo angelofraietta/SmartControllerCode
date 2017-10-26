@@ -164,15 +164,17 @@ void BaseShell::Save(FILE* outfile)
 		}
 	fprintf(outfile, "%s\r\n", EndBlock);
 
-}
+} 
 
 void BaseShell::SaveConnectors (FILE* OutFile)const
 {
 	for (unsigned OutletNum = 0; OutletNum < GetNumOutlets(); OutletNum++)
 		{
-			tpOutlet[OutletNum]->SaveConnectors(OutFile);
+                    OutletContainer* pOutlet = tpOutlet[OutletNum];
+                    
+                    pOutlet->SaveConnectors(OutFile);
 		}
-	
+	 
 }
 
 bool BaseShell::Restore(FILE* infile)
@@ -233,7 +235,8 @@ unsigned BaseShell::FindOutletConnectorIndex(unsigned OutletNum,
 unsigned BaseShell::FindInletConnectorIndex(unsigned SocketNum,
                                             const Connector* pCon)const
 {
-  if(!(SocketNum < GetNumInlets()) || !(tpInletConnections[SocketNum]->HasConnector(pCon)))
+  InletContainer* inlet = tpInletConnections[SocketNum];
+  if(!(SocketNum < GetNumInlets()) || !(inlet->HasConnector(pCon)))     
 		{
 			Error (eInvalidIndex, this, (int)SocketNum);
 			return 0;

@@ -64,7 +64,7 @@ class AnswerTask
     //## Other Operations (specified)
       //## Operation: startTask%992232180
       bool startTask (const char* name, 	// the name of the stream to open
-      DWORD port_speed	// The speed at which to open the port
+      unsigned port_speed	// The speed at which to open the port
       );
 
       //## Operation: stopTask%992232181

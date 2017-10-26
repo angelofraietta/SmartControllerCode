@@ -56,14 +56,14 @@ class SMFEvent{
   ~SMFEvent();
   
   const BYTE* GetData() {return pData;}//this is the data portion of the event
-  DWORD Length()const {return dwLength;}
+  UINT32 Length()const {return dwLength;}
   unsigned GetType()const {return evType;}
 
  private:
-  DWORD Time()const {return dwDeltaTime;}
-  DWORD dwDeltaTime;   //of the event compared to last event in this track
+  UINT32 Time()const {return dwDeltaTime;}
+  UINT32 dwDeltaTime;   //of the event compared to last event in this track
   BYTE* pData;         //data of the event
-  DWORD dwLength;      //length of data
+  UINT32 dwLength;      //length of data
   void ProcessSysex(BYTE* pEventStart, unsigned* pNumBytesRead, bool Continue = false);
   void ProcessMeta(BYTE* pEventStart, unsigned* pNumBytesRead);
   void ProcessMidi(BYTE Status, BYTE* pEventData, unsigned* pNumBytesRead);
@@ -82,9 +82,9 @@ class TTrackStruct{
   //access to track data
   bool GetEvent(SMFEvent** ppEvent);
   unsigned NumEvents()const{return wSize;}
-  DWORD GetTime()const {return dwCurrentTime;}
-  DWORD MaxTime()const {return dwMaxTime;}; //return the time of last event in track
-  void SetTime(DWORD CurrentTime); //set the pointer to this time or later
+  UINT32 GetTime()const {return dwCurrentTime;}
+  UINT32 MaxTime()const {return dwMaxTime;}; //return the time of last event in track
+  void SetTime(UINT32 CurrentTime); //set the pointer to this time or later
 
   //mute
   bool Mute()const {return fMute;}
@@ -94,8 +94,8 @@ class TTrackStruct{
   bool fMute;
   unsigned dwEventCursor; //current event
   unsigned wSize;//the number of events
-  DWORD dwCurrentTime;   //absolute time of event at dwCursor;
-  DWORD dwMaxTime;
+  UINT32 dwCurrentTime;   //absolute time of event at dwCursor;
+  UINT32 dwMaxTime;
   byte_vec cData;   //midi events
   sm_ptr::vector<SMFEvent*> pEvents;
   void LoadEvents();
@@ -115,11 +115,11 @@ class TSmf {
   unsigned   NumTracks()const {return wNumTracks;}
   unsigned Format()const {return wFormat;}
   unsigned GetResolution()const {return wTickInterval;}
-  DWORD GetTime()const {return dwCurrentTime;}
-  void SetTime(DWORD NewTime);
-  bool GetEvent(SMFEvent** ppEvent, DWORD* dwDeltaTime, unsigned* Track );//with time from last event
-  DWORD NumEvents()const {return dwNumEvents;}
-  DWORD MaxTime()const {return dwMaxTime;}; //return the maxt time of tracks
+  UINT32 GetTime()const {return dwCurrentTime;}
+  void SetTime(UINT32 NewTime);
+  bool GetEvent(SMFEvent** ppEvent, UINT32* dwDeltaTime, unsigned* Track );//with time from last event
+  UINT32 NumEvents()const {return dwNumEvents;}
+  UINT32 MaxTime()const {return dwMaxTime;}; //return the maxt time of tracks
  private:
   bool fIsOpen;
   bool fInSysex;
@@ -127,9 +127,9 @@ class TSmf {
   unsigned wFormat;    //ditto
   unsigned wTickInterval;
   unsigned wCurrentTrack; //the track we are currently reading
-  DWORD dwCurrentTime;    //the current time in ticks
-  DWORD dwNumEvents;      //total number of events
-  DWORD dwMaxTime;        //maximum time of all tracks
+  UINT32 dwCurrentTime;    //the current time in ticks
+  UINT32 dwNumEvents;      //total number of events
+  UINT32 dwMaxTime;        //maximum time of all tracks
   sm_ptr::vector<TTrackStruct*> aTracks;  //array of tracks
 
 };

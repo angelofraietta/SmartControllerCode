@@ -36,7 +36,7 @@ TSmf::~TSmf()
 bool TSmf::Read(const char* FileName)
 {
   FILE* InFile;
-	const DWORD FileBuffLen = 255;
+	const UINT32 FileBuffLen = 255;
 	char FullFileName [FileBuffLen];
 
 
@@ -139,7 +139,7 @@ void TSmf::Close()
   aTracks.erase(aTracks.begin(), aTracks.end());
   fIsOpen = false;
 }
-void TSmf::SetTime(DWORD NewTime)
+void TSmf::SetTime(UINT32 NewTime)
 {
   //set time for each track
   for(unsigned i = 0; i < aTracks.size(); i++)
@@ -149,7 +149,7 @@ void TSmf::SetTime(DWORD NewTime)
   
 }
 
-bool TSmf::GetEvent(SMFEvent** ppEvent, DWORD* pdwDeltaTime, unsigned* pTrack)//with time from last event
+bool TSmf::GetEvent(SMFEvent** ppEvent, UINT32* pdwDeltaTime, unsigned* pTrack)//with time from last event
 {
   SMFEvent* pNextEvent;
   bool ValidTrack = false;
@@ -168,7 +168,7 @@ bool TSmf::GetEvent(SMFEvent** ppEvent, DWORD* pdwDeltaTime, unsigned* pTrack)//
         fInSysex = false;
     }
   //iterate through the tracks and find the lowest value
-  DWORD dwLowestTime;
+  UINT32 dwLowestTime;
   wCurrentTrack = 0;
   unsigned wLowestTrack = 0;
   //find first valid event
@@ -213,10 +213,10 @@ bool TSmf::GetEvent(SMFEvent** ppEvent, DWORD* pdwDeltaTime, unsigned* pTrack)//
 
 
 void Load_hsmf_Chunk(FILE* hFile, byte_vec* Buff, unsigned* pNumBytesRead)
-{
+{ 
   BYTE c;
   unsigned fPtr = 0;
-  unsigned long ChunkLength; //read from chunk header
+  unsigned ChunkLength; //read from chunk header
 	bool failed = false;
 
   for(unsigned i = 0; i < CHUNK_ID_SIZE && !failed; i++ )
@@ -268,7 +268,7 @@ void Load_hsmf_Chunk(FILE* hFile, byte_vec* Buff, unsigned* pNumBytesRead)
   fPtr +=  CHUNK_LENGTH_SIZE;//now increment pointer
   
   //now read the number of bytes into the buffer
-  for(unsigned long i = 0; i < ChunkLength && !failed; i++)
+  for(unsigned i = 0; i < ChunkLength && !failed; i++)
     {
 			unsigned bytes_read = fread (&c, 1, 1, hFile); 
 			failed = failed || (bytes_read != 1);
@@ -297,7 +297,7 @@ bool ReadSMFHeader(FILE* hFile,  unsigned* pNumBytesRead, unsigned * wFormat, un
   Load_hsmf_Chunk(hFile, &HeaderData, pNumBytesRead);
   
   //see if valid
-  if(!HeaderData[0] == 'M' || !HeaderData[1] == 'T' || !HeaderData[2] == 'h' || !HeaderData[3] == 'd')
+  if(HeaderData[0] != 'M' || HeaderData[1] != 'T' || HeaderData[2] != 'h' || HeaderData[3] != 'd')
     return false; //this is not a midi file
   
   *wFormat = (unsigned ) (HeaderData[8] * 0x0100 + HeaderData[9]);
@@ -364,7 +364,7 @@ bool TTrackStruct::GetEvent(SMFEvent** ppEvent)
   return true;
 }
 
-void TTrackStruct::SetTime(DWORD dwNewTime)
+void TTrackStruct::SetTime(UINT32 dwNewTime)
 {
   if(!pEvents.size())
     return;
@@ -428,7 +428,7 @@ void SMFEvent::ProcessSysex(BYTE* pEventStart, unsigned* pNumBytesRead, bool Con
 {
   unsigned wCursor = 0;
   //get the length of the message
-  DWORD dwSysexLen = ReadVarLen(pEventStart, &wCursor);
+  UINT32 dwSysexLen = ReadVarLen(pEventStart, &wCursor);
   
   //create a buffer for the message
   pData = new BYTE[dwSysexLen +1]; //we need extra for status
@@ -440,7 +440,7 @@ void SMFEvent::ProcessSysex(BYTE* pEventStart, unsigned* pNumBytesRead, bool Con
     pData[0] = 0xF0;
   
   //store data
-  for(DWORD i = 0; i < dwSysexLen; i++)
+  for(UINT32 i = 0; i < dwSysexLen; i++)
     {
       pData[i+1] = pEventStart[wCursor];
       wCursor++;
@@ -495,12 +495,12 @@ void SMFEvent::ProcessMeta(BYTE* pEventStart, unsigned* pNumBytesRead)
       
       {
         unsigned NumBytesRead;
-        DWORD TextLen = ReadVarLen(&pEventStart[wCursor], &NumBytesRead);
+        UINT32 TextLen = ReadVarLen(&pEventStart[wCursor], &NumBytesRead);
         wCursor += NumBytesRead;
         
         //create buffer for text
         pData = new BYTE[TextLen + 1];
-        for(DWORD i = 0; i < TextLen; i++)
+        for(UINT32 i = 0; i < TextLen; i++)
           {
             pData[i] = pEventStart[wCursor];
             wCursor++;

@@ -10,11 +10,15 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/hal_mac/testsim.cpp</file>
-            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engineinterface/presentationquestion.cpp</file>
-            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/hal_mac/simulator.cpp</file>
-            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engineinterface/patchquestion.cpp</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/baseshel.h</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/sequencer.cpp</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/smfstl.cpp</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/sequencer.h</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/baseshel.cpp</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/smfstl.h</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/smerror.h</file>
             <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engine/stdafx.h</file>
+            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/engineinterface/typedefs.h</file>
         </group>
     </open-files>
 </project-private>

@@ -47,7 +47,7 @@ const char*const SessionQuestion::simulator_name = "simulator";
 
 //## Other Operations (implementation)
 //## Operation: create%985819688
-SessionQuestion* SessionQuestion::create (const char* name, DWORD port_speed)
+SessionQuestion* SessionQuestion::create (const char* name, unsigned port_speed)
 {
   //## begin SessionQuestion::create%985819688.body preserve=yes
 	SessionQuestion* question;
@@ -169,7 +169,7 @@ StreamedQuestion::~StreamedQuestion()
 //## Other Operations (implementation)
 //## Operation: open%985819699
 //	Opens the lower layer device
-bool StreamedQuestion::open (const char* dev_name, DWORD port_speed)
+bool StreamedQuestion::open (const char* dev_name, unsigned port_speed)
 {
   //## begin StreamedQuestion::open%985819699.body preserve=yes
   _lower_layer = NetworkLayer::create(dev_name, port_speed);

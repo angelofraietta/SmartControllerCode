@@ -379,7 +379,7 @@ namespace sm_str {
                             ) const
         {
           //## begin sm_str::vector::operator []%980824880.body preserve=yes
-          return (const T) _data [index];
+          return  _data [index];
           //## end sm_str::vector::operator []%980824880.body
         }
       

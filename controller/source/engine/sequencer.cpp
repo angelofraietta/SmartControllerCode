@@ -321,7 +321,7 @@ void Sequencer::SetTempo(double NewTempo)
   else
     {
       flTempo = (float)NewTempo;
-      dwTickDuration = (DWORD) (60000UL / NewTempo / wResolution);
+      dwTickDuration = (UINT32) (60000UL / NewTempo / wResolution);
       SetTickTempo((float)NewTempo); //add here
     }
 }
@@ -427,7 +427,7 @@ void Sequencer::Close()
   sOpenFileName = "";
 }
 
-void Sequencer::SetPosition(DWORD NewTime)
+void Sequencer::SetPosition(UINT32 NewTime)
 {
   if(NewTime < dwMaxTime)
     {
@@ -557,7 +557,7 @@ void Sequencer::OutputMeta()
 void Sequencer::OutputTempo()
 {
   //convert dword usec per beat to bpm
-  DWORD UsecPerBeat  = pCurrentEvent->GetData()[0] * 0x10000;
+  UINT32 UsecPerBeat  = pCurrentEvent->GetData()[0] * 0x10000;
   UsecPerBeat  += pCurrentEvent->GetData()[1] * 0x100;
   UsecPerBeat  += pCurrentEvent->GetData()[2];
   

@@ -57,16 +57,16 @@ class Sequencer: public BaseShell, TickCallback
   void Close();
   void Start() {dwCurrentTime = 0; SetPosition (0);}
   void End() {dwCurrentTime = dwMaxTime;}
-  void Rewind(DWORD dwTime);
-  void FastForward(DWORD dwTime);
+  void Rewind(UINT32 dwTime);
+  void FastForward(UINT32 dwTime);
   unsigned GetNumTracks()const;
   unsigned GetResolution()const {return wResolution;}
   void PurgeItem(DWORD){};
   bool IsPlaying()const {return fIsPlaying;}
-  DWORD GetMaxTime()const {return dwMaxTime;}
-  DWORD GetCurrentPos()const {return dwCurrentTime;}
+  UINT32 GetMaxTime()const {return dwMaxTime;}
+  UINT32 GetCurrentPos()const {return dwCurrentTime;}
   
-  void SetPosition(DWORD NewPosition);
+  void SetPosition(UINT32 NewPosition);
   void SetFlush(int f){fFlushNotes = (f);}
   int GetFlush()const {return fFlushNotes? 1:0;}
  	const BaseShell* GetReference() const;
@@ -76,16 +76,16 @@ class Sequencer: public BaseShell, TickCallback
   bool fFlushNotes;//flush all notes after stopping
   bool ArrayNoteOn[16][128]; //flag for each note on
   float flTempo, flResetTempo;
-  DWORD dwTickDuration; //in micor second per beat
-  DWORD dwLastEventTime;
+  UINT32 dwTickDuration; //in micor second per beat
+  UINT32 dwLastEventTime;
   TSmf* SequenceDevice;
   
   string sMidiFileName, sResetMidiFileName, sOpenFileName;
-  DWORD dwMaxTime, dwCurrentTime;//the current sequence number
+  UINT32 dwMaxTime, dwCurrentTime;//the current sequence number
   
   //details for coming event
   SMFEvent* pCurrentEvent;
-  DWORD dwDeltaTime; //Time from previous event
+  UINT32 dwDeltaTime; //Time from previous event
   unsigned wTrack;   //which track it belongs to
   void ResetNoteOnArray();
   void FlushNoteOn();

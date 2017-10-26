@@ -468,7 +468,12 @@ bool IdentityAnswer::RemoveIdentity (Identity* id)
 
 unsigned IdentityAnswer::GetIdentityKey (Identity* id)
 {
-    unsigned key_index = valid_identities[id];
+    unsigned key_index = 0;
+
+    if (valid_identities.count(id))
+    {
+        key_index = valid_identities[id];
+    }
     return key_index;
 }
 //## Operation: GetIdentity%1020302313

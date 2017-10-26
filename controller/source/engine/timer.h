@@ -103,10 +103,13 @@ class DelayLine :protected TimerObject
         static void* operator new(size_t);
 				static void operator delete(void*);
 
-        DelayLineQueueItem(DWORD p = 0):lParam(p), pSchedule(NULL){}
+        DelayLineQueueItem(unsigned long p = 0):lParam(p), pSchedule(NULL)
+        {
+        //printf ("DelayLineQueueItem %lu\r\n", p);
+        }
         void SetSchedule (ScheduledObject* Schedule){pSchedule = Schedule;}
 
-				DWORD lParam;         //Parameter to be returned after event has arived
+	unsigned long lParam;         //Parameter to be returned after event has arived
         ScheduledObject* pSchedule; // handle that must be returned if we want to kill the event
 				static MemoryCache _mem_manager;
       };
@@ -118,9 +121,9 @@ class DelayLine :protected TimerObject
     void SetInterval(unsigned);
     unsigned GetInterval()const {return wInterval;}
     
-    bool GoOneShot(DWORD);
+    bool GoOneShot(unsigned long);
     
-    virtual void OutputFunction(DWORD){};
+    virtual void OutputFunction(unsigned long){};
     
     void ReceiveClockTiming(void* pParam);
     
@@ -131,7 +134,7 @@ class DelayLine :protected TimerObject
     
     
     void Purge();
-    virtual void PurgeItem(DWORD) {}; //its derived class will receive one for each param
+    virtual void PurgeItem(unsigned long) {}; //its derived class will receive one for each param
 };
 
 

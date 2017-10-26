@@ -42,7 +42,7 @@
 
 //## begin module%3AC3CD4901CE.additionalDeclarations preserve=yes
 static PresentationQuestion simulator ("simulator");
-static unsigned current_interface = 0;
+static unsigned current_interface = 1;
 
 static IndexServer <PresentationQuestion> *presentation_index_server = NULL;
 

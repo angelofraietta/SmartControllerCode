@@ -148,9 +148,9 @@ class KeyBaseType
 				key = 0;
 				
 				const BYTE* cursor = *in_val;
-				for (unsigned i = 0; i < sizeof(DWORD); i++)
+				for (unsigned i = 0; i < sizeof(key); i++)
 					{
-						DWORD byte_val = *cursor;
+						unsigned byte_val = *cursor;
 						for (unsigned weight = 0; weight < i; weight ++)
 							{
 								byte_val =  (byte_val * 0x100);
@@ -165,7 +165,7 @@ class KeyBaseType
       }
 
       //## Operation: Key%986437489
-      DWORD Key () const
+      unsigned Key () const
       {
         return key;
 

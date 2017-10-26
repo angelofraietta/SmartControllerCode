@@ -181,7 +181,7 @@ bool MacEvent::Wait (int timeout)
 							break;
 							
 						default:
-							printf (" event fail\r\n");
+							//printf (" event fail\r\n");
 							break;
 						}
 				}

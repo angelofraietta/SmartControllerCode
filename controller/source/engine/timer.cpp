@@ -124,9 +124,10 @@ void DelayLine::ReceiveClockTiming(void* pParam)
 }
 
 
-bool DelayLine::GoOneShot(DWORD Param)
+bool DelayLine::GoOneShot(unsigned long Param)
 {
 
+  
   bool ret = false;
   //get the time
   DWORD CallbackTime = Scheduler::getTime() + wInterval;

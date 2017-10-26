@@ -433,6 +433,7 @@ void PatchQuestion::SetFileName (PresentationQuestion* pQuestion, P_PATCH dwpPat
 P_PATCH PatchQuestion::LoadPatchFile (PresentationQuestion* pQuestion, const char* FileName, P_PATCH dwpParent)
 {
   //## begin PatchQuestion::LoadPatchFile%-326480328.body preserve=yes
+    printf("PatchQuestion::LoadPatchFile \r\n");
 	P_PATCH ret;
   const unsigned len =  strlen (FileName) + 1;
 	const unsigned question_size = SMUtility::TargetFuncBufSize()

@@ -145,7 +145,7 @@ AnswerTask::~AnswerTask()
 //## Operation: startTask%992232180
 //	Opens the lower layer device, using the name and speed
 //	as a parameter, and starts the thead task
-bool AnswerTask::startTask (const char* name, DWORD port_speed)
+bool AnswerTask::startTask (const char* name, unsigned port_speed)
 {
   //## begin AnswerTask::startTask%992232180.body preserve=yes
 	_stream->open (name, port_speed, 1024);
