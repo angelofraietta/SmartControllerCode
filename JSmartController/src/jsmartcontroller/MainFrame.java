@@ -8,6 +8,7 @@ import Jni.*;
 import javax.swing.filechooser.*;
 import java.net.*;
 import java.util.*;
+import java.util.List;
 
 /**
  * <p>Title: Smart Controller</p>
@@ -43,9 +44,37 @@ class DeviceProber extends Thread {
       // Send a message to the broadcast address and see who responds
       boolean ret = false;
       byte[] buf = new byte[256];
+      String dString = new String("Who Are You");
+      buf = dString.getBytes();
 
       try{
-        InetAddress address = InetAddress.getByName("192.168.0.255");
+        List<NetworkInterface> interfaces = NetworkDevice.viableInterfaces();
+        byte[] finalBuf = buf;
+        interfaces.forEach(ni -> {
+
+          InetAddress broadcast = NetworkDevice.getBroadcast(ni);
+
+
+          if (broadcast != null) {
+            try {
+
+              DatagramPacket packet;
+              packet = new DatagramPacket(finalBuf, finalBuf.length,
+                      broadcast, _port);
+
+              WriteDisplayText("Wait for Device Response on port " + _port);
+              socket.send(packet);
+
+            } catch (Exception ex) {
+
+            }
+
+          }
+
+        });
+
+        /*
+        InetAddress address = InetAddress.getByName("localhost");
         String dString = new String("Who Are You");
         buf = dString.getBytes();
 
@@ -55,8 +84,8 @@ class DeviceProber extends Thread {
 
         WriteDisplayText("Wait for Device Response on port " + _port);
         socket.send(packet);
-
-      } catch (IOException e) {
+*/
+      } catch (Exception e) {
         e.printStackTrace();
       }
       return ret;

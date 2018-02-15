@@ -42,7 +42,7 @@ CPPFLAGS += -I ../../../mididriver/hal_rtems
 CPPFLAGS += $(DEFINES)
 CPPFLAGS += -I/System/Library/Frameworks/JavaVM.framework/Headers
 
-FRAMEWORKS += -framework CoreMidi -framework CoreServices 
+FRAMEWORKS += -framework CoreMidi -framework CoreServices -framework AudioToolbox
 J_FRAMEWORKS = -framework JavaVM
 
 LD_LIBS   +=  ../engine/sm_engine.a  

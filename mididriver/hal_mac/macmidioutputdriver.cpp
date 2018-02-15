@@ -16,10 +16,11 @@
 //## begin module%3D6AB5580013.includes preserve=yes
 #include <stddef.h>
 #include <CoreMIDI/MIDIServices.h>
+#include <AudioUnit/AudioUnit.h>
+#include <AudioToolbox/AudioToolbox.h> //for AUGraph
+#include <CoreServices/CoreServices.h> //for file stuff
 #include "iodata.h"
 #include "midiflags.h"
-//#include "qtime/QuickTimeComponents.h"
-//#include "qtime/QuickTimeMusic.h"
 //## end module%3D6AB5580013.includes
 
 #include "midioutputdriver.h"
@@ -31,6 +32,16 @@
 //## end module%3D6AB5580013.declarations
 
 //## begin module%3D6AB5580013.additionalDeclarations preserve=yes
+
+enum {
+    kMidiMessage_ControlChange      = 0xB,
+    kMidiMessage_ProgramChange      = 0xC,
+    kMidiMessage_BankMSBControl     = 0,
+    kMidiMessage_BankLSBControl     = 32,
+    kMidiMessage_NoteOn             = 0x9
+};
+
+UInt8 midiChannelInUse = 0; //we're using midi channel 1...
 
 void SetSimDigitalOutput (unsigned channel, bool value);
 void SetSimAnalogueOutput (unsigned channel, unsigned value);
@@ -89,19 +100,24 @@ class MacMidiOutputDriver : public MidiOutputDriver  //## Inherits: <unnamed>%3D
       //	transmits digital CV outputs
       void TransmitDigital (unsigned char data_val, int output_num);
 
-      //## Operation: TransmitQuicktimeMidiByte%1120506345
+      //## Operation: TransmitSoftSynthMidiByte%1120506345
       //	Transmits Midi Byte to an output
-      void TransmitQuicktimeMidiByte (unsigned char data, 	// The Midi byte to transmit
+      void TransmitSoftSynthMidiByte (unsigned char data, 	// The Midi byte to transmit
 	    int output_num = 0	// The Midi Output to go to
      );
-
+      
     // Additional Public Declarations
       //## begin MacMidiOutputDriver%3D6AB8F6030E.public preserve=yes
+      // we will overload
+      void TransmitMidiData (const MidiData& midi_data, int output_num = 0	// The Midi Output to go to
+      );
       //## end MacMidiOutputDriver%3D6AB8F6030E.public
 
   protected:
     // Additional Protected Declarations
       //## begin MacMidiOutputDriver%3D6AB8F6030E.protected preserve=yes
+      
+      void TransmitSoftSynthMidiMesssage(const MidiData& midi_data);
       //## end MacMidiOutputDriver%3D6AB8F6030E.protected
 
   private:
@@ -110,18 +126,18 @@ class MacMidiOutputDriver : public MidiOutputDriver  //## Inherits: <unnamed>%3D
       //## Operation: TransmitSysex%1030414466
       bool TransmitSysex ();
 
-      //## Operation: OpenQuicktime%1120506346
-      bool OpenQuicktime ();
+      //## Operation: OpenSoftSynth%1120506346
+      bool OpenSoftSynth ();
 
-      //## Operation: CloseQuicktime%1120506347
-      bool CloseQuicktime ();
+      //## Operation: CloseSoftSynth%1120506347
+      bool CloseSoftSynth ();
 
     // Data Members for Class Attributes
 
-      //## Attribute: _useQtime%42C994980399
-      //## begin MacMidiOutputDriver::_useQtime%42C994980399.attr preserve=no  private: bool {UA} false
-      bool _useQtime;
-      //## end MacMidiOutputDriver::_useQtime%42C994980399.attr
+      //## Attribute: _useSoftSynth%42C994980399
+      //## begin MacMidiOutputDriver::_useSoftSynth%42C994980399.attr preserve=no  private: bool {UA} false
+      bool _useSoftSynth;
+      //## end MacMidiOutputDriver::_useSoftSynth%42C994980399.attr
 
       //## Attribute: _num_bytes%42C99C0A007D
       //	The number of bytes transmitted in this Midi Message
@@ -151,6 +167,11 @@ class MacMidiOutputDriver : public MidiOutputDriver  //## Inherits: <unnamed>%3D
   MIDIPortRef _OutPort;
   MIDIClientRef _client;
   MIDIEndpointRef _Dest;
+  
+  AUGraph _graph;
+  AudioUnit _synthUnit;
+  
+     AUNode synthNode, limiterNode, outNode;
       //## end MacMidiOutputDriver%3D6AB8F6030E.private
   private: //## implementation
     // Additional Implementation Declarations
@@ -213,29 +234,17 @@ MidiOutputDriver* MidiOutputDriver::create (int queue_size)
   //## end MidiOutputDriver::create%1012864640.body
 }
 
+// we are just going to overload this
 void MidiOutputDriver::TransmitMidiData (const MidiData& midi_data, int output_num)
 {
-  //## begin MidiOutputDriver::TransmitMidiData%1013488868.body preserve=yes
-  //## end MidiOutputDriver::TransmitMidiData%1013488868.body
+    printf ("MidiOutputDriver::TransmitMidiData\r\n");
+} 
 
-  int tx_bytes =  MidiUtilities::num_bytes((char) midi_data.status);
-    
-  TransmitMidiByte (midi_data.status,output_num);
-    
-  if (tx_bytes > 1)
-    {
-      TransmitMidiByte (midi_data.data1, output_num);
-    }
-    
-  if (tx_bytes > 2)
-    {
-      TransmitMidiByte (midi_data.data2, output_num);
-     }
-}
 
 void MidiOutputDriver::TransmitMidiMessageByte (unsigned char data, int output_num, unsigned device)
 {
   //## begin MidiOutputDriver::TransmitMidiMessageByte%1018308378.body preserve=yes
+    printf ("MidiOutputDriver::TransmitMidiMessageByte\r\n");
   MidiOutputDriver* p_device = _devices[device];
 
   if (p_device)
@@ -268,17 +277,25 @@ void MidiOutputDriver::TransmitDigitalVoltage (unsigned char data_val, int outpu
 void MidiOutputDriver::TransmitMidiDataMessage (const MidiData& midi_data, int output_num, unsigned device)
 {
   //## begin MidiOutputDriver::TransmitMidiDataMessage%1018308381.body preserve=yes
+    printf ("MidiOutputDriver::TransmitMidiDataMessage\r\n");
   device = output_num;
 
   MidiOutputDriver* p_device = _devices[device];
 
   if (p_device)
   {
-  	p_device->TransmitMidiData(midi_data, output_num);
+
+    p_device->TransmitMidiData(midi_data, output_num);
+
+  }
+  else
+  {
+      printf("No pDevice\r\n");
   }
 
   //## end MidiOutputDriver::TransmitMidiDataMessage%1018308381.body
 }
+
 
 void MidiOutputDriver::TransmitIoData (IOData io_data, int output_num, unsigned device)
 {
@@ -307,7 +324,7 @@ bool MidiOutputDriver::GetDeviceName (unsigned index, char* ret_buf, unsigned bu
 		{
 			MIDIEndpointRef dev = MIDIGetDestination(index);
 			
-			if (dev != NULL) {
+			if (dev != 0) {
 				char name[64];
 				CFStringRef pname;
 				MIDIObjectGetStringProperty(dev, kMIDIPropertyName, &pname);
@@ -338,10 +355,10 @@ bool MidiOutputDriver::GetDeviceName (unsigned index, char* ret_buf, unsigned bu
 
 MacMidiOutputDriver::MacMidiOutputDriver (int queue_size)
   //## begin MacMidiOutputDriver::MacMidiOutputDriver%1030404440.hasinit preserve=no
-      : _useQtime(false), _num_bytes(0), _running_status(0), _in_sysex(false)
+      : _useSoftSynth(false), _num_bytes(0), _running_status(0), _in_sysex(false)
   //## end MacMidiOutputDriver::MacMidiOutputDriver%1030404440.hasinit
   //## begin MacMidiOutputDriver::MacMidiOutputDriver%1030404440.initialization preserve=yes
-  ,MidiOutputDriver (queue_size), _OutPort(NULL), _client(NULL), _Dest(NULL)
+  ,MidiOutputDriver (queue_size), _OutPort(0), _client(0), _Dest(0), _graph(NULL)
   //## end MacMidiOutputDriver::MacMidiOutputDriver%1030404440.initialization
 {
   //## begin MacMidiOutputDriver::MacMidiOutputDriver%1030404440.body preserve=yes
@@ -363,35 +380,37 @@ bool MacMidiOutputDriver::open (int device_num, int device_id)
   //## begin MacMidiOutputDriver::open%1030414461.body preserve=yes
   bool ret = false;
 
-  if (!device_num) // we will use quicktime
-		{
-			ret = OpenQuicktime();
-		}
+  if (!device_num) // we will use SOFTSYNTH
+    {
+        ret = OpenSoftSynth();
+        _useSoftSynth = true;
+        _devices[device_num] = this;
+    }
 
-	else
-		{
-			device_num -= 1; // convert to Core MIDI 
+    else
+    {
+        device_num -= 1; // convert to Core MIDI 
 
-			MIDIClientCreate(CFSTR("MIDI Out"), NULL, NULL, &_client);
-			MIDIOutputPortCreate(_client, CFSTR("Output port"), &_OutPort);
-			if (device_num <= MIDIGetNumberOfDestinations())
-				{
-					_Dest = MIDIGetDestination(device_num);
-					ret = true;
-				}
+        MIDIClientCreate(CFSTR("MIDI Out"), NULL, NULL, &_client);
+        MIDIOutputPortCreate(_client, CFSTR("Output port"), &_OutPort);
+        if (device_num <= MIDIGetNumberOfDestinations())
+        {
+                _Dest = MIDIGetDestination(device_num);
+                ret = true;
+        }
 			
-			if (ret)
-				{
-					if (device_id == -1 || device_id >= _max_devices)
-						{
-							_devices[device_num] = this;
-						}
-					else
-						{
-							_devices[device_id] = this;
-						}
-				}
-		}
+        if (ret)
+        {
+            if (device_id == -1 || device_id >= _max_devices)
+            {
+                _devices[device_num] = this;
+            }
+            else
+            {
+                _devices[device_id] = this;
+            }
+        }
+    }
   return ret;
   //## end MacMidiOutputDriver::open%1030414461.body
 }
@@ -399,21 +418,22 @@ bool MacMidiOutputDriver::open (int device_num, int device_id)
 bool MacMidiOutputDriver::close ()
 {
   //## begin MacMidiOutputDriver::close%1030414462.body preserve=yes
-	if (_useQtime)
-		{
-			return CloseQuicktime();
-		}
-
+    bool ret = true;
+    if (_useSoftSynth)
+    {
+        ret = CloseSoftSynth();
+    }
+    return ret;
   //## end MacMidiOutputDriver::close%1030414462.body
 }
 
 void MacMidiOutputDriver::TransmitMidiByte (unsigned char data, int output_num)
 {
   //## begin MacMidiOutputDriver::TransmitMidiByte%1030414463.body preserve=yes
-
-	if (_useQtime)
+    printf("TransmitMidiByte 0x%1x\r\n", data);
+	if (_useSoftSynth)
 		{
-			TransmitQuicktimeMidiByte(data);
+			TransmitSoftSynthMidiByte(data);
 		}
 	else
 		{
@@ -442,15 +462,16 @@ void MacMidiOutputDriver::TransmitDigital (unsigned char data_val, int output_nu
 bool MacMidiOutputDriver::TransmitSysex ()
 {
   //## begin MacMidiOutputDriver::TransmitSysex%1030414466.body preserve=yes
+    return false;
   //## end MacMidiOutputDriver::TransmitSysex%1030414466.body
 }
 
-void MacMidiOutputDriver::TransmitQuicktimeMidiByte (unsigned char data, int output_num)
+void MacMidiOutputDriver::TransmitSoftSynthMidiByte (unsigned char data, int output_num)
 {
-  //## begin MacMidiOutputDriver::TransmitQuicktimeMidiByte%1120506345.body preserve=yes
-  /*
+  //## begin MacMidiOutputDriver::TransmitSoftSynthMidiByte%1120506345.body preserve=yes
+  
   IOData iodata = data;
-	EnqueData(iodata);
+  EnqueData(iodata);
 
   // test for status
   if (data & 0x80)
@@ -488,6 +509,7 @@ void MacMidiOutputDriver::TransmitQuicktimeMidiByte (unsigned char data, int out
     {
       if (DequeData(&iodata))
       {
+          /*
         // write the status byte
         int tx_bytes =  MidiUtilities::num_bytes((char) (iodata & 0xff));
         DWORD short_msg = iodata & 0xff;
@@ -511,32 +533,118 @@ void MacMidiOutputDriver::TransmitQuicktimeMidiByte (unsigned char data, int out
         //  {
         //  MessageBox (0, "Unable to Tx byte", "MidiOut",  MB_OK);
         //  }
+           * */
       } //dequedata
     } // end !sysex
   }
-  */
-  //## end MacMidiOutputDriver::TransmitQuicktimeMidiByte%1120506345.body
+  
+  //## end MacMidiOutputDriver::TransmitSoftSynthMidiByte%1120506345.body
 }
 
-bool MacMidiOutputDriver::OpenQuicktime ()
+bool MacMidiOutputDriver::OpenSoftSynth ()
 {
-  //## begin MacMidiOutputDriver::OpenQuicktime%1120506346.body preserve=yes
-	printf ("Open Quicktime\r\n");
-	//_qtNoteAllocator = OpenDefaultComponent(kNoteAllocatorComponentType, 0);
-	//return _qtNoteAllocator != NULL;
-	return false;
-  //## end MacMidiOutputDriver::OpenQuicktime%1120506346.body
+  //## begin MacMidiOutputDriver::OpenSoftSynth%1120506346.body preserve=yes
+    printf ("Open SOFT SYNTH\r\n");
+    OSStatus result;
+    //create the nodes of the graph
+ 
+    
+    AudioComponentDescription cd;
+    cd.componentManufacturer = kAudioUnitManufacturer_Apple;
+    cd.componentFlags = 0;
+    cd.componentFlagsMask = 0;
+ 
+    require_noerr (result = NewAUGraph (&_graph), home);
+ 
+    cd.componentType = kAudioUnitType_MusicDevice;
+    cd.componentSubType = kAudioUnitSubType_DLSSynth;
+ 
+    require_noerr (result = AUGraphAddNode (_graph, &cd, &synthNode), home);
+ 
+    cd.componentType = kAudioUnitType_Effect;
+    cd.componentSubType = kAudioUnitSubType_PeakLimiter;  
+ 
+    require_noerr (result = AUGraphAddNode (_graph, &cd, &limiterNode), home);
+ 
+    cd.componentType = kAudioUnitType_Output;
+    cd.componentSubType = kAudioUnitSubType_DefaultOutput;  
+    require_noerr (result = AUGraphAddNode (_graph, &cd, &outNode), home);
+    
+    require_noerr (result = AUGraphOpen (_graph), home);
+    
+    require_noerr (result = AUGraphConnectNodeInput (_graph, synthNode, 0, limiterNode, 0), home);
+    require_noerr (result = AUGraphConnectNodeInput (_graph, limiterNode, 0, outNode, 0), home);
+    
+    // ok we're good to go - get the Synth Unit...
+    require_noerr (result = AUGraphNodeInfo(_graph, synthNode, 0, &_synthUnit), home);
+ 
+       // ok we're set up to go - initialize and start the graph
+    require_noerr (result = AUGraphInitialize (_graph), home);
+#if 0
+        //set our bank
+    require_noerr (result = MusicDeviceMIDIEvent(_synthUnit, 
+                                kMidiMessage_ControlChange << 4 | midiChannelInUse, 
+                                kMidiMessage_BankMSBControl, 0,
+                                0/*sample offset*/), home);
+ 
+    require_noerr (result = MusicDeviceMIDIEvent(_synthUnit, 
+                                kMidiMessage_ProgramChange << 4 | midiChannelInUse, 
+                                0/*prog change num*/, 0,
+                                0/*sample offset*/), home);
+#endif
+    CAShow (_graph); // prints out the graph so we can see what it looks like...
+    
+    require_noerr (result = AUGraphStart (_graph), home);
+    
+home:
+    printf ("Open SOFT SYNTH Result val %d\r\n", result);
+    return !(result);
+
+  //## end MacMidiOutputDriver::OpenSoftSynth%1120506346.body
 }
 
-bool MacMidiOutputDriver::CloseQuicktime ()
+bool MacMidiOutputDriver::CloseSoftSynth ()
 {
-  //## begin MacMidiOutputDriver::CloseQuicktime%1120506347.body preserve=yes
-  /*
-	if (_qtNoteAllocator != NULL)
-		CloseComponent(_qtNoteAllocator);
-  */
-  return false;
-  //## end MacMidiOutputDriver::CloseQuicktime%1120506347.body
+  //## begin MacMidiOutputDriver::CloseSoftSynth%1120506347.body preserve=yes
+    bool ret = false;
+    if (_graph) {
+        AUGraphStop (_graph); // stop playback - AUGraphDispose will do that for us but just showing you what to do
+        DisposeAUGraph (_graph);
+        ret = true;
+    }
+  return ret;
+  //## end MacMidiOutputDriver::CloseSoftSynth%1120506347.body
+}
+
+void MacMidiOutputDriver::TransmitSoftSynthMidiMesssage(const MidiData& midi_data)
+{
+    printf("Midi Message 0x%1x %d %d \r\n", midi_data.status, midi_data.data1, midi_data.data2);
+    MusicDeviceMIDIEvent(_synthUnit, midi_data.status, midi_data.data1, midi_data.data2, 0);
+}
+
+void MacMidiOutputDriver::TransmitMidiData (const MidiData& midi_data, int output_num)
+{
+    printf("MacMidiOutputDriver::TransmitMidiData\r\n");
+    if (_useSoftSynth)
+    {
+        TransmitSoftSynthMidiMesssage(midi_data);
+    }
+    else
+    {
+        int tx_bytes =  MidiUtilities::num_bytes((char) midi_data.status);
+
+        TransmitMidiByte (midi_data.status,output_num);
+
+        if (tx_bytes > 1)
+        {
+            TransmitMidiByte (midi_data.data1, output_num);
+         }
+        
+        if (tx_bytes > 2)
+        {
+            TransmitMidiByte (midi_data.data2, output_num);
+        }
+    }
 }
 
 // Additional Declarations

@@ -7,6 +7,7 @@
 #include "midiinputdriver.h"
 #include "midiinputsync.h"
 #include <CoreFoundation/CFRunLoop.h>
+#include <unistd.h> // used for usleep...
 
 void SetSimDigitalOutput (unsigned channel, bool value){}
 void SetSimAnalogueOutput (unsigned channel, unsigned value){}
@@ -60,8 +61,24 @@ int main()
       std::cout <<"Unable to open Midi Out"<<std::endl;
     }
 
-  std::cout<<"Press <ctrl> c to exit"<<std::endl;  
-  CFRunLoopRun();  
+  //std::cout<<"Press <ctrl> c to exit"<<std::endl;  
+  //CFRunLoopRun();  
 	
+  MidiData midi;
+  
+  midi.status = 0x90; // Note on
+  midi.data1 = 60;
+  midi.data2 = 127;
+  for (int i = 0; i < 10; i++)
+  {
+      midi.data1 = 60 + i;
+      midi.data2 = 127;
+      printf ("Play Note %d\r\n", i);
+      pOutputDriver->TransmitMidiData(midi, 0);
+      
+      usleep (1 * 1000 * 1000);
+      midi.data2 = 0;
+      pOutputDriver->TransmitMidiData(midi, 0);
+  }
   return 0;
 }

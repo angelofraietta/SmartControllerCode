@@ -610,7 +610,7 @@ unsigned PatchAnswer::MakeNew (const BYTE* question, BYTE* answer, unsigned answ
 unsigned PatchAnswer::SetFileName (const BYTE* question, BYTE* answer, unsigned answer_size)
 {
   //## begin PatchAnswer::SetFileName%983336489.body preserve=yes
-  printf ("PatchAnswer::SetFileName\r\n");
+  //printf ("PatchAnswer::SetFileName\r\n");
 	const BYTE* cursor = question;
 	Patch* pPatch = GetPatch (&cursor);
 	const char* filename = (const char*)cursor;
@@ -699,7 +699,7 @@ unsigned PatchAnswer::GetFileName (const BYTE* question, BYTE* answer, unsigned 
 	}
         else
         {
-            printf ("PatchAnswer::GetFileName No Patch \r\n");
+            //printf ("PatchAnswer::GetFileName No Patch \r\n");
         }
 	return ret_bytes;
 
@@ -886,7 +886,7 @@ Patch* PatchAnswer::GetPatch (const BYTE** buf)
 	P_PATCH pId (&cursor);
 	*buf = cursor;
         
-        printf ("PatchAnswer::GetPatch %u \r\n", pId.Key());
+        //printf ("PatchAnswer::GetPatch %u \r\n", pId.Key());
 
 	return (Patch*) IdentityAnswer::GetIdentity (pId);
 
@@ -1043,7 +1043,7 @@ bool PatchDeleter::Send (Patch* receiver)
 
   if (hal_include::Scheduler::LockEngine ())
   {
-    printf ("PatchAnswer::Destroy send %lu\r\n", (unsigned long)receiver);
+    //printf ("PatchAnswer::Destroy send %lu\r\n", (unsigned long)receiver);
     
     ret = GoOneShot ((unsigned long)receiver);
     hal_include::Scheduler::UnlockEngine ();
@@ -1060,7 +1060,7 @@ bool PatchDeleter::Send (Patch* receiver)
 //## Operation: OutputFunction%983336475; C++
 void PatchDeleter::OutputFunction (unsigned long receiver)
 {
-  printf("PatchDeleter::OutputFunction %lu\r\n", receiver);
+  //printf("PatchDeleter::OutputFunction %lu\r\n", receiver);
   Patch* pPatch = (Patch*)receiver;
 	if (pPatch)
 		{

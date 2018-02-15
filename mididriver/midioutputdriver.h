@@ -69,7 +69,7 @@ class MidiOutputDriver : public MidiDriver  //## Inherits: <unnamed>%3C5F57A0003
       static MidiOutputDriver* create (int queue_size);
 
       //## Operation: TransmitMidiData%1013488868
-      void TransmitMidiData (const MidiData& midi_data, int output_num = 0	// The Midi Output to go to
+      virtual void TransmitMidiData (const MidiData& midi_data, int output_num = 0	// The Midi Output to go to
       );
 
       //## Operation: SetTxReady%1017707552

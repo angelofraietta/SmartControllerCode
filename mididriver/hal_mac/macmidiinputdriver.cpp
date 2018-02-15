@@ -217,7 +217,7 @@ bool MidiInputDriver::GetDeviceName (unsigned index, char* ret_buf, unsigned buf
 	bool ret = false;
 	MIDIEndpointRef dev = MIDIGetSource(index);
 
-	if (dev != NULL) {
+	if (dev != 0) {
 		char name[64];
 		CFStringRef pname;
 		MIDIObjectGetStringProperty(dev, kMIDIPropertyName, &pname);
@@ -250,7 +250,7 @@ MacMidiInputDriver::MacMidiInputDriver (int queue_size, MidiInputSync* driver)
   //## begin MacMidiInputDriver::MacMidiInputDriver%1030404441.hasinit preserve=no
   //## end MacMidiInputDriver::MacMidiInputDriver%1030404441.hasinit
   //## begin MacMidiInputDriver::MacMidiInputDriver%1030404441.initialization preserve=yes
-  :MidiInputDriver (queue_size, driver), client(NULL), inPort(NULL)
+  :MidiInputDriver (queue_size, driver), client(0), inPort(0)
   //## end MacMidiInputDriver::MacMidiInputDriver%1030404441.initialization
 {
   //## begin MacMidiInputDriver::MacMidiInputDriver%1030404441.body preserve=yes

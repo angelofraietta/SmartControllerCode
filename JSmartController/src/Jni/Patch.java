@@ -115,7 +115,7 @@ public class Patch {
     public static native void SwapInlets(int pQuestion, int dwpPatch, int Inlet1, int Inlet2);
     
     /**
-       @roseuid 3E669DD101CA
+       @roseuid 3E669DD101CA    dd
      */
     public static native int GetInlet(int pQuestion, int dwpPatch, int SocketNum);
     

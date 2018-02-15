@@ -21,7 +21,7 @@ CPP_FLAGS += -I ../../estl
 CPP_FLAGS += -I ../ 
 CPP_FLAGS += -I ../../threads/source
 CPP_FLAGS += $(DEFINES)
-FRAMEWORKS += -framework CoreMidi -framework CoreServices
+FRAMEWORKS += -framework CoreMidi -framework CoreServices -framework AudioToolbox
 
 all: $(LIB) $(CC_O_FILES) $(TEST_EXE)
 
