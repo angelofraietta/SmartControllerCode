@@ -554,47 +554,47 @@ bool MacMidiOutputDriver::OpenSoftSynth ()
     cd.componentFlags = 0;
     cd.componentFlagsMask = 0;
  
-    require_noerr (result = NewAUGraph (&_graph), home);
+    __Require_noErr (result = NewAUGraph (&_graph), home);
  
     cd.componentType = kAudioUnitType_MusicDevice;
     cd.componentSubType = kAudioUnitSubType_DLSSynth;
  
-    require_noerr (result = AUGraphAddNode (_graph, &cd, &synthNode), home);
+    __Require_noErr (result = AUGraphAddNode (_graph, &cd, &synthNode), home);
  
     cd.componentType = kAudioUnitType_Effect;
     cd.componentSubType = kAudioUnitSubType_PeakLimiter;  
  
-    require_noerr (result = AUGraphAddNode (_graph, &cd, &limiterNode), home);
+    __Require_noErr (result = AUGraphAddNode (_graph, &cd, &limiterNode), home);
  
     cd.componentType = kAudioUnitType_Output;
     cd.componentSubType = kAudioUnitSubType_DefaultOutput;  
-    require_noerr (result = AUGraphAddNode (_graph, &cd, &outNode), home);
+    __Require_noErr (result = AUGraphAddNode (_graph, &cd, &outNode), home);
     
-    require_noerr (result = AUGraphOpen (_graph), home);
+    __Require_noErr (result = AUGraphOpen (_graph), home);
     
-    require_noerr (result = AUGraphConnectNodeInput (_graph, synthNode, 0, limiterNode, 0), home);
-    require_noerr (result = AUGraphConnectNodeInput (_graph, limiterNode, 0, outNode, 0), home);
+    __Require_noErr (result = AUGraphConnectNodeInput (_graph, synthNode, 0, limiterNode, 0), home);
+    __Require_noErr (result = AUGraphConnectNodeInput (_graph, limiterNode, 0, outNode, 0), home);
     
     // ok we're good to go - get the Synth Unit...
-    require_noerr (result = AUGraphNodeInfo(_graph, synthNode, 0, &_synthUnit), home);
+    __Require_noErr (result = AUGraphNodeInfo(_graph, synthNode, 0, &_synthUnit), home);
  
        // ok we're set up to go - initialize and start the graph
-    require_noerr (result = AUGraphInitialize (_graph), home);
+    __Require_noErr (result = AUGraphInitialize (_graph), home);
 #if 0
         //set our bank
-    require_noerr (result = MusicDeviceMIDIEvent(_synthUnit, 
+    __Require_noErr (result = MusicDeviceMIDIEvent(_synthUnit,
                                 kMidiMessage_ControlChange << 4 | midiChannelInUse, 
                                 kMidiMessage_BankMSBControl, 0,
                                 0/*sample offset*/), home);
  
-    require_noerr (result = MusicDeviceMIDIEvent(_synthUnit, 
+    __Require_noErr (result = MusicDeviceMIDIEvent(_synthUnit,
                                 kMidiMessage_ProgramChange << 4 | midiChannelInUse, 
                                 0/*prog change num*/, 0,
                                 0/*sample offset*/), home);
 #endif
     CAShow (_graph); // prints out the graph so we can see what it looks like...
     
-    require_noerr (result = AUGraphStart (_graph), home);
+    __Require_noErr (result = AUGraphStart (_graph), home);
     
 home:
     printf ("Open SOFT SYNTH Result val %d\r\n", result);
