@@ -237,14 +237,14 @@ MidiOutputDriver* MidiOutputDriver::create (int queue_size)
 // we are just going to overload this
 void MidiOutputDriver::TransmitMidiData (const MidiData& midi_data, int output_num)
 {
-    printf ("MidiOutputDriver::TransmitMidiData\r\n");
+    printf ("MidiOutputDriver::TransmitMidiData base\r\n");
 } 
 
 
 void MidiOutputDriver::TransmitMidiMessageByte (unsigned char data, int output_num, unsigned device)
 {
   //## begin MidiOutputDriver::TransmitMidiMessageByte%1018308378.body preserve=yes
-    printf ("MidiOutputDriver::TransmitMidiMessageByte\r\n");
+    //printf ("MidiOutputDriver::TransmitMidiMessageByte %d %u \n", output_num, device);
   MidiOutputDriver* p_device = _devices[device];
 
   if (p_device)
@@ -322,9 +322,11 @@ bool MidiOutputDriver::GetDeviceName (unsigned index, char* ret_buf, unsigned bu
 		}
 	else
 		{
-			MIDIEndpointRef dev = MIDIGetDestination(index);
+                       
+			MIDIEndpointRef dev = MIDIGetDestination(index - 1);
 			
 			if (dev != 0) {
+                            printf ("Read Device Name\n");
 				char name[64];
 				CFStringRef pname;
 				MIDIObjectGetStringProperty(dev, kMIDIPropertyName, &pname);
@@ -389,26 +391,22 @@ bool MacMidiOutputDriver::open (int device_num, int device_id)
 
     else
     {
-        device_num -= 1; // convert to Core MIDI 
-
+   
+        _useSoftSynth = false;
+        printf ("Open Core MIDI \n");
+    
         MIDIClientCreate(CFSTR("MIDI Out"), NULL, NULL, &_client);
         MIDIOutputPortCreate(_client, CFSTR("Output port"), &_OutPort);
         if (device_num <= MIDIGetNumberOfDestinations())
         {
-                _Dest = MIDIGetDestination(device_num);
+                _Dest = MIDIGetDestination(device_num-1);
                 ret = true;
         }
 			
         if (ret)
         {
-            if (device_id == -1 || device_id >= _max_devices)
-            {
-                _devices[device_num] = this;
-            }
-            else
-            {
-                _devices[device_id] = this;
-            }
+            _devices[device_num] = this;
+            
         }
     }
   return ret;
@@ -430,7 +428,7 @@ bool MacMidiOutputDriver::close ()
 void MacMidiOutputDriver::TransmitMidiByte (unsigned char data, int output_num)
 {
   //## begin MacMidiOutputDriver::TransmitMidiByte%1030414463.body preserve=yes
-    printf("TransmitMidiByte 0x%1x\r\n", data);
+    printf("TransmitMidiByte 0x%02x\r\n", data);
 	if (_useSoftSynth)
 		{
 			TransmitSoftSynthMidiByte(data);
@@ -624,9 +622,10 @@ void MacMidiOutputDriver::TransmitSoftSynthMidiMesssage(const MidiData& midi_dat
 
 void MacMidiOutputDriver::TransmitMidiData (const MidiData& midi_data, int output_num)
 {
-    printf("MacMidiOutputDriver::TransmitMidiData\r\n");
+    printf("MacMidiOutputDriver::TransmitMidiData Mod\r\n");
     if (_useSoftSynth)
     {
+        printf("MacMidiOutputDriver::TransmitSoftSynthMidiMesssage\r\n");
         TransmitSoftSynthMidiMesssage(midi_data);
     }
     else
