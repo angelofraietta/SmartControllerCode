@@ -10,8 +10,15 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/Users/angelofraietta/Documents/develop/SmartControllerCode/libOSC/test_OSC.c</file>
-            <file>file:/Users/angelofraietta/Documents/develop/SmartControllerCode/mididriver/hal_mac/macmidioutputdriver.cpp</file>
+            <file>file:/D:/develop/SmartControllerCode/controller/source/link_driver/hal_rtems/rtemscommport.cpp</file>
+            <file>file:/D:/develop/SmartControllerCode/controller/source/link_driver/Makefile.inc</file>
+            <file>file:/D:/develop/SmartControllerCode/controller/source/hal_linux/Makefile</file>
+            <file>file:/D:/develop/SmartControllerCode/controller/source/link_driver/hal_linux/rtemscommport.cpp</file>
+            <file>file:/D:/develop/SmartControllerCode/controller/source/hal_linux/bit_linux</file>
+            <file>file:/D:/develop/SmartControllerCode/controller/source/link_driver/hal_mac/maccommstream.cpp</file>
+            <file>file:/D:/develop/SmartControllerCode/controller/source/hal_mac/Makefile</file>
+            <file>file:/D:/develop/SmartControllerCode/controller/source/hal_linux/hal_linux.def</file>
+            <file>file:/D:/develop/SmartControllerCode/controller/source/link_driver/hal_linux/rtemscommport.h</file>
         </group>
     </open-files>
 </project-private>

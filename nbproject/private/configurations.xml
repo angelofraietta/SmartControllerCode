@@ -197,6 +197,11 @@
             <in>simulator.cpp</in>
             <in>simulatorinterface.h</in>
           </df>
+          <df name="hal_linux">
+            <in>scheduler.cpp</in>
+            <in>simulator.cpp</in>
+            <in>testsim.cpp</in>
+          </df>
           <df name="hal_mac">
             <in>macsimulator.cpp</in>
             <in>scheduler.cpp</in>
@@ -227,6 +232,8 @@
             <in>system.h</in>
           </df>
           <df name="hal_windows">
+            <df name="build">
+            </df>
             <in>midioutput.cpp</in>
             <in>scheduler.cpp</in>
             <in>test.cpp</in>
@@ -235,6 +242,11 @@
             <in>winsimulator.cpp</in>
           </df>
           <df name="link_driver">
+            <df name="hal_linux">
+              <in>linuxcommstream.cpp</in>
+              <in>rtemscommport.cpp</in>
+              <in>rtemscommport.h</in>
+            </df>
             <df name="hal_mac">
               <in>maccommport.cpp</in>
               <in>maccommport.h</in>
@@ -261,6 +273,7 @@
               <in>windowsmidiport.h</in>
             </df>
             <in>OSC-common.h</in>
+            <in>UDPPORT.cpp</in>
             <in>commstream.h</in>
             <in>controlfilter.h</in>
             <in>crc32.cpp</in>
@@ -292,14 +305,8 @@
       </df>
       <df name="JSmartController">
         <df name=".idea">
-          <df name="codeStyles">
-          </df>
         </df>
         <df name="build">
-          <df name="macSmartController">
-          </df>
-          <df name="macSmartController-working">
-          </df>
         </df>
         <df name="classes">
           <df name="Jni">
@@ -316,15 +323,9 @@
         <df name="out">
           <df name="production">
             <df name="JSmartController">
-              <df name="Jni">
-              </df>
               <df name="jsmartcontroller">
               </df>
               <df name="ViewForms">
-                <df name="Graphics">
-                  <df name="test">
-                  </df>
-                </df>
               </df>
             </df>
           </df>
@@ -333,6 +334,8 @@
           <df name="Jni">
           </df>
           <df name="jsmartcontroller">
+          </df>
+          <df name="tools">
           </df>
           <df name="ViewForms">
             <df name="Graphics">
@@ -405,6 +408,8 @@
       <df name="mididriver">
         <df name="design">
         </df>
+        <df name="hal_linux">
+        </df>
         <df name="hal_mac">
           <df name="qtime">
             <in>ComponentDispatchHelper.c</in>
@@ -438,6 +443,8 @@
           <in>testmid.cpp</in>
         </df>
         <df name="hal_rtems">
+          <df name="o-optimize">
+          </df>
           <in>filedriver.cpp</in>
           <in>midibsp.h</in>
           <in>rtemsmididriver.cpp</in>
@@ -489,6 +496,8 @@
       </df>
       <df name="threads">
         <df name="source">
+          <df name="hal_include">
+          </df>
           <df name="hal_mac">
             <in>activethreads.cpp</in>
             <in>macevent.cpp</in>

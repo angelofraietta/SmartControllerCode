@@ -191,6 +191,11 @@
             <in>simulator.cpp</in>
             <in>simulatorinterface.h</in>
           </df>
+          <df name="hal_linux">
+            <in>scheduler.cpp</in>
+            <in>simulator.cpp</in>
+            <in>testsim.cpp</in>
+          </df>
           <df name="hal_mac">
             <in>macsimulator.cpp</in>
             <in>scheduler.cpp</in>
@@ -227,6 +232,11 @@
             <in>winsimulator.cpp</in>
           </df>
           <df name="link_driver">
+            <df name="hal_linux">
+              <in>linuxcommstream.cpp</in>
+              <in>rtemscommport.cpp</in>
+              <in>rtemscommport.h</in>
+            </df>
             <df name="hal_mac">
               <in>maccommport.cpp</in>
               <in>maccommport.h</in>
@@ -1915,6 +1925,21 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="controller/source/hal_linux/scheduler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="4">
+      </item>
+      <item path="controller/source/hal_linux/simulator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="4">
+      </item>
+      <item path="controller/source/hal_linux/testsim.cpp"
+            ex="false"
+            tool="1"
+            flavor2="4">
+      </item>
       <item path="controller/source/hal_mac/macsimulator.cpp"
             ex="false"
             tool="1"
@@ -2126,6 +2151,21 @@
         </ccTool>
       </item>
       <item path="controller/source/link_driver/crc32.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_linux/linuxcommstream.cpp"
+            ex="false"
+            tool="1"
+            flavor2="4">
+      </item>
+      <item path="controller/source/link_driver/hal_linux/rtemscommport.cpp"
+            ex="false"
+            tool="1"
+            flavor2="4">
+      </item>
+      <item path="controller/source/link_driver/hal_linux/rtemscommport.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -4040,6 +4080,21 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="controller/source/hal_linux/scheduler.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_linux/simulator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/hal_linux/testsim.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="controller/source/hal_mac/macsimulator.cpp"
             ex="false"
             tool="1"
@@ -4196,6 +4251,21 @@
             flavor2="0">
       </item>
       <item path="controller/source/link_driver/crc32.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_linux/linuxcommstream.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_linux/rtemscommport.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="controller/source/link_driver/hal_linux/rtemscommport.h"
             ex="false"
             tool="3"
             flavor2="0">
