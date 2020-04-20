@@ -1,0 +1,2 @@
+#run the test in ./test directory
+java -classpath ../ ViewForms.Graphics.test.Application1

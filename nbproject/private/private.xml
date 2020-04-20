@@ -10,10 +10,8 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/controller/source/hal_mac/Makefile</file>
-            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/mididriver/hal_mac/testmid.cpp</file>
-            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/mididriver/hal_mac/Makefile</file>
-            <file>file:/Users/angelo/Documents/develop/SmartControllerCode/mididriver/hal_mac/macmidioutputdriver.cpp</file>
+            <file>file:/Users/angelofraietta/Documents/develop/SmartControllerCode/libOSC/test_OSC.c</file>
+            <file>file:/Users/angelofraietta/Documents/develop/SmartControllerCode/mididriver/hal_mac/macmidioutputdriver.cpp</file>
         </group>
     </open-files>
 </project-private>
