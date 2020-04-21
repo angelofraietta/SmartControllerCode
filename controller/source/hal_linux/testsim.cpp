@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <CoreFoundation/CFRunLoop.h>
 #include "stdafx.h"
 #include "../engineinterface/presentationquestion.h"
 #include "../engineinterface/patchquestion.h"
@@ -183,17 +182,17 @@ int main()
 {
     char buff [256];
     
-    printf ("Start Simulator");
+    printf ("Start Simulator\n");
 
 	SimulatorInitialise();
         InitialisePresentation();
 
 
-    probeFunction();
+    //probeFunction();
     
 	unsigned p_key = GetSelectedEngine();
         
-        PresentationQuestion* p = getPresentation(p_key);
+    PresentationQuestion* p = getPresentation(p_key);
         
 	P_PATCH p_val = PatchQuestion::MakeNew(p, "dummy.smp");
 

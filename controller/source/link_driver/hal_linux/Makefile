@@ -1,10 +1,11 @@
 
 .SUFFIXES : .cpp .o
 
-LIBNAME=sm_COMM.a
+LIBNAME=sm_comm.a
 LIB=$(LIBNAME)
 
-CC_PIECES = linuxcommstream rtemscommport
+CC_PIECES = linuxcommstream
+
 
 CC_FILES = $(CC_PIECES:%=%.cpp)
 CC_O_FILES = $(CC_PIECES:%=%.o)

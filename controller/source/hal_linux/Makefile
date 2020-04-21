@@ -12,7 +12,7 @@ TEST_EXE=smart.exe
 
 # C++ source names, if any, go here -- minus the .cc
 CC_PIECES=  scheduler \
- ../hal_include/simulator	
+ simulator
 
 CC_JPIECES =  ../engineinterface/PatchEditorInterface/PatchEditorInterface \
   ../engineinterface/PatchEditorInterface/BaseShellInterface \
@@ -37,10 +37,10 @@ CPPFLAGS += -I ../hal_include
 CPPFLAGS += -I ../link_driver
 CPPFLAGS += -I ../../../threads/source
 CPPFLAGS += -I ../../../mididriver
-CPPFLAGS += -I ../../../mididriver/hal_rtems
+CPPFLAGS += -I ../../../mididriver/hal_linux
 
 CPPFLAGS += $(DEFINES)
-CPPFLAGS += -I/System/Library/Frameworks/JavaVM.framework/Headers
+#CPPFLAGS += -I/System/Library/Frameworks/JavaVM.framework/Headers
 
 #FRAMEWORKS += -framework CoreMidi -framework CoreServices -framework AudioToolbox
 #J_FRAMEWORKS = -framework JavaVM
@@ -52,13 +52,14 @@ LD_LIBS   +=  ../link_driver/hal_linux/sm_comm.a
 LD_LIBS   +=  ../../../threads/source/hal_linux/sm_thread.a  
 LD_LIBS   +=  ../../../mididriver/hal_linux/sm_MIDI.a
 LD_LIBS   +=  ../../../libOSC/libosc.a
-LD_LIBS   +=  ../engineinterface/sm_question.a  
+LD_LIBS   +=  ../engineinterface/sm_question.a
+LD_LIBS += -lpthread
 #LD_LIBS   += -lstdc++ -v
 
-J_LIBS   =  ../engineinterface/PatchEditorInterface/patcheditorinterface.a
+#J_LIBS   =  ../engineinterface/PatchEditorInterface/patcheditorinterface.a
 
 
-all: $(CC_O_FILES) $(CJ_O_FILES) $(CC_SIM_O_FILES) $(JAVLIB) $(TEST_EXE)
+all: $(CC_O_FILES) $(CC_SIM_O_FILES) $(TEST_EXE)
 
 sim: $(TEST_EXE)
 	

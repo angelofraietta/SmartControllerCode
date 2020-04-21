@@ -4,49 +4,49 @@ echo $CURRENT_DIR
 # make the engine library
 cd ../engine
 echo Making engine in $PWD
-make INCMC=Makefile.mac $1
+make INCMC=Makefile.linux $1
 
 #make the engine interface library
 cd ../engineinterface
 echo Making engineinterface in $PWD
-make INCMC=Makefile.mac $1
+make INCMC=Makefile.linux $1
 
 #make PatchEditor
 cd PatchEditorInterface
-echo Making PatchEditorInterface in $PWD
-make $1
+#echo Making PatchEditorInterface in $PWD
+#make $1
 cd ../
 
 #make the link driver physical libraries
-cd ../link_driver/hal_mac
+cd ../link_driver/hal_linux
 echo Making link physical layer driver in $PWD
-make INCMC=Makefile.mac $1
+make INCMC=Makefile.linux $1
 
 #make the link layer libraries
 cd ../
 echo Making link logical layer in $PWD
-make INCMC=Makefile.mac $1
+make INCMC=Makefile.linux $1
 
 #return to original dir
 cd $CURRENT_DIR
 
-cd ../../../threads/source/hal_mac
+cd ../../../threads/source/hal_linux
 echo Making  active objects in $PWD
-make INCMC=Makefile.mac $1
+make INCMC=Makefile.linux $1
 
 cd $CURRENT_DIR
 
-cd ../../../mididriver/hal_mac
+cd ../../../mididriver/hal_linux
 echo Making  active objects in $PWD
 make $1
 
 cd $CURRENT_DIR
 cd ../../../libOSC
 echo Making  active objects in $PWD
-make INCMC=Makefile.mac $1
+make INCMC=Makefile.linux $1
 
 cd $CURRENT_DIR
 make all
-make install
- cp libsmartcontroljava.jnilib ../hal_rtems_pc386/o-optimize
+# make install
+# cp libsmartcontroljava.jnilib ../hal_rtems_pc386/o-optimize
 

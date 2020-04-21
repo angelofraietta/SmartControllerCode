@@ -24,6 +24,7 @@
 #include "udpport.h"
 //## begin module%4069C85102EE.additionalDeclarations preserve=yes
 #include <stdio.h>
+
 //#include <io.h>
 
 typedef struct
@@ -67,7 +68,7 @@ static int initudp(int chan)
     }
 		else
 			{
-				printf("Successful Bind to %u", chan);
+				printf("Successful Bind to %u\r\n", chan);
 			}
 	}
 
@@ -164,7 +165,7 @@ bool UDPPort::WriteBuffer (const unsigned char* lpBuf, unsigned long dwToWrite)
   if (_fd)
   {
     int bytes = sendto(_fd, (const char*) lpBuf, dwToWrite, 0 , (const sockaddr*)&_to, sizeof(_to));
-    ret = bytes > 0;
+    ret = bytes == dwToWrite;
   }
   return ret;
   //## end UDPPort::WriteBuffer%1080675291.body
@@ -176,7 +177,7 @@ unsigned long UDPPort::ReadBuffer (unsigned  char* lpBuf, unsigned long dwToRead
 {
   //## begin UDPPort::ReadBuffer%1080675292.body preserve=yes
 
-    int size_from = sizeof(_from);
+    socklen_t size_from = sizeof(_from);
     int n;
 	  if ((n = recvfrom(_fd, (char*)lpBuf, dwToRead, 0, (sockaddr*)&_from, &size_from)) >0)
 	  {
@@ -256,13 +257,14 @@ bool UDPPort::OpenPort (int port_number)
 			WSAStartup( wVersionRequested, &wsaData );
 		}
 #endif
-	
+
+
   Close();
   _fd = initudp(port_number);
 
   memset (&_from, 0, sizeof _from);
 	#ifndef WIN32
-  _to.sin_len         = sizeof (_to);
+  //_to.sin_len         = sizeof (_to);
   #endif
   _to.sin_family      = AF_INET;
   _to.sin_port        = htons ((short)port_number);
@@ -286,14 +288,14 @@ void UDPPort::flush ()
   static int flush_num = 0;
   sockaddr_in flush_to;
   sockaddr_in flush_from;
-  int size_from = sizeof(flush_from);
+  socklen_t size_from = sizeof(flush_from);
 
   char flush_end_buf [64];
   char ret_buf [1024];
 
   memset (&flush_to, 0, sizeof flush_to);
 	#ifndef WIN32
-  flush_to.sin_len         = sizeof (flush_to);
+  //flush_to.sin_len         = sizeof (flush_to);
   #endif
   flush_to.sin_family      = AF_INET;
   flush_to.sin_port        = _to.sin_port;
@@ -302,6 +304,8 @@ void UDPPort::flush ()
 
   printf ("UDP Flush Start\r\n");
 
+  // send two messages - one for us, and one for blocked thread
+  sendto(_fd, _flush_message, strlen(_flush_message), 0 , (const sockaddr*)&flush_to, sizeof(flush_to));
   sendto(_fd, _flush_message, strlen(_flush_message), 0 , (const sockaddr*)&flush_to, sizeof(flush_to));
 
 

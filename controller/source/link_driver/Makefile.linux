@@ -1,0 +1,32 @@
+.SUFFIXES : .cpp .o
+
+LINK_FILES=../../../threads/source/hal_linux/sm_thread.a
+INC_PATH=../../../threads/source
+
+CC_FILES = $(CC_PIECES:%=%.cpp)
+CC_O_FILES = $(CC_PIECES:%=%.o)
+
+CPP_FLAGS = $(COMMON_CPPFLAGS)
+CPP_FLAGS += $(COMMON_DEFINES)
+
+LIB=$(LIBNAME)
+
+
+all: $(LIB) $(CC_O_FILES) 
+
+lib :$(LIB)
+
+.cpp.o :
+	cc $(CPP_FLAGS) -c $<
+
+
+
+$(LIB) : $(CC_O_FILES)
+	ar -r -s  $@ $?
+
+$(TESTNAME) : $(LIB) udpecho.cpp
+	g++ -I$(INC_PATH) udpecho.cpp -o $(TESTNAME) $(LIB) $(LINK_FILES)
+
+clean:
+	-rm *.a
+	-rm *.o

@@ -44,15 +44,6 @@ CommStream* CommStream::create (const char* name)
   //## begin CommStream::create%988756712.body preserve=yes
 	CommStream* ret = NULL;
 
-	RtemsCommPort* pPort = new RtemsCommPort;
-	if (pPort->Open(name))
-		{
-			ret = pPort;
-		}
-	else
-		{
-			delete pPort;
-		}
 	return ret;
 
   //## end CommStream::create%988756712.body
