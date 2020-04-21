@@ -1,0 +1,27 @@
+.SUFFIXES : .cpp .o
+
+
+CC_FILES = $(CC_PIECES:%=%.cpp)
+CC_O_FILES = $(CC_PIECES:%=%.o)
+
+CPP_FLAGS = $(COMMON_CPPFLAGS)
+CPP_FLAGS += $(COMMON_DEFINES)
+
+LIB=$(LIBNAME)
+
+
+all: $(LIB) $(CC_O_FILES)
+
+lib :$(LIB)
+
+.cpp.o :
+	cc $(CPP_FLAGS) -c $<
+
+
+
+$(LIB) : $(CC_O_FILES)
+	ar -r -s  $@ $?
+
+clean:
+	-rm *.a
+	-rm *.o

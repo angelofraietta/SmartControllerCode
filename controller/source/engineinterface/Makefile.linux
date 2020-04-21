@@ -1,0 +1,45 @@
+TESTNAME=test.exe
+
+.SUFFIXES : .cpp .o
+
+TEST_EXE=$(TESTNAME)
+
+CC_FILES = $(CC_PIECES:%=%.cpp)
+CC_O_FILES = $(CC_PIECES:%=%.o)
+
+CC_SIM_O_FILES = $(CC_SIM_PIECES:%=%.o)
+
+CC_TEST_O_FILES = $(CC_TEST_PIECES:%=%.o)
+
+
+CPP_FLAGS = $(COMMON_CPPFLAGS)
+CPP_FLAGS += $(COMMON_DEFINES)
+
+
+
+
+LIB=$(LIBNAME)
+
+LINK_FLAGS = $(LIB)
+LINK_THREAD   +=  ../../../threads/source/hal_linux/sm_thread.a
+
+
+all: $(LIB) $(SIMLIBNAME) $(CC_TEST_O_FILES) $(CC_O_FILES) $(CC_SIM_O_FILES) $(TEST_EXE)
+
+lib :$(LIB) $(SIMLIBNAME)
+
+
+.cpp.o :
+	cc $(CPP_FLAGS) -c $<
+
+$(SIMLIBNAME) : $(CC_SIM_O_FILES)
+	ar -r -s  $@ $?
+
+$(LIB) : $(CC_O_FILES)
+	ar -r -s  $@ $?
+
+$(TEST_EXE) : $(LIB) testindex.o
+	g++  testindex.o -o $(TEST_EXE) $(LINK_FLAGS) $(LINK_THREAD)
+clean:
+	-rm *.a
+	-rm *.o
