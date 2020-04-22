@@ -66,8 +66,7 @@ class MultiThread
       virtual void resume () = 0;
 
       //## Operation: wait%992298024
-      virtual void wait (unsigned long period	// The period we are going to wait
-      ) = 0;
+      //virtual void wait (unsigned long period	// The period we are going to wait  ) = 0;
 
       //## Operation: create%994716922
       static MultiThread* create (ActiveObject* pActive);

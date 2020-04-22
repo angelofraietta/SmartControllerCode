@@ -17,6 +17,7 @@
 
 //## begin module%3CCE1352007F.includes preserve=yes
 #include <stddef.h>
+#include <stdlib.h>
 //## end module%3CCE1352007F.includes
 
 // memorycache
@@ -60,7 +61,8 @@ MemoryCache::~MemoryCache()
   while (_full)
   {
   	MemorySegment* _next = _full->_next;
-    delete [] (_full->_mem);
+    //delete [] (_full->_mem);
+    free (_full->_mem);
     delete _full;
     _full = _next;
   }
@@ -100,7 +102,7 @@ void* MemoryCache::allocate (size_t size)
   }
   else
   {
-  	ret = new char [size];
+  	ret = malloc(size); // new char [size];
   }
 
   return ret;
@@ -138,7 +140,8 @@ void MemoryCache::free (void* mem)
   }
   else
   {
-  	delete [] mem;
+    free (mem);
+  	//delete [] mem;
   }
 
   //## end MemoryCache::free%1020137287.body

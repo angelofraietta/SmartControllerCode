@@ -202,14 +202,17 @@ int main()
         PatchQuestion::GetFileName(p, p_val, buff, sizeof(buff));
         
         printf ("P VAL and name %u %s\r\n", p_val.Key(), buff);
-	//cout<<"Press c to exit..."<<endl;
 
-	char c;
+	    printf("Press c to exit...");
+
+	char c = 'b';
 	//cin>>c;
 	while (c != 'c' && c != 'C')
 		{
-			//cin>>c;
+			c = (char)getchar();
 		}
+
+      PatchQuestion::Destroy(p, p_val);
 
 		return 0;
 }

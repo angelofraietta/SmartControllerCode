@@ -14,9 +14,12 @@
    //## end module%3D4719D5004D.additionalIncludes
 
    //## begin module%3D4719D5004D.includes preserve=yes
-   #include <stdio.h>
-   #include <unistd.h>
-   #include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <time.h>
    #include "activeobject.h"
 
    #include <iostream>
@@ -144,12 +147,13 @@
      //## end LinuxThread::resume%1028069950.body
    }
 
+
    //## Operation: wait%1028069951
    //      Waits for the thread to finish
    void LinuxThread::wait (unsigned long period)
    {
      //## begin LinuxThread::wait%1028069951.body preserve=yes
-    //pthread_kill(_threadId, 0);
+    pthread_kill(_threadId, 0);
     #pragma unused(period)
 
      //## end LinuxThread::wait%1028069951.body
