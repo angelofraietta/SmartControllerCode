@@ -232,8 +232,6 @@
             <in>system.h</in>
           </df>
           <df name="hal_windows">
-            <df name="build">
-            </df>
             <in>midioutput.cpp</in>
             <in>scheduler.cpp</in>
             <in>test.cpp</in>
@@ -273,7 +271,6 @@
               <in>windowsmidiport.h</in>
             </df>
             <in>OSC-common.h</in>
-            <in>UDPPORT.cpp</in>
             <in>commstream.h</in>
             <in>controlfilter.h</in>
             <in>crc32.cpp</in>
@@ -334,8 +331,6 @@
           <df name="Jni">
           </df>
           <df name="jsmartcontroller">
-          </df>
-          <df name="tools">
           </df>
           <df name="ViewForms">
             <df name="Graphics">
@@ -409,6 +404,11 @@
         <df name="design">
         </df>
         <df name="hal_linux">
+          <in>linuxmidiinputdriver.cpp</in>
+          <in>linuxmidioutputdriver.cpp</in>
+          <in>mididseq.c</in>
+          <in>testalsaout.c</in>
+          <in>testmid.cpp</in>
         </df>
         <df name="hal_mac">
           <df name="qtime">
@@ -443,8 +443,6 @@
           <in>testmid.cpp</in>
         </df>
         <df name="hal_rtems">
-          <df name="o-optimize">
-          </df>
           <in>filedriver.cpp</in>
           <in>midibsp.h</in>
           <in>rtemsmididriver.cpp</in>
@@ -496,7 +494,13 @@
       </df>
       <df name="threads">
         <df name="source">
-          <df name="hal_include">
+          <df name="hal_linux">
+            <in>activethreads.cpp</in>
+            <in>linuxevent.cpp</in>
+            <in>linuxmutex.cpp</in>
+            <in>linuxthread.cpp</in>
+            <in>testlib.cpp</in>
+            <in>threadslib.cpp</in>
           </df>
           <df name="hal_mac">
             <in>activethreads.cpp</in>
